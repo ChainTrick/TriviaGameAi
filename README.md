@@ -4,6 +4,8 @@ A self-contained Node.js + Socket.IO app for live trivia nights. One device acts
 the **host** (controls questions, reveals answers, awards points); players join from
 their phones by scanning a **QR code**. Everything updates in real time.
 
+🌐 Website: [TriviaGameAI.com](https://triviagameai.com)
+
 ## Quick start
 
 ```bash
