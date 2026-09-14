@@ -6,20 +6,52 @@ their phones by scanning a **QR code**. Everything updates in real time.
 
 🌐 Website: [TriviaGameAI.com](https://triviagameai.com)
 
-## Quick start
+## Installation & running (3 steps)
+
+You only need **[Node.js](https://nodejs.org)** installed — that's the one prerequisite.
+Check it with `node -v` in a terminal (any recent version works).
+
+### Step 1 — Get the code
+
+Either download this repo as a ZIP from GitHub, or clone it:
 
 ```bash
-cd into the folder where you saved all the files from this repo
-npm install        # already done if node_modules exists
+git clone https://github.com/ChainTrick/TriviaGameAi.git
+cd TriviaGameAi
+```
+
+(If you downloaded a ZIP instead, just open that folder in your terminal.)
+
+### Step 2 — Install the dependencies
+
+Run this once inside the project folder:
+
+```bash
+npm install
+```
+
+### Step 3 — Start the game server
+
+```bash
 node server.js
 ```
 
-The server listens on port **8090** and prints:
+That's it! The server listens on port **8090** and prints:
 
 - Host page : `http://<LAN-IP>:8090/host`  ← open this on your host device (laptop/phone)
 - Players   : `http://<LAN-IP>:8090/`      ← encoded in the QR code shown on the host page
 
 Open the host page, press **Start game**, and players scan the big QR to join.
+
+## Screenshots
+
+**Host view** — control questions, reveal answers, share the join QR code, and manage scores:
+
+![Host dashboard](Screenshot_host.png)
+
+**Player view** (on a phone) — pick your wager, answer before time runs out, and watch the live scoreboard:
+
+![Player screen](Screenshot_player.png)
 
 ## How a game works
 
