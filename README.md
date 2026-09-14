@@ -1,10 +1,10 @@
-# Trivia Night — QR-code trivia over your local network
+# TriviaGameAi — QR-code trivia over your local network
 
 A self-contained Node.js + Socket.IO app for live trivia nights. One device acts as
 the **host** (controls questions, reveals answers, awards points); players join from
 their phones by scanning a **QR code**. Everything updates in real time.
 
-🌐 Website: [TriviaGameAI.com](https://triviagameai.com)
+🌐 Website: [TriviaGameAi.com](https://triviagameai.com)
 
 ## Installation & running (3 steps)
 
@@ -60,7 +60,8 @@ The host can change both numbers in the setup panel before starting.
 
 1. Host picks options (rounds, questions/round, shuffle) → **Start game**.
 2. Players see "waiting" until the first question is sent; they pick their **wager**
-   and type/pick an answer, then lock it in before time runs out.
+   (required — no stake means the question is forfeited), type/pick an answer, then
+   lock it in before time runs out.
 3. Host presses **Reveal** — correct answers are highlighted for everyone, points
    update live on every screen (host scoreboard + player boards).
 4. **Next** advances to the next question. The game flows straight into round 2 —
@@ -88,7 +89,9 @@ Each question is worth whatever a player stakes, not a fixed amount:
   of every new round (and when a new game starts).
 - You may change your pick freely *within* the current question; the chip is only
   locked in when the host reveals.
-- **Correct → +wager**, **wrong → no penalty** in rounds 1–4. No wager picked = no points at stake either way.
+- **A stake is required**: players must pick a chip before they can answer — no
+  stake means the question is forfeited (nothing gained or lost either way).
+- **Correct → +wager**, **wrong → no penalty** in rounds 1–4.
 - After all rounds there is one **final question**: each player may wager any whole number of points from **0 up to their current score**. It's double-or-nothing — correct adds the stake, wrong subtracts it (you can't go below 0).
 
 So a confident player can swing big (+8 on an even round) while a cautious one plays
@@ -111,16 +114,22 @@ the `QUESTIONS_FILE` constant at the top of `server.js`.
 ## Tests
 
 ```bash
-node test-e2e.mjs   # needs the server running; simulates host + 2 players end-to-end
+node test-e2e.mjs        # needs the server running; simulates host + 2 players end-to-end
+node test-full-game.mjs  # full default game (4 rounds x 4 questions + final question)
 ```
 
-Covers: joining (+ join-ack), lobby, full game flow (3×2 with automatic advance
+`test-e2e.mjs` covers: joining (+ join-ack), lobby, full game flow (3×2 with automatic advance
 into round 2 and a host pause after later rounds), per-round wager options
 (1–4 on odd rounds, 2/4/6/8 on even rounds), chip pick / reuse rejection within
-a round / per-round pool reset / no-stake rule, scoring (correct adds the stake,
-wrong never subtracts in rounds), the final question (wager any amount up to your
-score — correct adds it, wrong subtracts it; over-score wagers rejected), and
-disconnect/rejoin with score persistence. All 33 checks pass.
+a round / per-round pool reset, the **required-stake rule** (no stake = forfeited question,
+nothing gained or lost; answers without a stake earn nothing), scoring (correct adds the
+stake, wrong never subtracts in rounds), manual point adjustments by the host (any positive
+or negative amount), the final question (wager any amount up to your score — correct adds it,
+wrong subtracts it; over-score wagers rejected), and disconnect/rejoin with score persistence.
+
+`test-full-game.mjs` plays a complete default game end-to-end: required stakes on every
+question, per-round chip reuse, forfeits, round-boundary pauses, the final question, and
+final standings. Both suites pass fully.
 
 ## Notes
 

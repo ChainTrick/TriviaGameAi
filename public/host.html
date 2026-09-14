@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Trivia Night — Host</title>
+<title>TriviaGameAi — Host</title>
 <style>
   :root {
     --bg: #0b1220;
@@ -96,10 +96,8 @@
   .pt-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
   select.pt-select { padding: 9px 10px; font-size: 14px; color: var(--text); background: rgba(255,255,255,.06); border: 1px solid var(--glass-border); border-radius: 9px; outline: none; flex: 1; }
   select.pt-select option { background: #131c30; }
-  .pt-btns { display: flex; gap: 6px; }
-  button.mini { padding: 8px 12px; font-size: 14px; font-weight: 700; border-radius: 9px; border: 1px solid var(--glass-border); background: rgba(255,255,255,.06); color: var(--text); cursor: pointer; }
-  button.mini.plus { color: var(--good); }
-  button.mini.minus { color: #fca5a5; }
+  input.pt-input { width: 110px; padding: 9px 12px; font-size: 15px; color: var(--text); background: rgba(255,255,255,.06); border: 1px solid var(--glass-border); border-radius: 9px; outline: none; }
+  input.pt-input:focus { border-color: var(--accent); }
 
   .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
   .hidden { display: none !important; }
@@ -117,7 +115,7 @@
   <div class="card">
     <div class="brand">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9.5 7h5M9.5 11h5M9.5 15h3"/></svg>
-      <div><h1>Trivia Night — Host</h1></div>
+      <div><h1>TriviaGameAi — Host</h1></div>
     </div>
 
     <!-- SETUP -->
@@ -126,7 +124,7 @@
         <div class="field"><label for="roundsCount">Rounds</label><input id="roundsCount" type="number" min="1" max="20" value="4"></div>
         <div class="field"><label for="perRoundCount">Questions / round</label><input id="perRoundCount" type="number" min="1" max="763" value="4"></div>
       </div>
-      <p style="font-size:13px;color:var(--muted);margin-top:12px;line-height:1.5">Scoring is wager-based: players stake chips per question (each chip once per round, right or wrong). Rounds 1 &amp; 3 offer 1–4 pts, rounds 2 &amp; 4 offer 2/4/6/8 pts — correct = +stake, wrong = no penalty. After all rounds there's a <b>final question</b>: each player may wager any amount up to their whole score (correct doubles it in, wrong loses it). Players see the final question only after everyone has set a stake.</p>
+      <p style="font-size:13px;color:var(--muted);margin-top:12px;line-height:1.5">Scoring is wager-based and a stake is <b>required</b>: players must pick a chip before they can answer (no stake = the question is forfeited). Each chip value can be used once per round, right or wrong. Rounds 1 &amp; 3 offer 1–4 pts, rounds 2 &amp; 4 offer 2/4/6/8 pts — correct = +stake, wrong = no penalty. After all rounds there's a <b>final question</b>: each player must wager any amount up to their whole score (correct doubles it in, wrong loses it). Players see the final question only after everyone has set a stake.</p>
       <label class="check-row"><input id="shuffleOn" type="checkbox" checked /> Shuffle questions</label>
       <div class="controls">
         <button id="startBtn" class="primary">Start game</button>
@@ -184,9 +182,8 @@
       <label style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px">Manual points (bonus / corrections)</label>
       <div class="pt-row">
         <select id="ptPlayer" class="pt-select"></select>
-        <button id="ptMinus10" class="mini minus">−10</button>
-        <button id="ptPlus5" class="mini plus">+5</button>
-        <button id="ptPlus10" class="mini plus">+10</button>
+        <input id="ptAmount" class="pt-input" type="number" step="1" placeholder="+/- pts" autocomplete="off" />
+        <button id="ptApply" class="ghost" style="padding:9px 14px;font-size:14px">Apply</button>
       </div>
     </div>
   </div>
@@ -321,14 +318,16 @@ $('skipBtn').onclick = () => {
   if (confirm('Skip this question without awarding points?')) socket.emit('skipQuestion');
 };
 
-function manualPts(pts) {
+function applyManualPoints() {
   const id = $('ptPlayer').value;
   if (!id) return;
+  const pts = Math.round(Number($('ptAmount').value));
+  if (!Number.isFinite(pts) || pts === 0) return; // empty / zero = no-op
   socket.emit('awardPoints', { playerId: id, points: pts });
+  $('ptAmount').value = '';
 }
-$('ptMinus10').onclick = () => manualPts(-10);
-$('ptPlus5').onclick = () => manualPts(5);
-$('ptPlus10').onclick = () => manualPts(10);
+$('ptApply').onclick = applyManualPoints;
+$('ptAmount').addEventListener('keydown', (e) => { if (e.key === 'Enter') applyManualPoints(); });
 
 // keyboard shortcuts for the host
 document.addEventListener('keydown', (e) => {

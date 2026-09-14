@@ -1,6 +1,8 @@
 // Ad-hoc verification: full default game (4 rounds x 4 questions + final).
-// Confirms PER-ROUND chip options and reuse end to end: each chip value may be
-// used once per round, the pool resets every round, wrong answers cost nothing.
+// Confirms PER-ROUND chip options, reuse end to end, and REQUIRED wagers:
+// every player must stake on every question — a skipped stake forfeits the
+// question. Chips spent in an earlier round are available again each round;
+// wrong answers cost nothing.
 import { io } from 'socket.io-client';
 
 const URL = 'http://127.0.0.1:8090';
@@ -37,17 +39,18 @@ await new Promise((resolve) => {
 const expectedOpts = [[1,2,3,4],[2,4,6,8],[1,2,3,4],[2,4,6,8]];
 let blueScore = 0;
 let redScore = 0;
-// Chips each player spends per question (null = skip). The KEY regression:
-// chips spent in an earlier round are available again — e.g. Blue uses 2 and
-// 4 in round 1 AND again in round 2, where they are offered by the pool.
-const bluePlan = [2, 4, null, 1,   // R1 (odd pool): 2/4/-/1
-                  2, 4, 6, null,   // R2 (even pool): 2 and 4 REUSED from R1! + fresh 6
-                  2, null, 3, null,// R3 (odd pool): 2 reused again; 3 fresh
-                  8, 4, null, null]; // R4 (even pool): 8 fresh; 4 reused from R1/R2
-const redPlan  = [1, null, 3, null, // R1: 1/-(chip 1 retried on Q2 -> rejected)/3/-
-                  2, null, 4, 8,    // R2: 2 fresh (new round), 4 and 8 fresh
-                  1, null, null, null, // R3: only chip 1; rest skipped
-                  null, null, null, null]; // R4: all skipped
+// Chips each player spends per question (null = NO STAKE -> the question is
+// forfeited: no points either way). The KEY regressions: chips spent in an
+// earlier round are available again — e.g. Blue uses 2 and 4 in round 1 AND
+// again in round 2, where they are offered by the pool.
+const bluePlan = [2, 4, null, 1,   // R1 (odd pool): 2/4/forfeit/1
+                  2, 4, 6, null,   // R2 (even pool): 2 and 4 REUSED from R1! + fresh 6 / forfeit
+                  2, null, 3, null,// R3 (odd pool): 2 reused again; 3 fresh; forfeits
+                  8, 4, null, null]; // R4 (even pool): 8 fresh; 4 reused from R1/R2; forfeits
+const redPlan  = [1, null, 3, null, // R1: 1/forfeit(chip 1 retried on Q2 -> rejected)/3/forfeit
+                  2, null, 4, 8,    // R2: 2 fresh (new round), forfeit, 4 and 8 fresh
+                  1, null, null, null, // R3: only chip 1; rest forfeited
+                  null, null, null, null]; // R4: all forfeited
 
 for (let rnd = 1; rnd <= 4; rnd++) {
   for (let qi = 1; qi <= 4; qi++) {
@@ -85,7 +88,8 @@ for (let rnd = 1; rnd <= 4; rnd++) {
       check('R1Q2: Red retry of chip 1 (same round) rejected', st.players.find((p) => p.name === 'Verify Red').wager == null);
     }
 
-    // Both answer correctly.
+    // Both answer correctly — even on forfeited questions (no stake), to prove
+    // that an answer without a stake earns nothing and shows no result mark.
     const q = st.question;
     blue.socket.emit('answer', { value: q.isMultipleChoice ? q.correctIndex : q.answerRaw });
     red.socket.emit('answer', { value: q.isMultipleChoice ? q.correctIndex : q.answerRaw });
@@ -94,11 +98,17 @@ for (let rnd = 1; rnd <= 4; rnd++) {
       const iv = setInterval(() => { if (st && st.phase === 'reveal') { clearInterval(iv); resolve(); } }, 50);
     });
 
-    // Correct -> +wager. No wager -> score unchanged.
+    // Correct -> +wager. No wager -> forfeit: score unchanged, no result mark.
     if (blueWager != null) blueScore += blueWager;
     check(`R${rnd}Q${qi}: Blue score now ${blueScore}`, st.players.find((p) => p.name === 'Verify Blue').score === blueScore);
     if (redWager != null) redScore += redWager;
     check(`R${rnd}Q${qi}: Red score now ${redScore}`, st.players.find((p) => p.name === 'Verify Red').score === redScore);
+    if (blueWager == null) {
+      check(`R${rnd}Q${qi}: Blue forfeit shows no result mark`, st.players.find((p) => p.name === 'Verify Blue').correct == null);
+    }
+    if (redWager == null) {
+      check(`R${rnd}Q${qi}: Red forfeit shows no result mark`, st.players.find((p) => p.name === 'Verify Red').correct == null);
+    }
 
     // The spent chip must show up in the used list right after reveal.
     if (blueWager != null) {
@@ -111,8 +121,10 @@ for (let rnd = 1; rnd <= 4; rnd++) {
       const iv = setInterval(() => { if (st && ((st.phase === 'question' && st.questionInRound !== qi) || st.phase === 'roundEnd')) { clearInterval(iv); resolve(); } }, 50);
     });
 
-    // The used list must reset at the start of each new round.
-    if (qi === 4 && rnd < 4) {
+    // The used list must reset at the start of each new round. Only round 1
+    // auto-advances; rounds 2 and 3 pause at roundEnd (handled below), so only
+    // wait for the next round here when the advance is automatic.
+    if (qi === 4 && rnd < 4 && rnd === 1) {
       const nextRnd = rnd + 1;
       await new Promise((resolve) => {
         const iv = setInterval(() => { if (st && st.phase === 'question' && st.currentRound === nextRnd) { clearInterval(iv); resolve(); } }, 50);
@@ -120,8 +132,7 @@ for (let rnd = 1; rnd <= 4; rnd++) {
     }
   }
   // After rounds 2 and 3 there is a host pause; after round 1 it auto-advances,
-  // and after round 4 the game pauses at "round complete" — the host then
-  // presses "Play final question 🏆".
+  // and after round 4 advance() goes STRAIGHT into the final question (no pause).
   if (rnd < 4 && rnd > 1) {
     check(`after R${rnd}: paused at roundEnd`, st.phase === 'roundEnd');
     host.emit('startNextRound');
@@ -129,12 +140,7 @@ for (let rnd = 1; rnd <= 4; rnd++) {
       const iv = setInterval(() => { if (st && st.phase === 'question' && st.currentRound === rnd + 1) { clearInterval(iv); resolve(); } }, 50);
     });
   } else if (rnd === 4) {
-    check('after R4: paused at roundEnd awaiting final question', st.phase === 'roundEnd');
-    host.emit('startNextRound'); // "Play final question 🏆"
-    await new Promise((resolve) => {
-      const iv = setInterval(() => { if (st && st.isFinal === true && st.phase === 'question') { clearInterval(iv); resolve(); } }, 50);
-    });
-    check('final question started after host press', st.isFinal === true && st.phase === 'question');
+    check('after R4: advanced straight to the final question', st.phase === 'question' && st.isFinal === true);
   } else {
     check('after R1: auto-advanced to round 2', st.phase === 'question' && st.currentRound === 2);
   }

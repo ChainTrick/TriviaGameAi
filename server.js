@@ -1,4 +1,4 @@
-// Trivia Night — host-controlled trivia over a local network.
+// TriviaGameAi — host-controlled trivia over a local network.
 // Host device runs this server + opens /host; players scan a QR code to join /.
 import express from 'express';
 import http from 'http';
@@ -413,7 +413,10 @@ io.on('connection', (socket) => {
     if (state.phase !== 'question') return;
     const q = activeQuestion();
     for (const p of state.players.values()) {
-      if (!p.answered) continue;
+      // A wager is REQUIRED to play a question: no stake set -> the question
+      // is forfeited, nothing at risk either way.
+      if (p.wager == null) continue;
+      if (!p.answered) { p.correct = false; continue; }
       const w = p.wager;
       p.correct = checkCorrectness(q, p);
       if (finalQuestion) {
@@ -529,7 +532,7 @@ io.on('connection', (socket) => {
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log('────────────────────────────────────────────');
-  console.log(`Trivia Night running`);
+  console.log(`TriviaGameAi running`);
   console.log(`  Host page : http://${lanIp}:${PORT}/host`);
   console.log(`  Players   : ${joinUrl}  (QR at /qr.png)`);
   console.log('────────────────────────────────────────────');

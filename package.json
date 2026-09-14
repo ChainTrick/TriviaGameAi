@@ -1,7 +1,7 @@
 {
-  "name": "trivia-app",
+  "name": "triviagameai",
   "version": "1.0.0",
-  "description": "QR-code trivia night: host controls questions/scoring, players join by scanning a QR code over the local network.",
+  "description": "TriviaGameAi — QR-code trivia over your local network: host controls questions/scoring, players join by scanning a QR code.",
   "type": "module",
   "main": "server.js",
   "scripts": {

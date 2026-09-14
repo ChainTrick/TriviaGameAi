@@ -147,8 +147,14 @@ check('chip spent earlier in the SAME round is rejected (Blue has no wager)', st
 blue.socket.emit('setWager', { points: 2 }); // per-round reset -> accepted
 await sleep(150);
 check('chip from an earlier round is available again (Blue wagers 2)', st.players.find((p) => p.name === 'Blue Team').wager === 2);
-// Red's chip 3 was spent on Q5 of this round; Blue answers with stake, Red wrong.
-await playQuestion([[red, null]], [[blue, true], [red, false]]);
+// Red's chip 3 was spent on Q5 of this round -> rejected; fresh chip 2 works.
+red.socket.emit('setWager', { points: 3 }); // same-round reuse -> rejected
+await sleep(150);
+check('Red same-round chip reuse rejected (no wager)', st.players.find((p) => p.name === 'Red Team').wager == null);
+red.socket.emit('setWager', { points: 2 });
+await sleep(150);
+// Blue answers with stake (set above), Red wrong.
+await playQuestion([], [[blue, true], [red, false]]);
 host.emit('nextQuestion');
 
 // NEW: after the last regular round comes the FINAL question — players may
@@ -199,6 +205,22 @@ check('reusing a spent chip is rejected (Blue still has no wager)', st.players.f
 blue.socket.emit('setWager', { points: 2 });
 await sleep(150);
 check('fresh chip accepted after spent one rejected', st.players.find((p) => p.name === 'Blue Team').wager === 2);
+
+// --- No-stake forfeit + manual point adjustments -------------------------
+const blueBefore = st.players.find((p) => p.name === 'Blue Team').score; // 39: carried in, +3 on Q1 of this game
+red.socket.emit('answer', { value: answerFor(st.question, true) }); // Red answers but has NO stake
+host.emit('reveal');
+await waitFor((s) => s.phase === 'reveal', 'forfeit reveal');
+check('no-stake answer is forfeited (Red shows no result)', st.players.find((p) => p.name === 'Red Team').correct == null);
+check('forfeit costs nothing (Red score unchanged at 0)', st.players.find((p) => p.name === 'Red Team').score === 0);
+
+// Manual points: host can award any positive or negative amount.
+host.emit('awardPoints', { playerId: blue.id, points: -7 });
+await sleep(150);
+check('manual -7 applied (Blue score now ' + (blueBefore - 7) + ')', st.players.find((p) => p.name === 'Blue Team').score === blueBefore - 7);
+host.emit('awardPoints', { playerId: blue.id, points: 25 });
+await sleep(150);
+check('manual +25 applied (Blue score now ' + (blueBefore + 18) + ')', st.players.find((p) => p.name === 'Blue Team').score === blueBefore + 18);
 
 // --- Disconnect / rejoin keeps score -------------------------------------
 red.socket.disconnect();

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Trivia Night</title>
+<title>TriviaGameAi</title>
 <style>
   :root {
     --bg: #0b1220;
@@ -101,6 +101,7 @@
     font-size: 13px; font-weight: 700; color: var(--accent); background: rgba(59,130,246,.14);
   }
   .opt.selected { border-color: var(--accent); background: var(--accent-soft); }
+  .opt.disabled { opacity: .45; cursor: not-allowed; }
   .opt.correct { border-color: var(--good); background: rgba(52, 211, 153, 0.14); }
   .opt.correct .key { color: var(--good); background: rgba(52,211,153,.18); }
   .opt.wrongpick { border-color: var(--bad); background: rgba(248, 113, 113, 0.12); }
@@ -150,7 +151,7 @@
   <div id="view-join" class="card hidden">
     <div class="brand">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9.5 7h5M9.5 11h5M9.5 15h3"/></svg>
-      <div><h1>Trivia Night</h1><span class="sub">Join the game</span></div>
+      <div><h1>TriviaGameAi</h1><span class="sub">Join the game</span></div>
     </div>
     <label for="name">Team name</label>
     <input id="name" type="text" maxlength="24" placeholder="e.g. Blue Team" autocomplete="off" />
@@ -161,7 +162,7 @@
   <div id="view-lobby" class="card hidden">
     <div class="brand">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.6 3.7-5.5 7-5.5s6.2 1.9 7 5.5"/></svg>
-      <div><h1 id="lobbyName">Trivia Night</h1><span class="sub">Waiting for the host to start…</span></div>
+      <div><h1 id="lobbyName">TriviaGameAi</h1><span class="sub">Waiting for the host to start…</span></div>
     </div>
     <div class="waiting"><div class="pulse"></div>The host is setting up.<br/>Get ready — questions are coming.</div>
     <div id="lobbyBoard" class="board"></div>
@@ -177,7 +178,7 @@
       <span class="wager-label">Wager</span>
       <div class="wagers" id="wagers"></div>
     </div>
-    <p class="wager-hint" id="wagerHint">Pick your stake — each chip can only be used once per game. No pick = no points at stake.</p>
+    <p class="wager-hint" id="wagerHint">REQUIRED — pick your stake before answering.</p>
 
     <div id="opts" class="opts"></div>
     <form id="freeForm" class="hidden" style="margin-top:4px">
@@ -289,7 +290,7 @@ function renderWagers(st) {
       input.disabled = true;
     }
     el.appendChild(input);
-    $('wagerHint').textContent = `Final question — stake any whole number from 0 up to your score (${max}). Correct doubles it in, wrong loses it. The question appears once every player has wagered.`;
+    $('wagerHint').textContent = `Final question — REQUIRED: stake any whole number from 0 up to your score (${max}). Correct doubles it in, wrong loses it. The question appears once every player has wagered.`;
     return;
   }
 
@@ -309,7 +310,7 @@ function renderWagers(st) {
     }
     el.appendChild(b);
   }
-  $('wagerHint').textContent = `Pick your stake (${opts.join(' / ')}) — each chip can only be used once per round. No pick = no points at stake.`;
+  $('wagerHint').textContent = `REQUIRED — pick your stake (${opts.join(' / ')}) before answering; each chip can only be used once per round.`;
 }
 
 function questionLabel(st) {
@@ -333,6 +334,9 @@ function renderQuestion(st) {
 
   renderWagers(st);
 
+  // A stake is REQUIRED before answering — lock the answer controls until set.
+  const noStake = st.phase === 'question' && me && me.wager == null;
+
   const optsEl = $('opts');
   optsEl.innerHTML = '';
   if (finalHidden) {
@@ -343,11 +347,13 @@ function renderQuestion(st) {
   if (q.isMultipleChoice) {
     q.options.forEach((label, i) => {
       const b = document.createElement('button');
-      b.className = 'opt';
+      b.className = 'opt' + (noStake ? ' disabled' : '');
       b.innerHTML = `<span class="key">${'abcd'[i]}</span><span>${esc(label)}</span>`;
       if (myAnswer === i) b.classList.add('selected');
       b.onclick = () => {
         if (st.phase !== 'question') return;
+        const meNow = myPlayer(st);
+        if (!meNow || meNow.wager == null) return; // stake required first
         myAnswer = i;
         socket.emit('answer', { value: i });
         optsEl.querySelectorAll('.opt').forEach((o, j) => o.classList.toggle('selected', j === i));
@@ -358,6 +364,8 @@ function renderQuestion(st) {
   } else {
     $('freeForm').classList.remove('hidden');
     if (typeof myAnswer === 'string') $('freeInput').value = myAnswer;
+    $('freeInput').disabled = noStake;
+    $('freeForm').querySelector('button').disabled = noStake;
   }
 
   const answeredNow = me ? !!me.answered : false;
@@ -407,7 +415,11 @@ function renderReveal(st) {
   } else {
     res.classList.remove('hidden', 'good', 'bad');
     res.classList.add('bad');
-    res.innerHTML = X_SVG + ' No answer submitted.';
+    if (me && me.wager == null) {
+      res.innerHTML = X_SVG + ' No stake set — question forfeited.';
+    } else {
+      res.innerHTML = X_SVG + ' No answer submitted.';
+    }
   }
 
   $('revealBoard').innerHTML = boardHtml(st.players, st.phase);
@@ -424,7 +436,7 @@ socket.on('state', (st) => {
 
   switch (st.phase) {
     case 'lobby':
-      $('lobbyName').textContent = `Trivia Night — ${myPlayer(st).name}`;
+      $('lobbyName').textContent = `TriviaGameAi — ${myPlayer(st).name}`;
       $('lobbyBoard').innerHTML = boardHtml(st.players, st.phase);
       show('lobby');
       break;
@@ -474,6 +486,8 @@ socket.on('joined', ({ playerId }) => {
 
 $('freeForm').onsubmit = (e) => {
   e.preventDefault();
+  const meNow = myPlayer(st);
+  if (!meNow || meNow.wager == null) return; // stake required first
   const v = $('freeInput').value.trim();
   if (!v || myAnswer !== null) return;
   myAnswer = v;
