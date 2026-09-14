@@ -1,0 +1,3341 @@
+{
+  "questions": [
+    {
+      "category": [
+        "animals"
+      ],
+      "question": "Dogs are the most popular pets in America. Cats are second. Fish are third. What is fourth? Is it: a) Hamsters b) Birds c) Ferrets or d) Snakes",
+      "options": [
+        "a) Hamsters",
+        "b) Birds",
+        "c) Ferrets",
+        "d) Snakes"
+      ],
+      "answer": "b) Birds"
+    },
+    {
+      "category": [
+        "food"
+      ],
+      "question": "According to industry sales figures, what is the most popular type of deli meat sold in America? Is it: a) Ham b) Turkey c) Chicken or d) Other (salami, bologna etc)",
+      "options": [
+        "a) Ham",
+        "b) Turkey",
+        "c) Chicken",
+        "d) Other (salami, bologna etc)"
+      ],
+      "answer": "b) Turkey"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to a Pew Research study, what is the most common reason people move to a different state? Is it: a) School b) Job c) Retirement or d) State income taxes",
+      "options": [
+        "a) School",
+        "b) Job",
+        "c) Retirement",
+        "d) State income taxes"
+      ],
+      "answer": "b) Job"
+    },
+    {
+      "category": [
+        "alcohol"
+      ],
+      "question": "According to US Dept of Health, a serving of beer is 12 oz. A serving of liquor is 1.5 oz. How many ounces is a standard serving of wine? Is it: a) 4 b) 5 c) 8 or d) 10",
+      "options": [
+        "a) 4",
+        "b) 5",
+        "c) 8",
+        "d) 10"
+      ],
+      "answer": "b) 5 oz"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to research from Pew Institute, which of the following activities does the average American spend the most time doing each year? Is it: a) Shopping for groceries b) Stuck in traffic c) Taking a shower or d) Sitting on the toilet",
+      "options": [
+        "a) Shopping for groceries",
+        "b) Stuck in traffic",
+        "c) Taking a shower",
+        "d) Sitting on the toilet"
+      ],
+      "answer": "b) Stuck in traffic (97 hrs)"
+    },
+    {
+      "category": [
+        "automobiles"
+      ],
+      "question": "The first ever minivan was introduced in 1983 by what car manufacturer? Was it a) Toyota b) Chrysler c) Ford or d) General Motors",
+      "options": [
+        "a) Toyota",
+        "b) Chrysler",
+        "c) Ford",
+        "d) General Motors"
+      ],
+      "answer": "b) Chrysler"
+    },
+    {
+      "category": [
+        "90s"
+      ],
+      "question": "In the early 90s, during the heyday of 1-900 numbers, what was the most popular service paid for by calling a 1-900 number? Was it: a) Psychic hotlines b) Shop at home c) Adult (sexual) content or d) Celebrity hotlines",
+      "options": [
+        "a) Psychic hotlines",
+        "b) Shop at home",
+        "c) Adult (sexual) content",
+        "d) Celebrity hotlines"
+      ],
+      "answer": "c) Adult content"
+    },
+    {
+      "category": [
+        "college football"
+      ],
+      "question": "Which of the following bowl games is not one of the so-called New Year's 6 Bowls? Is it: a) The Orange Bowl b) The Cotton Bowl c) The Citrus Bowl or d) The Sugar Bowl",
+      "options": [
+        "a) The Orange Bowl",
+        "b) The Cotton Bowl",
+        "c) The Citrus Bowl",
+        "d) The Sugar Bowl"
+      ],
+      "answer": "c) The Citrus Bowl"
+    },
+    {
+      "category": [
+        "us states"
+      ],
+      "question": "The Appalachian Trail runs through 14 states. Which of the following states does the Appalachian Trail not touch? Is it: a) New Jersey b) Kentucky c) Connecticut or d) Maryland",
+      "options": [
+        "a) New Jersey",
+        "b) Kentucky",
+        "c) Connecticut",
+        "d) Maryland"
+      ],
+      "answer": "b) Kentucky"
+    },
+    {
+      "category": [
+        "internet"
+      ],
+      "question": "Which of the following is the most commonly used streaming device in America? Is it: a) Amazon Fire Stick b) Apple TV c) Roku or d) Google Chromecast",
+      "options": [
+        "a) Amazon Fire Stick",
+        "b) Apple TV",
+        "c) Roku",
+        "d) Google Chromecast"
+      ],
+      "answer": "c) Roku"
+    },
+    {
+      "category": [
+        "alcohol"
+      ],
+      "question": "According to sales figures, the most popular whiskey in America is Jack Daniels. What is the second most popular? Is it: a) Jameson b) Crown Royal c) Fireball or d) Johnnie Walker",
+      "options": [
+        "a) Jameson",
+        "b) Crown Royal",
+        "c) Fireball",
+        "d) Johnnie Walker"
+      ],
+      "answer": "b) Crown Royal"
+    },
+    {
+      "category": [
+        "food"
+      ],
+      "question": "According to Major League Baseball, what is the most popular concession sold at ballparks in America? Is it: a) Popcorn b) Hot dogs c) Nachos or d) Peanuts",
+      "options": [
+        "a) Popcorn",
+        "b) Hot dogs",
+        "c) Nachos",
+        "d) Peanuts"
+      ],
+      "answer": "b) Hot dogs"
+    },
+    {
+      "category": [
+        "automobiles"
+      ],
+      "question": "What is the most popular type of new vehicle sold in America? Is it: a) Crossover/SUV b) Compact car c) Pickup truck or d) Full-sized sedan",
+      "options": [
+        "a) Crossover/SUV",
+        "b) Compact car",
+        "c) Pickup truck",
+        "d) Full-sized sedan"
+      ],
+      "answer": "a) Crossover/SUV"
+    },
+    {
+      "category": [
+        "music"
+      ],
+      "question": "In 2020, a song by this artist set a record by being the only song in history to remain in the top ten of the Billboard charts for the entire year, and was also Spotify's most streamed song with almost 2 billion streams that year. Was it a song by: a) Post Malone b) Harry Styles c) DaBaby or d) The Weeknd",
+      "options": [
+        "a) Post Malone",
+        "b) Harry Styles",
+        "c) DaBaby",
+        "d) The Weeknd"
+      ],
+      "answer": "d) The Weeknd"
+    },
+    {
+      "category": [
+        "comedians"
+      ],
+      "question": "According to Netflix, of all the comedians who have a special on their platform, who is the most watched? Is it: a) Chris Rock b) Jerry Seinfeld c) Dave Chappelle or d) Katt Williams",
+      "options": [
+        "a) Chris Rock",
+        "b) Jerry Seinfeld",
+        "c) Dave Chappelle",
+        "d) Katt Williams"
+      ],
+      "answer": "c) Dave Chappelle"
+    },
+    {
+      "category": [
+        "food"
+      ],
+      "question": "Which of the following items is not typically a part of the all-star special at Waffle House? Is it: a- A waffle, b- Toast, c- Biscuits and gravy, or d- Grits",
+      "options": [
+        "a) A waffle",
+        "b) Toast",
+        "c) Biscuits and gravy",
+        "d) Grits"
+      ],
+      "answer": "c) Biscuits and gravy"
+    },
+    {
+      "category": [
+        "alcohol"
+      ],
+      "question": "Which of the following beers is the best selling so-called 'light' beer in America? Is it: a) Miller Lite b) Michelob Ultra c) Coors Light or d) Bud Light",
+      "options": [
+        "a) Miller Lite",
+        "b) Michelob Ultra",
+        "c) Coors Light",
+        "d) Bud Light"
+      ],
+      "answer": "b) Michelob Ultra"
+    },
+    {
+      "category": [
+        "sports"
+      ],
+      "question": "According to the oddsmakers in Vegas, the Super Bowl is the most bet on sporting event in America. What is number 2? Is it: a) March Madness b) Kentucky Derby c) The World Series or d) NBA Finals",
+      "options": [
+        "a) March Madness",
+        "b) Kentucky Derby",
+        "c) The World Series",
+        "d) NBA Finals"
+      ],
+      "answer": "a) March Madness"
+    },
+    {
+      "category": [
+        "music"
+      ],
+      "question": "This artist has the record for the highest number of most streamed songs on Spotify with 6. Meaning 6 different times they had the most streamed song on Spotify. Is it: a) Post Malone b) Bruno Mars c) Coldplay or d) Imagine Dragons",
+      "options": [
+        "a) Post Malone",
+        "b) Bruno Mars",
+        "c) Coldplay",
+        "d) Imagine Dragons"
+      ],
+      "answer": "b) Bruno Mars"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to Zagat, how many times a week does the average American eat out? Is it: a) Once or less b) 2-5 times c) 6-ten times or d) More than 10 times",
+      "options": [
+        "a) Once or less",
+        "b) 2-5 times",
+        "c) 6-ten times",
+        "d) More than 10 times"
+      ],
+      "answer": "b) 2-5 times a week (4.9 times)"
+    },
+    {
+      "category": [
+        "music"
+      ],
+      "question": "This artist holds the record for most number one hits in a calendar year with 6 songs reaching number one. Is it: a) Michael Jackson b) The Beatles c) Taylor Swift or d) Drake",
+      "options": [
+        "a) Michael Jackson",
+        "b) The Beatles",
+        "c) Taylor Swift",
+        "d) Drake"
+      ],
+      "answer": "b) The Beatles"
+    },
+    {
+      "category": [
+        "food"
+      ],
+      "question": "According to industry sales data, what is the most popular flavor of chewing gum in America? Is it: a) Cinnamon b) Spearmint c) Fruit flavors or d) Original/Bubble gum flavor",
+      "options": [
+        "a) Cinnamon",
+        "b) Spearmint",
+        "c) Fruit flavors",
+        "d) Original/Bubble gum flavor"
+      ],
+      "answer": "b) Spearmint"
+    },
+    {
+      "category": [
+        "animals"
+      ],
+      "question": "Which of the following tastes can cats not taste? Is it: a) Bitter b) Sweet c) Sour or d) Salty",
+      "options": [
+        "a) Bitter",
+        "b) Sweet",
+        "c) Sour",
+        "d) Salty"
+      ],
+      "answer": "b) Sweet"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "In the US armed forces, which of the following is the highest ranking? Is it: a) Colonel b) Major c) General or d) Captain",
+      "options": [
+        "a) Colonel",
+        "b) Major",
+        "c) General",
+        "d) Captain"
+      ],
+      "answer": "c) General"
+    },
+    {
+      "category": [
+        "us cities"
+      ],
+      "question": "Which of the following cities is not considered to be located in the so-called Rust Belt? Is it: a) Cleveland Ohio b) Detroit Michigan c) Buffalo New York or d) Minneapolis Minnesota",
+      "options": [
+        "a) Cleveland Ohio",
+        "b) Detroit Michigan",
+        "c) Buffalo New York",
+        "d) Minneapolis Minnesota"
+      ],
+      "answer": "d) Minneapolis"
+    },
+    {
+      "category": [
+        "alcohol"
+      ],
+      "question": "The style of whiskey made in this country is the most exported whiskey in the world. Is it: a) American whiskey b) Scotch whisky c) Canadian whiskey or d) Irish whiskey",
+      "options": [
+        "a) American whiskey",
+        "b) Scotch whisky",
+        "c) Canadian whiskey",
+        "d) Irish whiskey"
+      ],
+      "answer": "b) Scotch whisky"
+    },
+    {
+      "category": [
+        "80s music"
+      ],
+      "question": "Which of the following 80s artists sold the most records? Is it: a) Madonna b) Whitney Houston c) Phil Collins or d) Prince",
+      "options": [
+        "a) Madonna",
+        "b) Whitney Houston",
+        "c) Phil Collins",
+        "d) Prince"
+      ],
+      "answer": "a) Madonna"
+    },
+    {
+      "category": [
+        "sports"
+      ],
+      "question": "Of the top 10 athletes with the most appearances on the cover of Sports Illustrated, 6 of those athletes played this sport. Is it: a) Baseball b) Basketball c) Football or d) Golf",
+      "options": [
+        "a) Baseball",
+        "b) Basketball",
+        "c) Football",
+        "d) Golf"
+      ],
+      "answer": "b) Basketball"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "On American FM radio dials, what is the highest frequency? Is it: a) 105.9 b) 106.9 c) 107.9 d) 108.9",
+      "options": [
+        "a) 105.9",
+        "b) 106.9",
+        "c) 107.9",
+        "d) 108.9"
+      ],
+      "answer": "c) 107.9"
+    },
+    {
+      "category": [
+        "automobiles"
+      ],
+      "question": "According to industry sales figures, since this SUV debuted in 1991, it has sold over 8 million units which makes it the best selling SUV in history. Is it: a) Ford Explorer b) Jeep Cherokee c) Toyota 4Runner or d) Chevy Suburban",
+      "options": [
+        "a) Ford Explorer",
+        "b) Jeep Cherokee",
+        "c) Toyota 4Runner",
+        "d) Chevy Suburban"
+      ],
+      "answer": "a) Ford Explorer"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to the American Journal of Medicine, which of the following everyday activities burns the most calories per minute? Is it: a) Cleaning the house b) Cutting the grass with push lawnmower c) Handwashing your car or d) Sex",
+      "options": [
+        "a) Cleaning the house",
+        "b) Cutting the grass with push lawnmower",
+        "c) Handwashing your car",
+        "d) Sex"
+      ],
+      "answer": "b) Cutting the grass with push lawnmower"
+    },
+    {
+      "category": [
+        "music"
+      ],
+      "question": "This artist has spent a combined 101 weeks with the number one song on the Billboard charts, which is the most all time by a good margin. Who am I talking about? Is it: a) Mariah Carey b) Whitney Houston c) Drake or d) Beyoncé",
+      "options": [
+        "a) Mariah Carey",
+        "b) Whitney Houston",
+        "c) Drake",
+        "d) Beyoncé"
+      ],
+      "answer": "a) Mariah Carey"
+    },
+    {
+      "category": [
+        "the internet"
+      ],
+      "question": "This famous person is responsible for 6 of the top 10 most liked Instagram photos of all time. Is it: a) Lionel Messi b) Kylie Jenner c) The Rock or d) Donald Trump",
+      "options": [
+        "a) Lionel Messi",
+        "b) Kylie Jenner",
+        "c) The Rock",
+        "d) Donald Trump"
+      ],
+      "answer": "a) Lionel Messi"
+    },
+    {
+      "category": [
+        "food"
+      ],
+      "question": "According to industry sales figures, the most popular flavor of potato chips sold in America is plain. What is number 2? Is it: a) BBQ b) Sour cream and onion c) Salt and vinegar or d) Cheddar and sour cream",
+      "options": [
+        "a) BBQ",
+        "b) Sour cream and onion",
+        "c) Salt and vinegar",
+        "d) Cheddar and sour cream"
+      ],
+      "answer": "a) BBQ"
+    },
+    {
+      "category": [
+        "space"
+      ],
+      "question": "What is the name of the nearest star to our solar system? Is it: a) Proxima Centauri b) Sirius c) Andromeda or d) Alpha",
+      "options": [
+        "a) Proxima Centauri",
+        "b) Sirius",
+        "c) Andromeda",
+        "d) Alpha"
+      ],
+      "answer": "a) Proxima Centauri"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "Which of the following is NOT one of the 6 letters that are given to contestants to solve the final puzzle on Wheel of Fortune? Is it: a) T b) E c) M or d) N",
+      "options": [
+        "a) T",
+        "b) E",
+        "c) M",
+        "d) N"
+      ],
+      "answer": "c) M"
+    },
+    {
+      "category": [
+        "music"
+      ],
+      "question": "According to Spotify, the most streamed legacy artist (which means no longer making music) on the platform is this band, with about 20 billion streams. Is it: a) Queen b) The Eagles c) Led Zeppelin or d) 2Pac",
+      "options": [
+        "a) Queen",
+        "b) The Eagles",
+        "c) Led Zeppelin",
+        "d) 2Pac"
+      ],
+      "answer": "a) Queen"
+    },
+    {
+      "category": [
+        "tv"
+      ],
+      "question": "Which of these sitcoms has the most seasons? Is it: a) Always Sunny in Philadelphia b) The Office c) Seinfeld or d) Friends",
+      "options": [
+        "a) Always Sunny in Philadelphia",
+        "b) The Office",
+        "c) Seinfeld",
+        "d) Friends"
+      ],
+      "answer": "a) Always Sunny in Philadelphia (16 seasons)"
+    },
+    {
+      "category": [
+        "presidents"
+      ],
+      "question": "Since the administration of George W. Bush, what has been the nickname of the president's armored Cadillac? Is it: a) The Monster b) The Beast c) The Chief or d) The Tank",
+      "options": [
+        "a) The Monster",
+        "b) The Beast",
+        "c) The Chief",
+        "d) The Tank"
+      ],
+      "answer": "b) The Beast"
+    },
+    {
+      "category": [
+        "music"
+      ],
+      "question": "This rapper holds the record for most featured appearances on other artists songs with almost 600 guest appearances. Is it: a) Jay-Z b) Lil Wayne c) Snoop Dogg or d) Eminem",
+      "options": [
+        "a) Jay-Z",
+        "b) Lil Wayne",
+        "c) Snoop Dogg",
+        "d) Eminem"
+      ],
+      "answer": "c) Snoop Dogg"
+    },
+    {
+      "category": [
+        "food"
+      ],
+      "question": "According to DoorDash, what is the most commonly ordered food item from their service? Is it: a) French fries b) Burgers c) Tacos or d) Wings",
+      "options": [
+        "a) French fries",
+        "b) Burgers",
+        "c) Tacos",
+        "d) Wings"
+      ],
+      "answer": "a) French fries"
+    },
+    {
+      "category": [
+        "money"
+      ],
+      "question": "Of the Forbes 400 richest Americans, this company is responsible for the wealth of the most people on that list, with 8 entries getting the bulk of their wealth from the company. Is it: a) Microsoft b) Google c) Coca-Cola or d) Walmart",
+      "options": [
+        "a) Microsoft",
+        "b) Google",
+        "c) Coca-Cola",
+        "d) Walmart"
+      ],
+      "answer": "d) Walmart"
+    },
+    {
+      "category": [
+        "college football"
+      ],
+      "question": "There have been 8 teams in the history of college football to win back-to-back national championships. Which of the following is NOT one of those teams? Is it: a) Oklahoma b) Notre Dame c) Minnesota or d) Miami",
+      "options": [
+        "a) Oklahoma",
+        "b) Notre Dame",
+        "c) Minnesota",
+        "d) Miami"
+      ],
+      "answer": "d) Miami"
+    },
+    {
+      "category": [
+        "famous people"
+      ],
+      "question": "Which person has the most statues dedicated to them in America? Is it: a) Abraham Lincoln b) Sacagawea c) Christopher Columbus or d) John F. Kennedy",
+      "options": [
+        "a) Abraham Lincoln",
+        "b) Sacagawea",
+        "c) Christopher Columbus",
+        "d) John F. Kennedy"
+      ],
+      "answer": "a) Abraham Lincoln"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "How many hairs are on the average human head? Is it: a) 10,000 b) 100,000 c) 1 million or d) 10 million",
+      "options": [
+        "a) 10,000",
+        "b) 100,000",
+        "c) 1 million",
+        "d) 10 million"
+      ],
+      "answer": "b) 100,000"
+    },
+    {
+      "category": [
+        "geography"
+      ],
+      "question": "Which of the following countries DOES NOT have the word 'republic' in their official name? Is it: a) Ireland b) Iran c) China or d) Israel",
+      "options": [
+        "a) Ireland",
+        "b) Iran",
+        "c) China",
+        "d) Israel"
+      ],
+      "answer": "d) Israel"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "The peace sign as it's known today was first created in the 1950s as the logo for an organization that protested what? Is it: a) Nuclear weapons b) Vietnam c) The Soviet Union or d) Segregation",
+      "options": [
+        "a) Nuclear weapons",
+        "b) Vietnam",
+        "c) The Soviet Union",
+        "d) Segregation"
+      ],
+      "answer": "a) Nuclear weapons"
+    },
+    {
+      "category": [
+        "space"
+      ],
+      "question": "In 1981, NASA launched its first space shuttle. What was the name? Was it: a) Atlantis b) Voyager c) Columbia or d) Discovery",
+      "options": [
+        "a) Atlantis",
+        "b) Voyager",
+        "c) Columbia",
+        "d) Discovery"
+      ],
+      "answer": "c) Columbia"
+    },
+    {
+      "category": [
+        "easter"
+      ],
+      "question": "According to Christian tradition, who was the first to see the resurrected Jesus? Was it: a) John b) Peter c) Mary Magdalene or d) Paul",
+      "options": [
+        "a) John",
+        "b) Peter",
+        "c) Mary Magdalene",
+        "d) Paul"
+      ],
+      "answer": "c) Mary Magdalene"
+    },
+    {
+      "category": [
+        "movies"
+      ],
+      "question": "Of the top 10 highest grossing films of the 80s, 5 of them featured this actor in a starring role. Was it: a) Tom Cruise b) Eddie Murphy c) Mel Gibson or d) Harrison Ford",
+      "options": [
+        "a) Tom Cruise",
+        "b) Eddie Murphy",
+        "c) Mel Gibson",
+        "d) Harrison Ford"
+      ],
+      "answer": "d) Harrison Ford"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "What letter begins more words than any other letter in the English language? Is it: R, S, E or A",
+      "options": [
+        "a) R",
+        "b) S",
+        "c) E",
+        "d) A"
+      ],
+      "answer": "b) S"
+    },
+    {
+      "category": [
+        "food"
+      ],
+      "question": "Ranch dressing is the most popular salad dressing sold in America. What is number 2? Is it: a) Thousand Island b) Caesar c) Italian or d) Blue Cheese",
+      "options": [
+        "a) Thousand Island",
+        "b) Caesar",
+        "c) Italian",
+        "d) Blue Cheese"
+      ],
+      "answer": "c) Italian"
+    },
+    {
+      "category": [
+        "the 80s"
+      ],
+      "question": "According to Guinness World Records, this person was the most photographed person of the 1980s in the whole wide world. Is it: a) Ronald Reagan b) Pope John Paul II c) Madonna or d) Princess Diana",
+      "options": [
+        "a) Ronald Reagan",
+        "b) Pope John Paul II",
+        "c) Madonna",
+        "d) Princess Diana"
+      ],
+      "answer": "d) Princess Diana"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "Which of these mostly defunct stores had the most locations at its peak? Is it: a) Kmart (2500), b) Sears (3500), c) Circuit City (800) or d) Toys R Us (1600)",
+      "options": [
+        "a) Kmart (2500)",
+        "b) Sears (3500)",
+        "c) Circuit City (800)",
+        "d) Toys R Us (1600)"
+      ],
+      "answer": "b) Sears had 3500 stores"
+    },
+    {
+      "category": [
+        "music"
+      ],
+      "question": "This artist holds the record for most number one hits in a calendar year with 6 songs reaching number one. Is it: a) Elton John b) The Beatles c) Beyoncé or d) Frank Sinatra",
+      "options": [
+        "a) Elton John",
+        "b) The Beatles",
+        "c) Beyoncé",
+        "d) Frank Sinatra"
+      ],
+      "answer": "b) The Beatles"
+    },
+    {
+      "category": [
+        "sports"
+      ],
+      "question": "Based on the amount of players who have played vs the amount who have made the Hall of Fame, which pro sports Hall of Fame is the hardest to get into? Is it: a) Basketball b) Baseball c) Football or d) Hockey",
+      "options": [
+        "a) Basketball",
+        "b) Baseball",
+        "c) Football",
+        "d) Hockey"
+      ],
+      "answer": "b) Baseball"
+    },
+    {
+      "category": [
+        "the govt"
+      ],
+      "question": "In an election for the president, which of these happens if the electoral college is tied? Is it: a) The House of Representatives decides b) The Supreme Court decides c) The governors decide or d) We vote again",
+      "options": [
+        "a) The House of Representatives decides",
+        "b) The Supreme Court decides",
+        "c) The governors decide",
+        "d) We vote again"
+      ],
+      "answer": "b) House of Representatives"
+    },
+    {
+      "category": [
+        "junk food"
+      ],
+      "question": "According to the Girl Scouts website, what is the most popular flavor of Girl Scout cookies? Is it: a) Thin Mints b) Samoas c) Do-Si-Dos or d) Tag-A-Longs",
+      "options": [
+        "a) Thin Mints",
+        "b) Samoas",
+        "c) Do-Si-Dos",
+        "d) Tag-A-Longs"
+      ],
+      "answer": "a) Thin Mints"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "Today, the average number of children per American family is 2. What was the average in 1825? Is it: a) 3 b) 5 c) 7 or d) 9",
+      "options": [
+        "a) 3",
+        "b) 5",
+        "c) 7",
+        "d) 9"
+      ],
+      "answer": "c) 7"
+    },
+    {
+      "category": [
+        "us cities"
+      ],
+      "question": "The most densely populated major city in America is New York City. What is number 2? Is it: a) Chicago b) Miami c) San Francisco or d) Washington DC",
+      "options": [
+        "a) Chicago",
+        "b) Miami",
+        "c) San Francisco",
+        "d) Washington DC"
+      ],
+      "answer": "c) San Francisco"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "Hanukkah is also known as the festival of what? Is it: a) Lights b) Gifts c) Family or d) Feasts",
+      "options": [
+        "a) Lights",
+        "b) Gifts",
+        "c) Family",
+        "d) Feasts"
+      ],
+      "answer": "a) Lights"
+    },
+    {
+      "category": [
+        "commercials"
+      ],
+      "question": "Based on total revenue, this product is the most successful product ever advertised through infomercials, with over 1 billion dollars a year in revenue. Is it: a) George Foreman grill b) Bowflex c) Proactiv acne solution or d) The Snuggie",
+      "options": [
+        "a) George Foreman grill",
+        "b) Bowflex",
+        "c) Proactiv acne solution",
+        "d) The Snuggie"
+      ],
+      "answer": "c) Proactiv"
+    },
+    {
+      "category": [
+        "cartoons"
+      ],
+      "question": "According to Warner Brothers, which character appeared as Bugs Bunny's main antagonist the most in the Looney Tunes cartoons? Is it: a) Elmer Fudd b) Yosemite Sam c) Marvin the Martian or d) Daffy Duck",
+      "options": [
+        "a) Elmer Fudd",
+        "b) Yosemite Sam",
+        "c) Marvin the Martian",
+        "d) Daffy Duck"
+      ],
+      "answer": "a) Elmer Fudd"
+    },
+    {
+      "category": [
+        "automobiles"
+      ],
+      "question": "Being produced continuously in some form since 1935, this is the longest-running automobile nameplate in America. Is it?: a) Chevy Suburban b) Toyota Land Cruiser c) Ford F150 or d) Honda Accord",
+      "options": [
+        "a) Chevy Suburban",
+        "b) Toyota Land Cruiser",
+        "c) Ford F150",
+        "d) Honda Accord"
+      ],
+      "answer": "a) Chevy Suburban"
+    },
+    {
+      "category": [
+        "history"
+      ],
+      "question": "Historians use the term 'Reign of Terror' to refer to a period of violence and mass executions that took place during which revolution? Is it: a) The Cuban b) The Bolshevik c) The French or d) The Iranian",
+      "options": [
+        "a) The Cuban",
+        "b) The Bolshevik",
+        "c) The French",
+        "d) The Iranian"
+      ],
+      "answer": "c) The French"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to the US Census Bureau, what's the earliest year that a Gen Z person could be born? Is it: a) 1992 b) 1997 c) 2007 or d) 2010",
+      "options": [
+        "a) 1992",
+        "b) 1997",
+        "c) 2007",
+        "d) 2010"
+      ],
+      "answer": "b) 1997"
+    },
+    {
+      "category": [
+        "comedians"
+      ],
+      "question": "According to Forbes, this comedian has a net worth more than a billion dollars, which makes them the world's richest comedian. Is it: a) Jerry Seinfeld b) Jay Leno c) Ellen DeGeneres or d) Adam Sandler",
+      "options": [
+        "a) Jerry Seinfeld",
+        "b) Jay Leno",
+        "c) Ellen DeGeneres",
+        "d) Adam Sandler"
+      ],
+      "answer": "a) Jerry Seinfeld"
+    },
+    {
+      "category": [
+        "alcohol"
+      ],
+      "question": "A Long Island Iced Tea is a drink that is popular with underage drinkers and people who don't really like alcohol. Which of the following ingredients is not in a traditional Long Island Iced Tea? Is it: a) Whiskey b) Tequila c) Gin or d) Rum",
+      "options": [
+        "a) Whiskey",
+        "b) Tequila",
+        "c) Gin",
+        "d) Rum"
+      ],
+      "answer": "a) Whiskey"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to industry figures, the most commonly prescribed drug in America is used to treat what? Is it: a) Asthma b) High cholesterol c) Heartburn or d) Male pattern baldness",
+      "options": [
+        "a) Asthma",
+        "b) High cholesterol",
+        "c) Heartburn",
+        "d) Male pattern baldness"
+      ],
+      "answer": "b) High cholesterol"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to Experian, how many credit cards does the average American have? Is it: a) 1 b) 2 c) 4 or d) 5 or more",
+      "options": [
+        "a) 1",
+        "b) 2",
+        "c) 4",
+        "d) 5 or more"
+      ],
+      "answer": "c) 4"
+    },
+    {
+      "category": [
+        "sports"
+      ],
+      "question": "There are 4 NBA teams whose names do not end in an S. Name one. Bonus point for each additional one you can name.",
+      "options": [
+        "a) Utah Jazz",
+        "b) OKC Thunder",
+        "c) Miami Heat",
+        "d) Orlando Magic"
+      ],
+      "answer": "a) Utah Jazz, OKC Thunder, Miami Heat, Orlando Magic"
+    },
+    {
+      "category": [
+        "commercials"
+      ],
+      "question": "In the 1970s commercial that featured a Native American crying a single tear, what made that man cry that tear? Was it: a) Forest fires b) Global warming c) Homelessness or d) Littering",
+      "options": [
+        "a) Forest fires",
+        "b) Global warming",
+        "c) Homelessness",
+        "d) Littering"
+      ],
+      "answer": "d) Littering"
+    },
+    {
+      "category": [
+        "music"
+      ],
+      "question": "Which one of these bands named after places has had the most Billboard Top 40 hits? Is it: a) America b) Boston c) Chicago or d) Kansas",
+      "options": [
+        "a) America",
+        "b) Boston",
+        "c) Chicago",
+        "d) Kansas"
+      ],
+      "answer": "c) Chicago"
+    },
+    {
+      "category": [
+        "video games"
+      ],
+      "question": "Of the top 10 best selling video games of all time, only two companies have more than one game on the list. One is Nintendo. What is the other one? Is it: a) Rockstar b) Electronic Arts c) Capcom or d) Activision",
+      "options": [
+        "a) Rockstar",
+        "b) Electronic Arts",
+        "c) Capcom",
+        "d) Activision"
+      ],
+      "answer": "a) Rockstar (GTA 5 and RDR 2)"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to the US Census, what was the first decade in which the majority of American homes had indoor plumbing? Was it: a) 1900s b) 1920s c) 1940s or d) 1960s",
+      "options": [
+        "a) 1900s",
+        "b) 1920s",
+        "c) 1940s",
+        "d) 1960s"
+      ],
+      "answer": "c) 1940s"
+    },
+    {
+      "category": [
+        "automobiles"
+      ],
+      "question": "Which of these cars named after an animal has sold the most? Is it: a) Chevrolet Impala b) Volkswagen Beetle c) Ford Mustang or d) Dodge Ram Note: Some people don't think beetles are animals, they're wrong, insects are animals, but just let them know this isn't a trick question lol",
+      "options": [
+        "a) Chevrolet Impala",
+        "b) Volkswagen Beetle",
+        "c) Ford Mustang",
+        "d) Dodge Ram"
+      ],
+      "answer": "b) Volkswagen Beetle"
+    },
+    {
+      "category": [
+        "junk food"
+      ],
+      "question": "Other than cola flavor, what is the most popular flavor of soda? Is it: a) Orange b) Cherry c) Lemon/Lime or d) Ginger Ale",
+      "options": [
+        "a) Orange",
+        "b) Cherry",
+        "c) Lemon/Lime",
+        "d) Ginger Ale"
+      ],
+      "answer": "c) Lemon/Lime"
+    },
+    {
+      "category": [
+        "history"
+      ],
+      "question": "According to tradition, which of the following is contained in the Ark of the Covenant? Is it: a) The Holy Grail b) The Ten Commandments c) Dead Sea Scrolls or d) The bones of Abraham",
+      "options": [
+        "a) The Holy Grail",
+        "b) The Ten Commandments",
+        "c) Dead Sea Scrolls",
+        "d) The bones of Abraham"
+      ],
+      "answer": "b) The Ten Commandments"
+    },
+    {
+      "category": [
+        "music"
+      ],
+      "question": "According to Spotify, this artist is the most listened to legacy solo artist, meaning not currently making new music. Is it: a) Elvis b) Michael Jackson c) 2Pac or d) Prince",
+      "options": [
+        "a) Elvis",
+        "b) Michael Jackson",
+        "c) 2Pac",
+        "d) Prince"
+      ],
+      "answer": "b) Michael Jackson"
+    },
+    {
+      "category": [
+        "food"
+      ],
+      "question": "According to restaurant industry statistics, although medium rare is what most steak experts recommend, it is not the most popular temp ordered at restaurants. What is? Is it: a) Rare b) Medium c) Medium well or d) Well done",
+      "options": [
+        "a) Rare",
+        "b) Medium",
+        "c) Medium well",
+        "d) Well done"
+      ],
+      "answer": "b) Medium"
+    },
+    {
+      "category": [
+        "geography"
+      ],
+      "question": "According to the USPS, the most common name for a city or town or village or county in the US is this name, which serves as the name for 91 different locations in the country. Is it: a) Franklin b) Washington c) Springfield or d) Jefferson",
+      "options": [
+        "a) Franklin",
+        "b) Washington",
+        "c) Springfield",
+        "d) Jefferson"
+      ],
+      "answer": "b) Washington"
+    },
+    {
+      "category": [
+        "football"
+      ],
+      "question": "What NFL player, either current or former, appeared in the most commercials during NFL games over the last two seasons? Is it: a) Aaron Rodgers b) Travis Kelce c) Christian McCaffrey or d) Peyton Manning",
+      "options": [
+        "a) Aaron Rodgers",
+        "b) Travis Kelce",
+        "c) Christian McCaffrey",
+        "d) Peyton Manning"
+      ],
+      "answer": "b) Travis Kelce"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to the National Strength and Conditioning Association, how much can the average man bench press? Is it: a) 100 pounds b) 135 pounds c) 200 pounds or d) 235 pounds",
+      "options": [
+        "a) 100 pounds",
+        "b) 135 pounds",
+        "c) 200 pounds",
+        "d) 235 pounds"
+      ],
+      "answer": "b) 135 lbs"
+    },
+    {
+      "category": [
+        "food"
+      ],
+      "question": "If you go to Waffle House and order your hashbrowns, scattered, smothered, covered and capped, which of the following are you NOT gonna get on them? Is it: a) Onions b) Ham c) Cheese or d) Mushrooms",
+      "options": [
+        "a) Onions",
+        "b) Ham",
+        "c) Cheese",
+        "d) Mushrooms"
+      ],
+      "answer": "b) Ham"
+    },
+    {
+      "category": [
+        "us cities"
+      ],
+      "question": "This city receives the most thunderstorms of any major city not located in the state of Florida. Is it: a) New Orleans b) Oklahoma City c) Seattle or d) Atlanta",
+      "options": [
+        "a) New Orleans",
+        "b) Oklahoma City",
+        "c) Seattle",
+        "d) Atlanta"
+      ],
+      "answer": "a) New Orleans"
+    },
+    {
+      "category": [
+        "the 80s"
+      ],
+      "question": "The Brat Pack was a group of young actors/actresses who appeared in a number of coming of age films in the 80s. Which of the following people was NOT considered to be a core member of the Brat Pack? Was it: a) Molly Ringwald b) Rob Lowe c) Demi Moore or d) Johnny Depp",
+      "options": [
+        "a) Molly Ringwald",
+        "b) Rob Lowe",
+        "c) Demi Moore",
+        "d) Johnny Depp"
+      ],
+      "answer": "d) Johnny Depp"
+    },
+    {
+      "category": [
+        "sports"
+      ],
+      "question": "According to the NCAA, what percentage of college athletes go on to play professional ball? Is it: a) Less than 10% b) 10-20% c) 20-30% or d) Greater than 30%",
+      "options": [
+        "a) Less than 10%",
+        "b) 10-20%",
+        "c) 20-30%",
+        "d) Greater than 30%"
+      ],
+      "answer": "a) Less than 10%, 2%"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to the American Journal of Medicine, which of the following activities burns the most calories per minute? Is it: a) Cleaning the house b) Cutting the grass with push lawnmower c) Handwashing your car or d) Sex",
+      "options": [
+        "a) Cleaning the house",
+        "b) Cutting the grass with push lawnmower",
+        "c) Handwashing your car",
+        "d) Sex"
+      ],
+      "answer": "b) Cutting the grass"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "A barometer is used to measure what? Is it: a) Air pressure b) Wind speed c) Humidity or d) Blood alcohol content",
+      "options": [
+        "a) Air pressure",
+        "b) Wind speed",
+        "c) Humidity",
+        "d) Blood alcohol content"
+      ],
+      "answer": "a) Air pressure"
+    },
+    {
+      "category": [
+        "music"
+      ],
+      "question": "According to research from Neilson, this band that formed in Boston in 1970, has the top two most played songs on classic rock radio. Is it: a) Aerosmith b) The Eagles c) AC/DC or d) Steve Miller Band",
+      "options": [
+        "a) Aerosmith",
+        "b) The Eagles",
+        "c) AC/DC",
+        "d) Steve Miller Band"
+      ],
+      "answer": "a) Aerosmith (its dream on and sweet emotion)"
+    },
+    {
+      "category": [
+        "actresses"
+      ],
+      "question": "Which one of these actresses has NEVER won an Academy Award? Is it: a) Julia Roberts b) Scarlett Johansson c) Jennifer Lawrence or d) Reese Witherspoon",
+      "options": [
+        "a) Julia Roberts",
+        "b) Scarlett Johansson",
+        "c) Jennifer Lawrence",
+        "d) Reese Witherspoon"
+      ],
+      "answer": "b) Scarlett Johansson"
+    },
+    {
+      "category": [
+        "history"
+      ],
+      "question": "Which of the following is the earliest surviving system of laws? Is it: a) The Code of Hammurabi b) Rosetta Stone c) The Torah or d) Magna Carta",
+      "options": [
+        "a) The Code of Hammurabi",
+        "b) Rosetta Stone",
+        "c) The Torah",
+        "d) Magna Carta"
+      ],
+      "answer": "a) The Code of Hammurabi"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to research from Pew, what percentage of Americans have smoked marijuana? Is it: a) Less than 25% b) 25-50% or c) Greater than 50%",
+      "options": [
+        "a) Less than 25%",
+        "b) 25-50%",
+        "c) Greater than 50%"
+      ],
+      "answer": "c) Greater than 50%"
+    },
+    {
+      "category": [
+        "food"
+      ],
+      "question": "According to industry statistics, this is the most commonly purchased food from a vending machine in America. Is it: a) Skittles b) Honey Bun c) Snickers bar or d) Cheetos",
+      "options": [
+        "a) Skittles",
+        "b) Honey Bun",
+        "c) Snickers bar",
+        "d) Cheetos"
+      ],
+      "answer": "c) Snickers bar"
+    },
+    {
+      "category": [
+        "music"
+      ],
+      "question": "This artist holds the record for most number one hits in a calendar year with 6 songs reaching number one. Is it: a) Elton John b) The Beatles c) Taylor Swift or d) Frank Sinatra",
+      "options": [
+        "a) Elton John",
+        "b) The Beatles",
+        "c) Taylor Swift",
+        "d) Frank Sinatra"
+      ],
+      "answer": "b) The Beatles"
+    },
+    {
+      "category": [
+        "cartoons"
+      ],
+      "question": "According to Warner Brothers, what is the most common weapon used in the Looney Tunes cartoons? Is it: a) Anvil b) Banana peels c) Mallets or d) Dynamite (TNT)",
+      "options": [
+        "a) Anvil",
+        "b) Banana peels",
+        "c) Mallets",
+        "d) Dynamite (TNT)"
+      ],
+      "answer": "d) Dynamite (TNT)"
+    },
+    {
+      "category": [
+        "movies"
+      ],
+      "question": "Which of the following film franchises has grossed the most money at the box office? Is it: a) Harry Potter b) Star Wars c) James Bond or d) The Fast and the Furious",
+      "options": [
+        "a) Harry Potter",
+        "b) Star Wars",
+        "c) James Bond",
+        "d) The Fast and the Furious"
+      ],
+      "answer": "b) Star Wars"
+    },
+    {
+      "category": [
+        "music"
+      ],
+      "question": "The top touring female artist of all-time is Taylor Swift. Who is the top grossing male artist of all time? Is it: a) Billy Joel b) Elton John c) Kenny Chesney or d) Jimmy Buffet",
+      "options": [
+        "a) Billy Joel",
+        "b) Elton John",
+        "c) Kenny Chesney",
+        "d) Jimmy Buffet"
+      ],
+      "answer": "b) Elton John"
+    },
+    {
+      "category": [
+        "us cities"
+      ],
+      "question": "This metro area has the largest population of any inland metro area in the country. Is it: a) Atlanta b) Dallas-Ft Worth c) Phoenix or d) Denver",
+      "options": [
+        "a) Atlanta",
+        "b) Dallas-Ft Worth",
+        "c) Phoenix",
+        "d) Denver"
+      ],
+      "answer": "b) Dallas-Ft Worth"
+    },
+    {
+      "category": [
+        "college football"
+      ],
+      "question": "Most common matchup in the SEC Championship Game history. Is it: a) Alabama vs Florida b) LSU vs Tennessee c) Alabama vs Georgia or d) Auburn vs Georgia",
+      "options": [
+        "a) Alabama vs Florida",
+        "b) LSU vs Tennessee",
+        "c) Alabama vs Georgia",
+        "d) Auburn vs Georgia"
+      ],
+      "answer": "a) Alabama vs Florida"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to Dept of Labor statistics, how many days a year does the average person take off work? Paid and unpaid time off. Is it: a) 5 b) 10 c) 15 or d) 20",
+      "options": [
+        "a) 5",
+        "b) 10",
+        "c) 15",
+        "d) 20"
+      ],
+      "answer": "b) 10 days"
+    },
+    {
+      "category": [
+        "the internet"
+      ],
+      "question": "Which of these top 10 most visited websites in the year 2000 is still in the top 10 today? Is it: a) aol.com b) cnn.com c) yahoo.com or d) msn",
+      "options": [
+        "a) aol.com",
+        "b) cnn.com",
+        "c) yahoo.com",
+        "d) msn"
+      ],
+      "answer": "c) yahoo.com"
+    },
+    {
+      "category": [
+        "Movies"
+      ],
+      "question": "How many films are in the “Friday the 13th” franchise (The ones with Jason in the hockey mask)? A:8, B:10, C:12, D:13",
+      "options": [
+        "A:8",
+        "B:10",
+        "C:12",
+        "D:13"
+      ],
+      "answer": "C: 12"
+    },
+    {
+      "category": [
+        "Candy"
+      ],
+      "question": "What candy has been consistently identified as the top-selling Halloween candy nationwide for the past several years? A: Dum-Dum Pops, B: Reese’s Peanut Butter Cups, C: Candy Corn, D: Skittles",
+      "options": [
+        "A: Dum-Dum Pops",
+        "B: Reese’s Peanut Butter Cups",
+        "C: Candy Corn",
+        "D: Skittles"
+      ],
+      "answer": "B: Reese’s Peanut Butter Cups"
+    },
+    {
+      "category": [
+        "History"
+      ],
+      "question": "The tradition of carving Jack-o-lanterns originated in Ireland as a way to ward off evil spirits. What were Jack-o-lanterns originally made of, rather than the pumpkins we use today? A: Potato, B: Squash, C: Turnip or D: Melon",
+      "options": [
+        "A: Potato",
+        "B: Squash",
+        "C: Turnip",
+        "D: Melon"
+      ],
+      "answer": "C: Turnip"
+    },
+    {
+      "category": [
+        "General Knowledge"
+      ],
+      "question": "What was the original name for “Candy Corn”? A: Halloween Bites, B: Chicken Feed, C: Pumpkin Pits, D: Pumpkin Poop",
+      "options": [
+        "A: Halloween Bites",
+        "B: Chicken Feed",
+        "C: Pumpkin Pits",
+        "D: Pumpkin Poop"
+      ],
+      "answer": "B: Chicken Feed"
+    },
+    {
+      "category": [
+        "General Knowledge"
+      ],
+      "question": "What is the most common shoe size sold for men in america? is it: a) 8 b)9 c)10 or d)11",
+      "options": [
+        "a) 8",
+        "b) 9",
+        "c) 10",
+        "d) 11"
+      ],
+      "answer": "c-10"
+    },
+    {
+      "category": [
+        "Music"
+      ],
+      "question": "Which of the following artists has more studio albums? is it: a) fleetwood mac b) the rolling stones c) mariah carey or d) bob dylan",
+      "options": [
+        "a) fleetwood mac",
+        "b) the rolling stones",
+        "c) mariah carey",
+        "d) bob dylan"
+      ],
+      "answer": "d- bob dylan"
+    },
+    {
+      "category": [
+        "Sports"
+      ],
+      "question": "Who is the most followed american athlete on social media? is it: a) serena williams b) tom brady c) lebron james or d) steph curry",
+      "options": [
+        "a) serena williams",
+        "b) tom brady",
+        "c) lebron james",
+        "d) steph curry"
+      ],
+      "answer": "lebron james"
+    },
+    {
+      "category": [
+        "Animals"
+      ],
+      "question": "Which of the following animals have wild populations in the most states? is it: a) coyotes b) rattlesnakes c) alligators or d) wolves",
+      "options": [
+        "a) coyotes",
+        "b) rattlesnakes",
+        "c) alligators",
+        "d) wolves"
+      ],
+      "answer": "a- coyotes (49 states)"
+    },
+    {
+      "category": [
+        "Alcohol"
+      ],
+      "question": "According to US Dept of Health, a serving of beer is 12 oz. A serving of liquor is 1.5 oz. How many ounces is a standard serving of wine? is it: a) 4 b) 5 c) 8 or d) 10",
+      "options": [
+        "a) 4",
+        "b) 5",
+        "c) 8",
+        "d) 10"
+      ],
+      "answer": "b) 5 oz"
+    },
+    {
+      "category": [
+        "Animals"
+      ],
+      "question": "Which animal is mentioned the most in the bible? is it: a) donkey b) ox c) lion or d) sheep",
+      "options": [
+        "a) donkey",
+        "b) ox",
+        "c) lion",
+        "d) sheep"
+      ],
+      "answer": "d) sheep"
+    },
+    {
+      "category": [
+        "General Knowledge"
+      ],
+      "question": "On a typical keyboard, which of the following symbols is not located on the same key as a number? is it: a) the dollar sign b) hashtag c) question mark or d) percent sign",
+      "options": [
+        "a) the dollar sign",
+        "b) hashtag",
+        "c) question mark",
+        "d) percent sign"
+      ],
+      "answer": "c) question mark"
+    },
+    {
+      "category": [
+        "The Panhandle"
+      ],
+      "question": "Which of the following counties has the highest population? is it: a) bay county b) walton county or c) okaloosa county",
+      "options": [
+        "a) bay county",
+        "b) walton county",
+        "c) okaloosa county"
+      ],
+      "answer": "c) okaloosa county"
+    },
+    {
+      "category": [
+        "Technology"
+      ],
+      "question": "What is the most commonly used virtual assistant? is it: a) alexa b) google assistant or c) siri",
+      "options": [
+        "a) alexa",
+        "b) google assistant",
+        "c) siri"
+      ],
+      "answer": "c) siri"
+    },
+    {
+      "category": [
+        "Movies"
+      ],
+      "question": "Which of the following is NOT the name of a James Bond movie? is it: a) the spy who loved me b) you only live twice c) international man of mystery or d) live and let die",
+      "options": [
+        "a) the spy who loved me",
+        "b) you only live twice",
+        "c) international man of mystery",
+        "d) live and let die"
+      ],
+      "answer": "c) international man of mystery"
+    },
+    {
+      "category": [
+        "General Knowledge"
+      ],
+      "question": "Of these last names that are also a color, which one is the most common in America? is it: a) white b) brown c) green or d) gray",
+      "options": [
+        "a) white",
+        "b) brown",
+        "c) green",
+        "d) gray"
+      ],
+      "answer": "b) brown"
+    },
+    {
+      "category": [
+        "MTV"
+      ],
+      "question": "In 2008 when TRL aired its final episode, they released a list of the most played videos in the history of the show. which of the following videos was the most requested video in TRL's history? was it: a) baby one more time by britney spears b) bye bye bye by nsync c) i want it that way by the backstreet boys or d) real slim shady by eminem",
+      "options": [
+        "a) baby one more time by britney spears",
+        "b) bye bye bye by nsync",
+        "c) i want it that way by the backstreet boys",
+        "d) real slim shady by eminem"
+      ],
+      "answer": "a) baby one more time by britney spears"
+    },
+    {
+      "category": [
+        "Food"
+      ],
+      "question": "Of the 4 major cereal manufacturers, which one sells the most each year? is it: a) general mills b) kellogs c) post or d) quaker",
+      "options": [
+        "a) general mills",
+        "b) kellogs",
+        "c) post",
+        "d) quaker"
+      ],
+      "answer": "a) general mills"
+    },
+    {
+      "category": [
+        "General Knowledge"
+      ],
+      "question": "According to sales figures, what is the best selling genre of books in America? is it: a) mystery b) romance c) fantasy or d) classic literature",
+      "options": [
+        "a) mystery",
+        "b) romance",
+        "c) fantasy",
+        "d) classic literature"
+      ],
+      "answer": "b) romance"
+    },
+    {
+      "category": [
+        "Celebrities"
+      ],
+      "question": "According to the Hollywood Chamber of Commerce, the star on the Hollywood Walk of Fame belonging to this celebrity is the most visited star on the walk. is it: a) marilyn monroe b) michael jackson c) john wayne or d) frank sinatra",
+      "options": [
+        "a) marilyn monroe",
+        "b) michael jackson",
+        "c) john wayne",
+        "d) frank sinatra"
+      ],
+      "answer": "b) michael jackson"
+    },
+    {
+      "category": [
+        "General Knowledge"
+      ],
+      "question": "According to a Gallup poll from earlier this year, which of the following institutions does the American public trust the LEAST? is it: a) criminal justice system b) large tech companies c) congress or d) tv news",
+      "options": [
+        "a) criminal justice system",
+        "b) large tech companies",
+        "c) congress",
+        "d) tv news"
+      ],
+      "answer": "c) congress"
+    },
+    {
+      "category": [
+        "Basketball"
+      ],
+      "question": "Which of the following players was NOT on the iconic 1992 US mens Olympic basketball team aka the dream team? was it a) larry bird b) shaquille oneal c) magic johnson or d) karl malone",
+      "options": [
+        "a) larry bird",
+        "b) shaquille oneal",
+        "c) magic johnson",
+        "d) karl malone"
+      ],
+      "answer": "b) shaquille oneal"
+    },
+    {
+      "category": [
+        "Disney"
+      ],
+      "question": "What is Bambi's first word? a) mom b) bird c) flower or d) tree",
+      "options": [
+        "a) mom",
+        "b) bird",
+        "c) flower",
+        "d) tree"
+      ],
+      "answer": "b) bird"
+    },
+    {
+      "category": [
+        "The 80s"
+      ],
+      "question": "Which of these products did NOT debut in America the 80s? is it: a) slap bracelets b) cabbage patch kids c) chia pets or d) minivans",
+      "options": [
+        "a) slap bracelets",
+        "b) cabbage patch kids",
+        "c) chia pets",
+        "d) minivans"
+      ],
+      "answer": "c) chia pets"
+    },
+    {
+      "category": [
+        "General Knowledge"
+      ],
+      "question": "According to Costco's sales figures, what is the most commonly purchased item from Costco? is it: a) toilet paper b) diapers c) liquor or d) tobacco products",
+      "options": [
+        "a) toilet paper",
+        "b) diapers",
+        "c) liquor",
+        "d) tobacco products"
+      ],
+      "answer": "a) toilet paper"
+    },
+    {
+      "category": [
+        "US Cities"
+      ],
+      "question": "The metro area of this city gets the most rain annually of any metro area in the country. what city/metro area am i talking about? is it: a) seattle b) oklahoma city c) miami or d) new orleans",
+      "options": [
+        "a) seattle",
+        "b) oklahoma city",
+        "c) miami",
+        "d) new orleans"
+      ],
+      "answer": "c) miami"
+    },
+    {
+      "category": [
+        "Food"
+      ],
+      "question": "According to the Girl Scouts website, what is the most popular flavor of Girl Scout cookies? is it: a) thin mints b) samoas c) do-si-dos or d) tag-a-longs",
+      "options": [
+        "a) thin mints",
+        "b) samoas",
+        "c) do-si-dos",
+        "d) tag-a-longs"
+      ],
+      "answer": "a) thin mints"
+    },
+    {
+      "category": [
+        "Money"
+      ],
+      "question": "What is on the back of the 5 dollar bill? is it: a) lincoln memorial b) washington monument c) us capitol or d) white house",
+      "options": [
+        "a) lincoln memorial",
+        "b) washington monument",
+        "c) us capitol",
+        "d) white house"
+      ],
+      "answer": "a) lincoln memorial"
+    },
+    {
+      "category": [
+        "General Knowledge"
+      ],
+      "question": "Of the four following unlikely scenarios, which one would have the best odds of occurring? is it: a) catching a foul ball at an mlb game (1 in 835) b) being dealt a royal flush in poker (1 in 650,000) c) a pregnant woman having twins (1 in 250) or d) a college basketball player making the nba (1 in 3500)",
+      "options": [
+        "a) catching a foul ball at an mlb game",
+        "b) being dealt a royal flush in poker",
+        "c) a pregnant woman having twins",
+        "d) a college basketball player making the nba"
+      ],
+      "answer": "c) a pregnant woman having twins"
+    },
+    {
+      "category": [
+        "General Knowledge"
+      ],
+      "question": "According to Walmart, based on dollar amount, which of the following is stolen the most? is it: a) beer b) meat c) tobacco products or d) candy",
+      "options": [
+        "a) beer",
+        "b) meat",
+        "c) tobacco products",
+        "d) candy"
+      ],
+      "answer": "b) meat"
+    },
+    {
+      "category": [
+        "Animals"
+      ],
+      "question": "According to the AKC, the so called Fab 5 of service dogs is a list of the most common service dog breeds in America. Lab, Golden Retriever, German Shephard, Border Collie and what else? is it: a) poodle b) beagle c) husky or d) rottwieler",
+      "options": [
+        "a) poodle",
+        "b) beagle",
+        "c) husky",
+        "d) rottwieler"
+      ],
+      "answer": "a) poodle"
+    },
+    {
+      "category": [
+        "Movies"
+      ],
+      "question": "Which of these classic horror film is based on a true story? is it: a) the shining b) the omen c) the blair witch project or d) amityville horror",
+      "options": [
+        "a) the shining",
+        "b) the omen",
+        "c) the blair witch project",
+        "d) amityville horror"
+      ],
+      "answer": "d) amityville horror"
+    },
+    {
+      "category": [
+        "History"
+      ],
+      "question": "Which of these major religions is considered by historians to be the oldest? is it: a) islam b) hinduism c) christianity or d) judaism",
+      "options": [
+        "a) islam",
+        "b) hinduism",
+        "c) christianity",
+        "d) judaism"
+      ],
+      "answer": "b) hinduism"
+    },
+    {
+      "category": [
+        "General Knowledge"
+      ],
+      "question": "According to studies from various organizations, what is the average time that Americans wake up on a weekday? is it: a) 6 am b) 7am c) 8 am or d) 9 am",
+      "options": [
+        "a) 6 am",
+        "b) 7am",
+        "c) 8 am",
+        "d) 9 am"
+      ],
+      "answer": "b) 7 am"
+    },
+    {
+      "category": [
+        "General Knowledge"
+      ],
+      "question": "According to the UN, Chinese (both mandarin and cantonese) is the most natively-spoken language in the world. what is the second most natively-spoken language in the world? is it: a) spanish b) hindi c) arabic or d) russian",
+      "options": [
+        "a) spanish",
+        "b) hindi",
+        "c) arabic",
+        "d) russian"
+      ],
+      "answer": "a) spanish"
+    },
+    {
+      "category": [
+        "Music"
+      ],
+      "question": "According to Billboard, the Beatles are the most successful band of all time based on their performance on the Billboard charts. what band is the second most successful? is it: a) red hot chili peppers b) the rolling stones c) ac/dc or d) U2",
+      "options": [
+        "a) red hot chili peppers",
+        "b) the rolling stones",
+        "c) ac/dc",
+        "d) U2"
+      ],
+      "answer": "b) the rolling stones"
+    },
+    {
+      "category": [
+        "Landmarks"
+      ],
+      "question": "Opening in 1965, this stadium was the world's first domed stadium? was it: a) houston's astrodome b) new orleans super dome c) detroit's silver dome or d) atlanta's georgia dome",
+      "options": [
+        "a) houston's astrodome",
+        "b) new orleans super dome",
+        "c) detroit's silver dome",
+        "d) atlanta's georgia dome"
+      ],
+      "answer": "a) houston's astrodome"
+    },
+    {
+      "category": [
+        "Music"
+      ],
+      "question": "Kind of a morbid question, but the 27 club refers to the numerous rock stars that have passed away at the young age of 27. which of the following dead rock stars is NOT in that club? is it: a) jimi hendrix b) janis joplin c) 2pac or d) amy winehouse",
+      "options": [
+        "a) jimi hendrix",
+        "b) janis joplin",
+        "c) 2pac",
+        "d) amy winehouse"
+      ],
+      "answer": "c) 2pac"
+    },
+    {
+      "category": [
+        "sports"
+      ],
+      "question": "There are 4 NBA teams whose names do not end in an S. Name one. Bonus point for each additional one you can name.",
+      "options": [
+        "a) Utah Jazz",
+        "b) OKC Thunder",
+        "c) Miami Heat",
+        "d) Orlando Magic"
+      ],
+      "answer": "a) Utah Jazz, OKC Thunder, Miami Heat, Orlando Magic"
+    },
+    {
+      "category": [
+        "commercials"
+      ],
+      "question": "In the 1970s commercial that featured a Native American crying a single tear, what made that man cry that tear? Was it: a) Forest fires b) Global warming c) Homelessness or d) Littering",
+      "options": [
+        "a) Forest fires",
+        "b) Global warming",
+        "c) Homelessness",
+        "d) Littering"
+      ],
+      "answer": "d) Littering"
+    },
+    {
+      "category": [
+        "music"
+      ],
+      "question": "Which one of these bands named after places has had the most Billboard Top 40 hits? Is it: a) America b) Boston c) Chicago or d) Kansas",
+      "options": [
+        "a) America",
+        "b) Boston",
+        "c) Chicago",
+        "d) Kansas"
+      ],
+      "answer": "c) Chicago"
+    },
+    {
+      "category": [
+        "video games"
+      ],
+      "question": "Of the top 10 best selling video games of all time, only two companies have more than one game on the list. One is Nintendo. What is the other one? Is it: a) Rockstar b) Electronic Arts c) Capcom or d) Activision",
+      "options": [
+        "a) Rockstar",
+        "b) Electronic Arts",
+        "c) Capcom",
+        "d) Activision"
+      ],
+      "answer": "a) Rockstar (GTA 5 and RDR 2)"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to the US Census, what was the first decade in which the majority of American homes had indoor plumbing? Was it: a) 1900s b) 1920s c) 1940s or d) 1960s",
+      "options": [
+        "a) 1900s",
+        "b) 1920s",
+        "c) 1940s",
+        "d) 1960s"
+      ],
+      "answer": "c) 1940s"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "The world's biggest furniture retailer is IKEA. What is the most popular item people buy at IKEA? Is it: a) Bed frame b) Bookshelf c) Table or d) Couch",
+      "options": [
+        "a) Bed frame",
+        "b) Bookshelf",
+        "c) Table",
+        "d) Couch"
+      ],
+      "answer": "b) Bookshelf"
+    },
+    {
+      "category": [
+        "food"
+      ],
+      "question": "In the United States, what is the most popular type of milk sold? (Skim, Whole, 1% or 2%)",
+      "options": [
+        "a) Skim",
+        "b) Whole",
+        "c) 1%",
+        "d) 2%"
+      ],
+      "answer": "d) 2%"
+    },
+    {
+      "category": [
+        "music"
+      ],
+      "question": "In what music video did Michael Jackson first perform his famous moonwalk? Was it: a) Billie Jean b) Thriller c) Smooth Criminal or d) Beat It",
+      "options": [
+        "a) Billie Jean",
+        "b) Thriller",
+        "c) Smooth Criminal",
+        "d) Beat It"
+      ],
+      "answer": "a) Billie Jean"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to industry statistics, what is the most popular season for weddings in the US?",
+      "options": [
+        "a) Spring",
+        "b) Summer",
+        "c) Fall",
+        "d) Winter"
+      ],
+      "answer": "c) Fall"
+    },
+    {
+      "category": [
+        "halftime bonus"
+      ],
+      "question": "Name the 5 other major professional sports teams in America that share a team name with another major professional sports team (e.g., New York Giants in football and San Francisco Giants in baseball).",
+      "options": [
+        "a) New York/Winnipeg Jets",
+        "b) Arizona/St. Louis Cardinals",
+        "c) Texas/New York Rangers",
+        "d) Carolina/Florida Panthers",
+        "e) Los Angeles/Sacramento Kings"
+      ],
+      "answer": "a) New York/Winnipeg Jets; b) Arizona/St. Louis Cardinals; c) Texas/New York Rangers; d) Carolina/Florida Panthers; e) Los Angeles/Sacramento Kings"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "A fear of public speaking is the most common phobia Americans have. What is the second most common phobia, according to a Pew Research study? Is it: a) Heights b) Blood/Needles c) Flying or d) Bugs",
+      "options": [
+        "a) Heights",
+        "b) Blood/Needles",
+        "c) Flying",
+        "d) Bugs"
+      ],
+      "answer": "a) Heights"
+    },
+    {
+      "category": [
+        "disney"
+      ],
+      "question": "Which of the following cities does NOT have a Disney resort? Is it: a) Tokyo b) Hong Kong c) Shanghai or d) Beijing",
+      "options": [
+        "a) Tokyo",
+        "b) Hong Kong",
+        "c) Shanghai",
+        "d) Beijing"
+      ],
+      "answer": "d) Beijing"
+    },
+    {
+      "category": [
+        "alcohol"
+      ],
+      "question": "Based on sales figures, what is the most popular type of liquor in America? Is it: a) Whiskey b) Tequila c) Vodka or d) Rum",
+      "options": [
+        "a) Whiskey",
+        "b) Tequila",
+        "c) Vodka",
+        "d) Rum"
+      ],
+      "answer": "c) Vodka"
+    },
+    {
+      "category": [
+        "food"
+      ],
+      "question": "According to Major League Baseball, what is the most popular concession sold at ballparks in America? Is it: a) Popcorn b) Hot dogs c) Nachos or d) Peanuts",
+      "options": [
+        "a) Popcorn",
+        "b) Hot dogs",
+        "c) Nachos",
+        "d) Peanuts"
+      ],
+      "answer": "b) Hot dogs"
+    },
+    {
+      "category": [
+        "movies"
+      ],
+      "question": "Which of these historical events was NOT referenced in Forrest Gump? Was it: a) The Watergate break-in b) The moon landing c) The creation of Apple Computer or d) Cuban Missile Crisis",
+      "options": [
+        "a) Watergate break-in",
+        "b) Moon landing",
+        "c) Creation of Apple Computer",
+        "d) Cuban Missile Crisis"
+      ],
+      "answer": "d) Cuban Missile Crisis"
+    },
+    {
+      "category": [
+        "the 90s"
+      ],
+      "question": "In the early 1990s, during the heyday of 1-900 numbers, what was the most popular service paid for by calling a 1-900 number? Was it: a) Psychic hotlines b) Shop at home c) Adult content or d) Celebrity hotlines",
+      "options": [
+        "a) Psychic hotlines",
+        "b) Shop at home",
+        "c) Adult content",
+        "d) Celebrity hotlines"
+      ],
+      "answer": "c) Adult content"
+    },
+    {
+      "category": [
+        "sports"
+      ],
+      "question": "There are 4 NBA teams whose names do not end in an S. Name one. Bonus point for each additional one you can name.",
+      "options": [
+        "a) Utah Jazz",
+        "b) OKC Thunder",
+        "c) Miami Heat",
+        "d) Orlando Magic"
+      ],
+      "answer": "a) Utah Jazz, OKC Thunder, Miami Heat, Orlando Magic"
+    },
+    {
+      "category": [
+        "commercials"
+      ],
+      "question": "In the 1970s commercial that featured a Native American crying a single tear, what made that man cry that tear? Was it: a) Forest fires b) Global warming c) Homelessness or d) Littering",
+      "options": [
+        "a) Forest fires",
+        "b) Global warming",
+        "c) Homelessness",
+        "d) Littering"
+      ],
+      "answer": "d) Littering"
+    },
+    {
+      "category": [
+        "music"
+      ],
+      "question": "Which one of these bands named after places has had the most Billboard Top 40 hits? Is it: a) America b) Boston c) Chicago or d) Kansas",
+      "options": [
+        "a) America",
+        "b) Boston",
+        "c) Chicago",
+        "d) Kansas"
+      ],
+      "answer": "c) Chicago"
+    },
+    {
+      "category": [
+        "video games"
+      ],
+      "question": "Of the top 10 best selling video games of all time, only two companies have more than one game on the list. One is Nintendo. What is the other one? Is it: a) Rockstar b) Electronic Arts c) Capcom or d) Activision",
+      "options": [
+        "a) Rockstar",
+        "b) Electronic Arts",
+        "c) Capcom",
+        "d) Activision"
+      ],
+      "answer": "a) Rockstar (GTA 5 and RDR 2)"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to the US Census, what was the first decade in which the majority of American homes had indoor plumbing? Was it: a) 1900s b) 1920s c) 1940s or d) 1960s",
+      "options": [
+        "a) 1900s",
+        "b) 1920s",
+        "c) 1940s",
+        "d) 1960s"
+      ],
+      "answer": "c) 1940s"
+    },
+    {
+      "category": [
+        "geography"
+      ],
+      "question": "According to the USPS, the most common name for a city or town or village or county in the US is this name, which serves as the name for 91 different locations in the country. Is it: a) Franklin b) Washington c) Springfield or d) Jefferson",
+      "options": [
+        "a) Franklin",
+        "b) Washington",
+        "c) Springfield",
+        "d) Jefferson"
+      ],
+      "answer": "b) Washington"
+    },
+    {
+      "category": [
+        "sports"
+      ],
+      "question": "In the history of Sports Illustrated, this professional sports team has had the most athletes appear on the cover of the magazine while playing for that team. What team is this? Is it: a) Dallas Cowboys b) Los Angeles Lakers c) Chicago Bulls or d) Boston Red Sox",
+      "options": [
+        "a) Dallas Cowboys",
+        "b) Los Angeles Lakers",
+        "c) Chicago Bulls",
+        "d) Boston Red Sox"
+      ],
+      "answer": "b) Los Angeles Lakers"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "Which of the following colors is not one of the colors found on a traditional Rubik's cube? Is it: a) Orange b) Green c) Purple or d) White",
+      "options": [
+        "a) Orange",
+        "b) Green",
+        "c) Purple",
+        "d) White"
+      ],
+      "answer": "c) Purple"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "What is the most commonly broken bone in the human body? Is it: a) Hip b) Foot c) Collarbone or d) Arm",
+      "options": [
+        "a) Hip",
+        "b) Foot",
+        "c) Collarbone",
+        "d) Arm"
+      ],
+      "answer": "c) Collarbone"
+    },
+    {
+      "category": [
+        "the 80s"
+      ],
+      "question": "The first ever minivan was introduced in 1983 by what car manufacturer? Was it: a) Toyota b) Chrysler c) Ford or d) General Motors",
+      "options": [
+        "a) Toyota",
+        "b) Chrysler",
+        "c) Ford",
+        "d) General Motors"
+      ],
+      "answer": "b) Chrysler"
+    },
+    {
+      "category": [
+        "tv"
+      ],
+      "question": "Since this show debuted in 1979, it has aired more than 60,000 unique episodes, which is more than any other American TV program. Is it: a) NBC Nightly News b) ESPN SportsCenter c) Days of Our Lives or d) The Price Is Right",
+      "options": [
+        "a) NBC Nightly News",
+        "b) ESPN SportsCenter",
+        "c) Days of Our Lives",
+        "d) The Price Is Right"
+      ],
+      "answer": "b) ESPN SportsCenter"
+    },
+    {
+      "category": [
+        "history"
+      ],
+      "question": "In the 1930s, this city became the first city in the world to reach a population of 10 million people. Was it: a) London b) New York City c) Hong Kong or d) Paris",
+      "options": [
+        "a) London",
+        "b) New York City",
+        "c) Hong Kong",
+        "d) Paris"
+      ],
+      "answer": "b) New York City"
+    },
+    {
+      "category": [
+        "tv"
+      ],
+      "question": "Which of these sitcom characters was played by an actor or actress with the same name as their character? Is it: a) Elaine from Seinfeld b) Creed from The Office c) Debra from Everybody Loves Raymond or d) Carlton from The Fresh Prince",
+      "options": [
+        "a) Elaine from Seinfeld",
+        "b) Creed from The Office",
+        "c) Debra from Everybody Loves Raymond",
+        "d) Carlton from The Fresh Prince"
+      ],
+      "answer": "b) Creed from The Office"
+    },
+    {
+      "category": [
+        "food"
+      ],
+      "question": "Despite its European-sounding name, which of these foods was actually invented in the US? Is it: a) English muffin b) Belgian waffle c) German chocolate cake or d) French onion soup",
+      "options": [
+        "a) English muffin",
+        "b) Belgian waffle",
+        "c) German chocolate cake",
+        "d) French onion soup"
+      ],
+      "answer": "c) German chocolate cake"
+    },
+    {
+      "category": [
+        "sports"
+      ],
+      "question": "Of all the stadiums and arenas in the four major professional sports leagues in America (NBA, MLB, NFL, and NHL), what is the most common type of business that has the naming rights? Is it: a) Banks b) Automobile companies c) Insurance companies or d) Retail companies",
+      "options": [
+        "a) Banks",
+        "b) Automobile companies",
+        "c) Insurance companies",
+        "d) Retail companies"
+      ],
+      "answer": "a) Banks"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to the Department of Education, more degrees are earned in this undergraduate major than in any other. Is it: a) History b) Business c) English or d) Nursing",
+      "options": [
+        "a) History",
+        "b) Business",
+        "c) English",
+        "d) Nursing"
+      ],
+      "answer": "b) Business"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to the American Journal of Medicine, which of the following everyday activities burns the most calories per minute? Is it: a) Cleaning the house b) Cutting the grass with push lawnmower c) Handwashing your car or d) Sex",
+      "options": [
+        "a) Cleaning the house",
+        "b) Cutting the grass with push lawnmower",
+        "c) Handwashing your car",
+        "d) Sex"
+      ],
+      "answer": "b) Cutting the grass with push lawnmower"
+    },
+    {
+      "category": [
+        "health"
+      ],
+      "question": "Which of these illnesses would a doctor prescribe you antibiotics for? Is it: a) Chicken pox b) Strep throat c) Rabies or d) Measles",
+      "options": [
+        "a) Chicken pox",
+        "b) Strep throat",
+        "c) Rabies",
+        "d) Measles"
+      ],
+      "answer": "b) Strep throat"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to research from Monster.com, which of the following is the most common first job for teenage girls in America? Is it: a) Barista b) Babysitter c) Hostess or d) Waitress",
+      "options": [
+        "a) Barista",
+        "b) Babysitter",
+        "c) Hostess",
+        "d) Waitress"
+      ],
+      "answer": "b) Babysitter"
+    },
+    {
+      "category": [
+        "media"
+      ],
+      "question": "This media franchise has become the highest-grossing media franchise of all time with an estimated $100 billion in total revenue. What franchise is this? Is it: a) Spider-Man b) Pokémon c) Harry Potter or d) Mario",
+      "options": [
+        "a) Spider-Man",
+        "b) Pokémon",
+        "c) Harry Potter",
+        "d) Mario"
+      ],
+      "answer": "b) Pokémon"
+    },
+    {
+      "category": [
+        "music"
+      ],
+      "question": "According to research from Nielsen, this band, which formed in Boston in 1970, has the top two most played songs on classic rock radio. Is it: a) Aerosmith b) The Eagles c) AC/DC or d) Steve Miller Band",
+      "options": [
+        "a) Aerosmith",
+        "b) The Eagles",
+        "c) AC/DC",
+        "d) Steve Miller Band"
+      ],
+      "answer": "a) Aerosmith (Dream On and Sweet Emotion)"
+    },
+    {
+      "category": [
+        "actresses"
+      ],
+      "question": "Which one of these actresses has NEVER won an Academy Award? Is it: a) Julia Roberts b) Scarlett Johansson c) Jennifer Lawrence or d) Reese Witherspoon",
+      "options": [
+        "a) Julia Roberts",
+        "b) Scarlett Johansson",
+        "c) Jennifer Lawrence",
+        "d) Reese Witherspoon"
+      ],
+      "answer": "b) Scarlett Johansson"
+    },
+    {
+      "category": [
+        "history"
+      ],
+      "question": "Which of the following is the earliest surviving system of laws? Is it: a) The Code of Hammurabi b) Rosetta Stone c) The Torah or d) Magna Carta",
+      "options": [
+        "a) The Code of Hammurabi",
+        "b) Rosetta Stone",
+        "c) The Torah",
+        "d) Magna Carta"
+      ],
+      "answer": "a) The Code of Hammurabi"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to research from Pew, what percentage of Americans have smoked marijuana? Is it: a) Less than 25% b) 25-50% or c) Greater than 50%",
+      "options": [
+        "a) Less than 25%",
+        "b) 25-50%",
+        "c) Greater than 50%"
+      ],
+      "answer": "c) Greater than 50%"
+    },
+    {
+      "category": [
+        "food"
+      ],
+      "question": "According to industry statistics, this is the most commonly purchased food from a vending machine in America. Is it: a) Skittles b) Honey Bun c) Snickers Bar or d) Cheetos",
+      "options": [
+        "a) Skittles",
+        "b) Honey Bun",
+        "c) Snickers Bar",
+        "d) Cheetos"
+      ],
+      "answer": "c) Snickers Bar"
+    },
+    {
+      "category": [
+        "music"
+      ],
+      "question": "This artist holds the record for the most number-one hits in a calendar year with 6 songs reaching number one. Is it: a) Elton John b) The Beatles c) Taylor Swift or d) Frank Sinatra",
+      "options": [
+        "a) Elton John",
+        "b) The Beatles",
+        "c) Taylor Swift",
+        "d) Frank Sinatra"
+      ],
+      "answer": "b) The Beatles"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "On a typical keyboard, which of the following symbols is not located on the same key as a number? Is it: a) Dollar sign b) Hashtag c) Colon or d) Percent sign",
+      "options": [
+        "a) Dollar sign",
+        "b) Hashtag",
+        "c) Colon",
+        "d) Percent sign"
+      ],
+      "answer": "c) Colon"
+    },
+    {
+      "category": [
+        "video games"
+      ],
+      "question": "Which of the following characters is NOT a character from the fighting game Mortal Kombat? Is it: a) Johnny Cage b) Sub-Zero c) Chun-Li or d) Jax",
+      "options": [
+        "a) Johnny Cage",
+        "b) Sub-Zero",
+        "c) Chun-Li",
+        "d) Jax"
+      ],
+      "answer": "c) Chun-Li"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "In the US, Spanish is the most commonly spoken non-English language. What is the second most commonly spoken non-English language in the US? Is it: a) Italian b) Arabic c) Chinese or d) French",
+      "options": [
+        "a) Italian",
+        "b) Arabic",
+        "c) Chinese",
+        "d) French"
+      ],
+      "answer": "c) Chinese"
+    },
+    {
+      "category": [
+        "fashion"
+      ],
+      "question": "Based on total revenue over the years, this person is considered to be America's most successful fashion designer. Is it: a) Calvin Klein b) Tommy Hilfiger c) Donna Karan or d) Ralph Lauren",
+      "options": [
+        "a) Calvin Klein",
+        "b) Tommy Hilfiger",
+        "c) Donna Karan",
+        "d) Ralph Lauren"
+      ],
+      "answer": "d) Ralph Lauren"
+    },
+    {
+      "category": [
+        "music"
+      ],
+      "question": "Which of the following soul artists was NOT on Motown? Is it: a) Aretha Franklin b) Marvin Gaye c) Stevie Wonder or d) Diana Ross",
+      "options": [
+        "a) Aretha Franklin",
+        "b) Marvin Gaye",
+        "c) Stevie Wonder",
+        "d) Diana Ross"
+      ],
+      "answer": "a) Aretha Franklin"
+    },
+    {
+      "category": [
+        "alcohol"
+      ],
+      "question": "According to the US Department of Health, a serving of beer is 12 oz, a serving of liquor is 1.5 oz. How many ounces is a standard serving of wine? Is it: a) 4 b) 5 c) 8 or d) 10",
+      "options": [
+        "a) 4",
+        "b) 5",
+        "c) 8",
+        "d) 10"
+      ],
+      "answer": "b) 5"
+    },
+    {
+      "category": [
+        "sports"
+      ],
+      "question": "Which of the following achievements is considered the rarest in sports? Is it: a) Hole in one at The Masters b) Running a mile in under 4 minutes c) Grand Slam in the World Series or d) Quadruple double in the NBA",
+      "options": [
+        "a) Hole in one at The Masters",
+        "b) Running a mile in under 4 minutes",
+        "c) Grand Slam in the World Series",
+        "d) Quadruple double in the NBA"
+      ],
+      "answer": "d) Quadruple double in the NBA"
+    },
+    {
+      "category": [
+        "US cities"
+      ],
+      "question": "For over 25 years, this city has been recognized as the top US city for conventions and trade shows. Is it: a) Orlando b) New Orleans c) Las Vegas or d) Atlanta",
+      "options": [
+        "a) Orlando",
+        "b) New Orleans",
+        "c) Las Vegas",
+        "d) Atlanta"
+      ],
+      "answer": "c) Las Vegas"
+    },
+    {
+      "category": [
+        "movies"
+      ],
+      "question": "What was the first Pixar movie to get a PG rating?",
+      "options": [
+        "a) Finding Nemo",
+        "b) The Incredibles",
+        "c) Toy Story",
+        "d) Monsters Inc"
+      ],
+      "answer": "b) The Incredibles"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "Which of the following Asian countries doesn't traditionally use chopsticks as their main tableware?",
+      "options": [
+        "a) Vietnam",
+        "b) Korea",
+        "c) The Philippines",
+        "d) Taiwan"
+      ],
+      "answer": "c) The Philippines"
+    },
+    {
+      "category": [
+        "fast food"
+      ],
+      "question": "If you go to McDonald's and order a regular quarter pounder with cheese the way it comes, which of the following ingredients will be on the burger?",
+      "options": [
+        "a) Pickle",
+        "b) Tomato",
+        "c) Lettuce",
+        "d) Mayo"
+      ],
+      "answer": "a) Pickle"
+    },
+    {
+      "category": [
+        "actors"
+      ],
+      "question": "According to industry statistics, which of these action movie stars' movies have made the most money at the box office worldwide?",
+      "options": [
+        "a) Arnold Schwarzenegger",
+        "b) Sylvester Stallone",
+        "c) Jackie Chan",
+        "d) Jean-Claude Van Damme"
+      ],
+      "answer": "c) Jackie Chan ($5 billion)"
+    },
+    {
+      "category": [
+        "football"
+      ],
+      "question": "These two teams have met in the Super Bowl 3 separate times, which is the most of any matchup. Which is it?",
+      "options": [
+        "a) Patriots and Giants",
+        "b) Steelers and Packers",
+        "c) Steelers and Cowboys",
+        "d) Cowboys and Bills"
+      ],
+      "answer": "c) Steelers and Cowboys"
+    },
+    {
+      "category": [
+        "animals"
+      ],
+      "question": "Which animal is mentioned the most in the Bible?",
+      "options": [
+        "a) Snake",
+        "b) Ox",
+        "c) Lion",
+        "d) Sheep"
+      ],
+      "answer": "d) Sheep"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to Forbes, which of the following things, on average, costs more? Is it: a) A wedding (20k), b) A new pickup truck (60k), c) Giving birth to a baby in a hospital without insurance (18k), or d) A first-class round-trip flight to Europe ($7k) buying groceries for a week?",
+      "options": [
+        "a) Wedding",
+        "b) New pickup truck",
+        "c) Giving birth",
+        "d) Flight"
+      ],
+      "answer": "b) A new pickup truck"
+    },
+    {
+      "category": [
+        "presidents"
+      ],
+      "question": "Of the 46 presidents, 32 of them had this previous job experience before taking office. What is it?",
+      "options": [
+        "a) A lawyer",
+        "b) Military service member",
+        "c) A governor",
+        "d) A vice president"
+      ],
+      "answer": "b) Military service member"
+    },
+    {
+      "category": [
+        "food"
+      ],
+      "question": "Which of the following cuts of steak has the least amount of fat?",
+      "options": [
+        "a) Filet Mignon",
+        "b) New York Strip",
+        "c) Rib Eye",
+        "d) T-Bone"
+      ],
+      "answer": "a) Filet Mignon"
+    },
+    {
+      "category": [
+        "commercials"
+      ],
+      "question": "In the Pepto Bismol jingle, which of the following is NOT one of the symptoms that the pink medicine will fix?",
+      "options": [
+        "a) Nausea",
+        "b) Upset stomach",
+        "c) Bloating",
+        "d) Indigestion"
+      ],
+      "answer": "c) Bloating"
+    },
+    {
+      "category": [
+        "basketball"
+      ],
+      "question": "Of the following NBA greats, who was the only one to be drafted first overall in their respective draft class?",
+      "options": [
+        "a) Larry Bird",
+        "b) Michael Jordan",
+        "c) Charles Barkley",
+        "d) LeBron James"
+      ],
+      "answer": "d) LeBron James"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to a survey done by Ancestry.com, other than the term 'grandma,' what is the most common term grandkids use for their grandmas in America?",
+      "options": [
+        "a) Mamaw",
+        "b) Grammy",
+        "c) Nana",
+        "d) Grandmother"
+      ],
+      "answer": "c) Nana"
+    },
+    {
+      "category": [
+        "sports"
+      ],
+      "question": "The first UFC event in 1993 featured a tournament where fighters proficient in different martial arts faced each other. The winning fighter used what martial art?",
+      "options": [
+        "a) Kickboxing",
+        "b) Brazilian Jiu-Jitsu",
+        "c) Taekwondo",
+        "d) Judo"
+      ],
+      "answer": "b) Brazilian Jiu-Jitsu"
+    },
+    {
+      "category": [
+        "final question"
+      ],
+      "question": "This soundtrack has sold 45 million copies, which makes it the best-selling soundtrack of all time. Is it?",
+      "options": [
+        "a) Titanic soundtrack",
+        "b) The Bodyguard soundtrack",
+        "c) Saturday Night Fever soundtrack",
+        "d) The Grease soundtrack"
+      ],
+      "answer": "b) The Bodyguard soundtrack"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "What age is the average age that a kid loses their first tooth?",
+      "options": [
+        "a) 4 yrs old",
+        "b) 5 yrs old",
+        "c) 7 yrs old",
+        "d) 8 yrs old"
+      ],
+      "answer": "b) 5 yrs old"
+    },
+    {
+      "category": [
+        "90s movies"
+      ],
+      "question": "Which of the following historical events was NOT referenced in Forrest Gump?",
+      "options": [
+        "a) The Watergate break-in",
+        "b) The moon landing",
+        "c) Apple computer entering the stock market",
+        "d) Cuban Missile Crisis"
+      ],
+      "answer": "d) Cuban Missile Crisis"
+    },
+    {
+      "category": [
+        "US States"
+      ],
+      "question": "At 715 miles, the border between these two states is the longest border between two states in the whole country. What states are we talking about?",
+      "options": [
+        "a) California/Arizona",
+        "b) Louisiana/Mississippi",
+        "c) Oklahoma/Texas",
+        "d) Kentucky/Tennessee"
+      ],
+      "answer": "c) Oklahoma and Texas"
+    },
+    {
+      "category": [
+        "actors"
+      ],
+      "question": "Which of the following acting duos have appeared in the most films together?",
+      "options": [
+        "a) Seth Rogen and James Franco",
+        "b) The Rock and Kevin Hart",
+        "c) Tom Hanks and Meg Ryan",
+        "d) Robert De Niro and Al Pacino"
+      ],
+      "answer": "a) Seth Rogen and James Franco"
+    },
+    {
+      "category": [
+        "state capitals"
+      ],
+      "question": "There are 17 states in which the capital city is also the largest city by population in the state. Which of the following is NOT one of those states?",
+      "options": [
+        "a) Arizona",
+        "b) Nevada",
+        "c) Tennessee",
+        "d) Iowa"
+      ],
+      "answer": "b) Nevada"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "Which of the following board games is the most popular based on all-time sales?",
+      "options": [
+        "a) Scrabble",
+        "b) Monopoly",
+        "c) Clue",
+        "d) Life"
+      ],
+      "answer": "b) Monopoly"
+    },
+    {
+      "category": [
+        "sports"
+      ],
+      "question": "According to Forbes, Michael Jordan is the highest-paid athlete in history with a lifetime earnings of $4 billion. Who is number two?",
+      "options": [
+        "a) Tiger Woods",
+        "b) Tom Brady",
+        "c) LeBron James",
+        "d) Floyd Mayweather Jr"
+      ],
+      "answer": "a) Tiger Woods"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "What is the most popular pet in America that is not a cat or a dog?",
+      "options": [
+        "a) Fish",
+        "b) Birds",
+        "c) Rabbits",
+        "d) Some kind of reptile"
+      ],
+      "answer": "a) Fish"
+    },
+    {
+      "category": [
+        "movies"
+      ],
+      "question": "According to the Guinness Book of World Records, this person has been portrayed in 153 movies, making them the most portrayed American ever. Who are we talking about?",
+      "options": [
+        "a) Elvis Presley",
+        "b) Abraham Lincoln",
+        "c) Babe Ruth",
+        "d) Martin Luther King Jr"
+      ],
+      "answer": "a) Elvis Presley"
+    },
+    {
+      "category": [
+        "football"
+      ],
+      "question": "This quarterback/wide receiver duo combined for 12,766 yards and 114 touchdowns, both records that may never be broken. Is it?",
+      "options": [
+        "a) Tom Brady and Randy Moss",
+        "b) Peyton Manning and Marvin Harrison",
+        "c) Joe Montana and Jerry Rice",
+        "d) Steve Young and Jerry Rice"
+      ],
+      "answer": "b) Peyton Manning and Marvin Harrison"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "What is the most common shoe size sold for men in America?",
+      "options": [
+        "a) 8",
+        "b) 9",
+        "c) 10",
+        "d) 11"
+      ],
+      "answer": "c) 10"
+    },
+    {
+      "category": [
+        "food"
+      ],
+      "question": "Which of the following types of restaurants has the most locations in America?",
+      "options": [
+        "a) Chinese",
+        "b) Pizza",
+        "c) Mexican",
+        "d) BBQ"
+      ],
+      "answer": "b) Pizza (~78,000 locations)"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to the US Department of Transportation, what is the most common speed limit in a school zone in America?",
+      "options": [
+        "a) 15 mph",
+        "b) 20 mph",
+        "c) 30 mph",
+        "d) 35 mph"
+      ],
+      "answer": "b) 20 mph"
+    },
+    {
+      "category": [
+        "US States"
+      ],
+      "question": "This state has the lowest percentage of its population that was born in that state, with only 27 percent being born there. Which is it?",
+      "options": [
+        "a) New York",
+        "b) Nevada",
+        "c) Colorado",
+        "d) Virginia"
+      ],
+      "answer": "b) Nevada"
+    },
+    {
+      "category": [
+        "TV"
+      ],
+      "question": "This broadcast network is home to the longest-running morning show, the longest-running late-night show, the longest-running variety show, and the longest-running show overall. What network are we talking about?",
+      "options": [
+        "a) ABC",
+        "b) NBC",
+        "c) CBS",
+        "d) PBS"
+      ],
+      "answer": "b) NBC"
+    },
+    {
+      "category": [
+        "food"
+      ],
+      "question": "According to industry sales figures, since 1993, ranch dressing has been the most popular salad dressing in America after it overtook what dressing? Was it: a) Italian b) Balsamic c) Thousand Island or d) French",
+      "options": [
+        "a) Italian",
+        "b) Balsamic",
+        "c) Thousand Island",
+        "d) French"
+      ],
+      "answer": "a) Italian"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to industry figures, the most commonly prescribed drug in America is used to treat what? Is it: a) Asthma b) High cholesterol c) Heartburn or d) Erectile dysfunction",
+      "options": [
+        "a) Asthma",
+        "b) High cholesterol",
+        "c) Heartburn",
+        "d) Erectile dysfunction"
+      ],
+      "answer": "b) High cholesterol"
+    },
+    {
+      "category": [
+        "sports"
+      ],
+      "question": "There are 4 NBA teams whose names do not end in an S. Name one. Bonus point for each additional one you can name.",
+      "options": [
+        "a) Utah Jazz",
+        "b) OKC Thunder",
+        "c) Miami Heat",
+        "d) Orlando Magic"
+      ],
+      "answer": "a) Utah Jazz, OKC Thunder, Miami Heat, Orlando Magic"
+    },
+    {
+      "category": [
+        "commercials"
+      ],
+      "question": "In the 1970s commercial that featured a Native American crying a single tear, what made that man cry that tear? Was it: a) Forest fires b) Global warming c) Homelessness or d) Littering",
+      "options": [
+        "a) Forest fires",
+        "b) Global warming",
+        "c) Homelessness",
+        "d) Littering"
+      ],
+      "answer": "d) Littering"
+    },
+    {
+      "category": [
+        "music"
+      ],
+      "question": "Which one of these bands named after places has had the most Billboard Top 40 hits? Is it: a) America b) Boston c) Chicago or d) Kansas",
+      "options": [
+        "a) America",
+        "b) Boston",
+        "c) Chicago",
+        "d) Kansas"
+      ],
+      "answer": "c) Chicago"
+    },
+    {
+      "category": [
+        "video games"
+      ],
+      "question": "Of the top 10 best selling video games of all time, only two companies have more than one game on the list. One is Nintendo. What is the other one? Is it: a) Rockstar b) Electronic Arts c) Capcom or d) Activision",
+      "options": [
+        "a) Rockstar",
+        "b) Electronic Arts",
+        "c) Capcom",
+        "d) Activision"
+      ],
+      "answer": "a) Rockstar (GTA 5 and RDR 2)"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to the US Census, what was the first decade in which the majority of American homes had indoor plumbing? Was it: a) 1900s b) 1920s c) 1940s or d) 1960s",
+      "options": [
+        "a) 1900s",
+        "b) 1920s",
+        "c) 1940s",
+        "d) 1960s"
+      ],
+      "answer": "c) 1940s"
+    },
+    {
+      "category": [
+        "us states"
+      ],
+      "question": "How many US states only have one syllable in their name?",
+      "options": [
+        "a) 1 (maine)",
+        "b) 2",
+        "c) 3",
+        "d) 4"
+      ],
+      "answer": "a) 1 (maine)"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "What is the highest military award for valor that can be awarded in the united states?",
+      "options": [
+        "a) medal of honor",
+        "b) congressional medal of honor",
+        "c) distinguished service cross",
+        "d) bronze star"
+      ],
+      "answer": "a) medal of honor"
+    },
+    {
+      "category": [
+        "space"
+      ],
+      "question": "Between what two planets in our solar system is the asteroid belt located?",
+      "options": [
+        "a) mars and jupiter",
+        "b) mercury and venus",
+        "c) saturn and uranus",
+        "d) earth and mars"
+      ],
+      "answer": "a) mars and jupiter"
+    },
+    {
+      "category": [
+        "sports"
+      ],
+      "question": "The record for most expensive sports card is almost 14 million dollars that was paid for a 1952 topps card featuring this yankee legend. what player?",
+      "options": [
+        "a) mickey mantle",
+        "b) joe dimaggio",
+        "c) billy martin",
+        "d) ralph kiner"
+      ],
+      "answer": "a) mickey mantle"
+    },
+    {
+      "category": [
+        "movies"
+      ],
+      "question": "According to IMDB, which of the following characters have the most movies been made about? is it: a) aliens b) zombies c) werewolves or d) dragons",
+      "options": [
+        "a) aliens",
+        "b) zombies",
+        "c) werewolves",
+        "d) dragons"
+      ],
+      "answer": "a) aliens"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "This auto part has largely been replaced by fuel injection and the last american car to use one of these parts was manufactured in 1994. what is the name of this part?",
+      "options": [
+        "a) carburetor",
+        "b) air filter",
+        "c) brake pedal",
+        "d) shock absorber"
+      ],
+      "answer": "a) carburetor"
+    },
+    {
+      "category": [
+        "presidents"
+      ],
+      "question": "In the 20th century, were there more republican presidents or democratic presidents?",
+      "options": [
+        "a) republicans had 10. democrats had 7.",
+        "b) democrats had 10. republicans had 7",
+        "c) both had 5 each",
+        "d) neither had any"
+      ],
+      "answer": "a) republicans had 10. democrats had 7."
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to the UN, mandarin chinese is the most natively-spoken language in the world. what is the second most natively-spoken language in the world? is it: a)spanish b)hindi c)arabic or d)russian",
+      "options": [
+        "a) spanish",
+        "b) hindi",
+        "c) arabic",
+        "d) russian"
+      ],
+      "answer": "a) spanish"
+    },
+    {
+      "category": [
+        "basketball"
+      ],
+      "question": "This nba team made the playoffs every year from 1998-2019 which gives them one of the longest postseason streaks of any professional sports team in history. what team am I talking about?",
+      "options": [
+        "a) san antonio spurs",
+        "b) los angeles lakers",
+        "c) milwaukee bucks",
+        "d) cleveland cavaliers"
+      ],
+      "answer": "a) san antonio spurs"
+    },
+    {
+      "category": [
+        "alcohol"
+      ],
+      "question": "Based on sales figures, whats the most popular type of liquor in america? is it: a) whiskey b) tequila c) vodka or d) rum",
+      "options": [
+        "a) whiskey",
+        "b) tequila",
+        "c) vodka",
+        "d) rum"
+      ],
+      "answer": "c) vodka"
+    },
+    {
+      "category": [
+        "american history"
+      ],
+      "question": "The alleged crash of a UFO in roswell kicked off what the media called a UFO craze in america. what decade did that happen?",
+      "options": [
+        "a) 1940s",
+        "b) 1950s",
+        "c) 1960s",
+        "d) 1970s"
+      ],
+      "answer": "a) 1940s"
+    },
+    {
+      "category": [
+        "geography"
+      ],
+      "question": "At almost 6000 miles long, this mountain range is the longest continental mountain range in the world. is it: a) the andes b) the rockies c) the alps or d) the appalachian",
+      "options": [
+        "a) the andes",
+        "b) the rockies",
+        "c) the alps",
+        "d) the appalachian"
+      ],
+      "answer": "a) the andes"
+    },
+    {
+      "category": [
+        "the 80s"
+      ],
+      "question": "According to guiness world records, this person was the most photographed person of the 1980s in the whole wide world. is it: a) ronald reagan b) pope john paul II c) madonna or d) princess diana",
+      "options": [
+        "a) ronald reagan",
+        "b) pope john paul ii",
+        "c) madonna",
+        "d) princess diana"
+      ],
+      "answer": "d) princess diana"
+    },
+    {
+      "category": [
+        "cartoons"
+      ],
+      "question": "According to the guiness book of world records, this cartoon character is the most portrayed cartoon character ever, which means he has appeared in more films, tv shows, comics, ads, etc than any other cartoon character. his first official appearance was in 1940. what cartoon character am I talking about?",
+      "options": [
+        "a) bugs bunny",
+        "b) batman",
+        "c) looney tunes",
+        "d) spiderman"
+      ],
+      "answer": "a) bugs bunny"
+    },
+    {
+      "category": [
+        "us cities"
+      ],
+      "question": "This us city is the largest city in america that has an average elevation below sea level. what city am i talking about?",
+      "options": [
+        "a) new orleans",
+        "b) las vegas",
+        "c) los angeles",
+        "d) atlanta"
+      ],
+      "answer": "a) new orleans"
+    },
+    {
+      "category": [
+        "the internet"
+      ],
+      "question": "One of the first viral youtube videos, this 2007 video featured a baby biting his older brothers finger. what was the babys name?",
+      "options": [
+        "a) charlie",
+        "b) john",
+        "c) james",
+        "d) robert"
+      ],
+      "answer": "a) charlie"
+    },
+    {
+      "category": [
+        "space"
+      ],
+      "question": "Between what two planets in our solar system is the asteroid belt located?",
+      "options": [
+        "a) mars and jupiter",
+        "b) mercury and venus",
+        "c) saturn and uranus",
+        "d) earth and mars"
+      ],
+      "answer": "a) mars and jupiter"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "According to industry sales figures, 47% of ppl sleep on this size mattress, which makes it the most common. is it: a) king b) queen c) twin or d) full",
+      "options": [
+        "a) king",
+        "b) queen",
+        "c) twin",
+        "d) full"
+      ],
+      "answer": "b) queen"
+    },
+    {
+      "category": [
+        "alcohol"
+      ],
+      "question": "An arnold palmer is iced tea mixed with lemonade. if you add vodka to that drink, its named after what golfer?",
+      "options": [
+        "a) the immortal john daly",
+        "b) arnold palmer",
+        "c) tiger woods",
+        "d) jack nicklaus"
+      ],
+      "answer": "a) the immortal john daly"
+    },
+    {
+      "category": [
+        "general knowledge"
+      ],
+      "question": "Christianity is the largest religion in the world with 2.3 billion followers. which of the following is the second largest? is it: a) islam b) hinduism c) buddhism or d) secular/non-religious",
+      "options": [
+        "a) islam",
+        "b) hinduism",
+        "c) buddhism",
+        "d) secular/non-religious"
+      ],
+      "answer": "a) islam"
+    },
+    {
+      "category": [
+        "history"
+      ],
+      "question": "In 1517, the priest martin luther started the reformation by nailing his 95 theses to the door of a church in what modern-day country?",
+      "options": [
+        "a) germany",
+        "b) italy",
+        "c) spain",
+        "d) france"
+      ],
+      "answer": "a) germany"
+    },
+    {
+      "category": [
+        "music"
+      ],
+      "question": "Only two artists to have 5 number one singles from a single album. one did it in 1988. the other did it in 2011. name one. bonus if you can name both.",
+      "options": [
+        "a) michael jackson bad, katy perry teenage dream",
+        "b) whitney houston, taylor swift",
+        "c) justin bieber, bruno mars",
+        "d) mariah carey, lady gaga"
+      ],
+      "answer": "a) michael jackson bad, katy perry teenage dream"
+    },
+    {
+      "category": [
+        "video games"
+      ],
+      "question": "Of the all the games in the grand theft auto series, which was the first one to be set in a 3D environment? is it: a) gta 3 b) gta 4 c) gta vice city or d) gta san andreas",
+      "options": [
+        "a) grand theft auto III",
+        "b) grand theft auto IV",
+        "c) grand theft auto vice city",
+        "d) grand theft auto san andreas"
+      ],
+      "answer": "a) grand theft auto III"
+    },
+    {
+      "category": [
+        "football"
+      ],
+      "question": "The new england patriots and the pittsburgh steelers are tied for most super bowl wins by a franchise with 6 each. there are 2 teams that are tied for 3rd, with 5 superbowls a piece. name one of those teams. bonus point if you can name both.",
+      "options": [
+        "a) san francisco 49ers and dallas cowboys",
+        "b) green bay packers and buffalo bills",
+        "c) washington redskins and philadelphia eagles",
+        "d) cincinnati bengals and tampa bay buccaneers"
+      ],
+      "answer": "a) san francisco 49ers and dallas cowboys"
+    },
+    {
+      "category": [
+        "movies"
+      ],
+      "question": "According to IMDB, which of the following characters have the most movies been made about? is it: a) aliens b) zombies c) werewolves or d) dragons",
+      "options": [
+        "a) aliens",
+        "b) zombies",
+        "c) werewolves",
+        "d) dragons"
+      ],
+      "answer": "a) aliens"
+    },
+    {
+      "category": [
+        "tv"
+      ],
+      "question": "Put these HBO shows in order of when they first debuted from oldest to most recent: game of thrones, true blood, sex and the city, the sopranos",
+      "options": [
+        "a) sex and the city, the sopranos, true blood, game of thrones",
+        "b) game of thrones, true blood, the sopranos, sex and the city",
+        "c) the sopranos, sex and the city, true blood, game of thrones",
+        "d) true blood, game of thrones, sex and the city, the sopranos"
+      ],
+      "answer": "a) sex and the city, the sopranos, true blood, game of thrones"
+    },
+    {
+      "category": [
+        "d-list celebrities"
+      ],
+      "question": "This dancer, actor, and rapper got mostly famous for who he married, and shortly before they divorced in 2006, he released a rap album which sold dozens of copies. who am I talking about?",
+      "options": [
+        "a) kevin federline",
+        "b) justin bieber",
+        "c) rick ross",
+        "d) chris brown"
+      ],
+      "answer": "a) kevin federline"
+    },
+    {
+      "category": [
+        "history"
+      ],
+      "question": "The reason we have the leap year format we do is because of the gregorian calendar. Who started the gregorian calendar? was it: a) an emporer b) a king c) a pope or d) a czar",
+      "options": [
+        "a) an emperor",
+        "b) a king",
+        "c) a pope",
+        "d) a czar"
+      ],
+      "answer": "c) a pope (pope gregory the XIII)"
+    },
+    {
+      "category": [
+        "commercials"
+      ],
+      "question": "Michael jackson, spice girls, britney spears and beyonce have all appeared in commercials for what soda?",
+      "options": [
+        "a) pepsi",
+        "b) coca-cola",
+        "c) sprite",
+        "d) fanta"
+      ],
+      "answer": "a) pepsi"
+    },
+    {
+      "category": [
+        "science"
+      ],
+      "question": "According to science, how many minutes does light from the sun take to reach the earth? is it: a) 2 minutes b) 4 minutes c) 6 minutes or d) 8 minutes",
+      "options": [
+        "a) 2 minutes",
+        "b) 4 minutes",
+        "c) 6 minutes",
+        "d) 8 minutes"
+      ],
+      "answer": "d) 8 minutes"
+    },
+    {
+      "category": [
+        "florida"
+      ],
+      "question": "Which of the following local counties has the highest population? is it: a) bay county b) walton county or c) okaloosa county",
+      "options": [
+        "a) bay county",
+        "b) walton county",
+        "c) okaloosa county"
+      ],
+      "answer": "c) it has about 210k ppl, its okaloosa county"
+    },
+    {
+      "category": [
+        "toys"
+      ],
+      "question": "Which of the following toys has generated more revenue over the years? is it: a) hot wheels b) barbie c) legos or d) nerf guns",
+      "options": [
+        "a) hot wheels",
+        "b) barbie",
+        "c) legos",
+        "d) nerf guns"
+      ],
+      "answer": "c) legos"
+    }
+  ]
+}

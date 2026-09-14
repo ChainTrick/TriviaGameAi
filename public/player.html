@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Trivia Night</title>
+<style>
+  :root {
+    --bg: #0b1220;
+    --bg2: #0e1628;
+    --accent: #3b82f6;
+    --accent-soft: rgba(59, 130, 246, 0.16);
+    --text: #e6edf7;
+    --muted: #8fa0b8;
+    --glass: rgba(255, 255, 255, 0.055);
+    --glass-border: rgba(255, 255, 255, 0.10);
+    --good: #34d399;
+    --bad: #f87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+    background:
+      radial-gradient(900px 500px at 85% -10%, rgba(59, 130, 246, 0.14), transparent 60%),
+      radial-gradient(700px 420px at -10% 110%, rgba(59, 130, 246, 0.08), transparent 60%),
+      var(--bg);
+    color: var(--text);
+    display: flex;
+    justify-content: center;
+    padding: 24px 16px calc(24px + env(safe-area-inset-bottom));
+  }
+  .wrap { width: 100%; max-width: 560px; }
+
+  .card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    padding: 28px 24px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
+  }
+
+  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .brand svg { width: 34px; height: 34px; color: var(--accent); flex-shrink: 0; }
+  .brand h1 { font-size: 20px; font-weight: 650; letter-spacing: 0.2px; }
+  .brand span.sub { display: block; font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 2px; }
+
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 8px; letter-spacing: 0.4px; text-transform: uppercase; }
+  input[type="text"] {
+    width: 100%; padding: 14px 16px; font-size: 17px; color: var(--text);
+    background: rgba(255, 255, 255, 0.06); border: 1px solid var(--glass-border);
+    border-radius: 12px; outline: none; transition: border-color .15s;
+  }
+  input[type="text"]:focus { border-color: var(--accent); }
+
+  button.primary {
+    width: 100%; margin-top: 16px; padding: 15px; font-size: 16px; font-weight: 600;
+    color: #fff; background: linear-gradient(180deg, rgba(59,130,246,.9), rgba(59,130,246,.7));
+    border: none; border-radius: 12px; cursor: pointer; transition: transform .08s, opacity .15s;
+  }
+  button.primary:hover { opacity: .92; }
+  button.primary:active { transform: scale(0.985); }
+  button.primary:disabled { opacity: .45; cursor: default; }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--accent);
+    background: var(--accent-soft); border: 1px solid rgba(59,130,246,.3);
+    padding: 5px 12px; border-radius: 999px; margin-bottom: 14px; letter-spacing: .3px;
+  }
+
+  .qtext { font-size: 18.5px; line-height: 1.55; font-weight: 500; margin-bottom: 20px; white-space: pre-wrap; }
+
+  /* wager row */
+  .wager-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .wager-label { font-size: 13px; color: var(--muted); letter-spacing: .4px; text-transform: uppercase; white-space: nowrap; }
+  .wagers { display: flex; gap: 8px; flex: 1; }
+  .wbtn {
+    flex: 1; padding: 12px 0; font-size: 16px; font-weight: 700; color: var(--text);
+    background: rgba(255,255,255,.05); border: 1px solid var(--glass-border);
+    border-radius: 12px; cursor: pointer; transition: all .12s; position: relative;
+  }
+  .wbtn small { display: block; font-size: 10.5px; font-weight: 500; color: var(--muted); margin-top: 2px; letter-spacing: .3px; }
+  .wbtn:hover:not(:disabled) { border-color: rgba(59,130,246,.55); background: var(--accent-soft); }
+  .wbtn.selected { border-color: var(--accent); background: var(--accent-soft); color: #fff; box-shadow: 0 0 0 1px var(--accent) inset; }
+  .wbtn.selected small { color: rgba(255,255,255,.75); }
+  .wbtn.used { opacity: .38; cursor: default; text-decoration: line-through; }
+
+  .opts { display: grid; gap: 10px; }
+  .opt {
+    text-align: left; padding: 14px 16px; font-size: 15.5px; color: var(--text);
+    background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border);
+    border-radius: 13px; cursor: pointer; transition: border-color .12s, background .12s, transform .08s;
+    display: flex; align-items: center; gap: 12px; line-height: 1.4;
+  }
+  .opt:hover { border-color: rgba(59,130,246,.5); background: var(--accent-soft); }
+  .opt:active { transform: scale(0.985); }
+  .opt .key {
+    width: 26px; height: 26px; flex-shrink: 0; border-radius: 8px; display: grid; place-items: center;
+    font-size: 13px; font-weight: 700; color: var(--accent); background: rgba(59,130,246,.14);
+  }
+  .opt.selected { border-color: var(--accent); background: var(--accent-soft); }
+  .opt.correct { border-color: var(--good); background: rgba(52, 211, 153, 0.14); }
+  .opt.correct .key { color: var(--good); background: rgba(52,211,153,.18); }
+  .opt.wrongpick { border-color: var(--bad); background: rgba(248, 113, 113, 0.12); }
+
+  .locked-note { display: flex; align-items: center; gap: 8px; margin-top: 16px; font-size: 14px; color: var(--good); }
+  .wager-hint { font-size: 12px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+  .locked-note svg { width: 17px; height: 17px; }
+
+  .result-banner {
+    display: flex; align-items: center; gap: 10px; margin-top: 20px; padding: 14px 16px;
+    border-radius: 13px; font-size: 15.5px; font-weight: 600;
+  }
+  .result-banner.good { background: rgba(52,211,153,.13); border: 1px solid rgba(52,211,153,.4); color: var(--good); }
+  .result-banner.bad { background: rgba(248,113,113,.12); border: 1px solid rgba(248,113,113,.4); color: var(--bad); }
+  .result-banner svg { width: 19px; height: 19px; flex-shrink: 0; }
+
+  .answer-line { margin-top: 16px; font-size: 15px; color: var(--muted); }
+  .answer-line b { color: var(--text); font-weight: 600; }
+
+  /* scoreboard */
+  .board { margin-top: 24px; }
+  .board h3 { font-size: 12.5px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 10px; }
+  .row {
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 11px;
+    background: rgba(255,255,255,.04); margin-bottom: 6px; transition: background .3s;
+  }
+  .row.me { background: var(--accent-soft); border: 1px solid rgba(59,130,246,.35); }
+  .row.offline { opacity: .55; }
+  .rank { width: 22px; font-size: 13px; color: var(--muted); text-align: center; flex-shrink: 0; }
+  .row.me .rank { color: var(--accent); font-weight: 700; }
+  .pname { flex: 1; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pwager { font-size: 12.5px; color: var(--muted); min-width: 46px; text-align: right; }
+  .pscore { font-size: 15px; font-weight: 700; color: var(--accent); min-width: 48px; text-align: right; }
+
+  .waiting { text-align: center; padding: 34px 10px; color: var(--muted); font-size: 15.5px; line-height: 1.7; }
+  .pulse { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); margin: 0 auto 14px; animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse { 0%,100% { opacity: .35; transform: scale(.85);} 50% { opacity: 1; transform: scale(1.15); } }
+
+  .meta-line { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); margin-bottom: 14px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- JOIN -->
+  <div id="view-join" class="card hidden">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9.5 7h5M9.5 11h5M9.5 15h3"/></svg>
+      <div><h1>Trivia Night</h1><span class="sub">Join the game</span></div>
+    </div>
+    <label for="name">Team name</label>
+    <input id="name" type="text" maxlength="24" placeholder="e.g. Blue Team" autocomplete="off" />
+    <button id="joinBtn" class="primary">Join game</button>
+  </div>
+
+  <!-- LOBBY -->
+  <div id="view-lobby" class="card hidden">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.6 3.7-5.5 7-5.5s6.2 1.9 7 5.5"/></svg>
+      <div><h1 id="lobbyName">Trivia Night</h1><span class="sub">Waiting for the host to start…</span></div>
+    </div>
+    <div class="waiting"><div class="pulse"></div>The host is setting up.<br/>Get ready — questions are coming.</div>
+    <div id="lobbyBoard" class="board"></div>
+  </div>
+
+  <!-- QUESTION -->
+  <div id="view-question" class="card hidden">
+    <div class="meta-line"><span id="qNum"></span><span id="qPts"></span></div>
+    <div id="qCat" class="chip"></div>
+    <div id="qText" class="qtext"></div>
+
+    <div class="wager-row">
+      <span class="wager-label">Wager</span>
+      <div class="wagers" id="wagers"></div>
+    </div>
+    <p class="wager-hint" id="wagerHint">Pick your stake — each chip can only be used once per game. No pick = no points at stake.</p>
+
+    <div id="opts" class="opts"></div>
+    <form id="freeForm" class="hidden" style="margin-top:4px">
+      <input id="freeInput" type="text" maxlength="300" placeholder="Type your answer…" autocomplete="off" />
+      <button class="primary" type="submit">Lock in</button>
+    </form>
+    <div id="lockedNote" class="locked-note hidden">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+      Answer locked in — waiting for the host to reveal…
+    </div>
+  </div>
+
+  <!-- REVEAL -->
+  <div id="view-reveal" class="card hidden">
+    <div class="meta-line"><span id="rNum"></span><span id="rPts"></span></div>
+    <div id="rCat" class="chip"></div>
+    <div id="rText" class="qtext"></div>
+    <div id="rOpts" class="opts"></div>
+    <div id="rAnswerLine" class="answer-line hidden"></div>
+    <div id="myResult" class="result-banner hidden"></div>
+    <div id="revealBoard" class="board"></div>
+  </div>
+
+  <!-- ROUND END -->
+  <div id="view-roundend" class="card hidden">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5l3 2"/><circle cx="12" cy="12" r="9"/></svg>
+      <div><h1 id="reTitle">Round complete</h1><span class="sub">Waiting for the host to start the next round…</span></div>
+    </div>
+    <div class="waiting"><div class="pulse"></div>Take a breath — the next round is coming.</div>
+    <div id="roundEndBoard" class="board"></div>
+  </div>
+
+  <!-- ENDED -->
+  <div id="view-ended" class="card hidden">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0V4z"/><path d="M8 5H5a3 3 0 0 0 3 5M16 5h3a3 3 0 0 1-3 5M12 13v4M9 20h6"/></svg>
+      <div><h1>Final standings</h1><span class="sub">Round complete</span></div>
+    </div>
+    <div id="finalBoard" class="board"></div>
+  </div>
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+let meId = null;
+let meName = null; // set on join; used to re-identify after refresh
+let myAnswer = null; // number (option idx) or string, once locked
+let lastQuestionId = null;
+
+// Remember team name across refreshes.
+try { $('name').value = localStorage.getItem('tn_name') || ''; } catch (e) {}
+
+const $ = (id) => document.getElementById(id);
+function show(view) {
+  for (const v of ['join', 'lobby', 'question', 'reveal', 'roundend', 'ended']) {
+    $('view-' + v).classList.toggle('hidden', v !== view);
+  }
+}
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>';
+const X_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+
+function myPlayer(st) { return meId ? st.players.find(p => p.id === meId) : null; }
+
+function boardHtml(players, phase) {
+  if (!players.length) return '';
+  let html = '<h3>Scoreboard</h3>';
+  players.forEach((p, i) => {
+    const me = p.id === meId ? ' me' : '';
+    const off = p.online === false ? ' offline' : '';
+    const wcell = (phase === 'question' || phase === 'reveal') && p.wager != null
+      ? `<span class="pwager">w${p.wager}</span>` : '<span class="pwager"></span>';
+    html += `<div class="row${me}${off}"><span class="rank">${i + 1}</span><span class="pname">${esc(p.name)}${p.id === meId ? ' (you)' : ''}${p.online === false ? ' <small>(offline)</small>' : ''}</span>${wcell}<span class="pscore">${p.score}</span></div>`;
+  });
+  return html;
+}
+
+function renderWagers(st) {
+  const me = myPlayer(st);
+  const usedSet = new Set((me && me.wagersUsed) || []); // chips spent this game
+  const current = st.phase === 'question' ? (me ? me.wager : null) : null;
+  const el = $('wagers');
+  el.innerHTML = '';
+
+  // Final question: no fixed chips — stake any whole number up to your score.
+  if (st.isFinal) {
+    const max = me ? Math.max(0, me.score) : 0;
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.min = '0';
+    input.max = String(max);
+    input.value = current != null ? String(current) : '';
+    input.style.cssText = 'flex:1;padding:12px 14px;font-size:16px;color:var(--text);background:rgba(255,255,255,.06);border:1px solid var(--glass-border);border-radius:12px;outline:none';
+    input.placeholder = `0–${max}`;
+    if (st.phase === 'question') {
+      const commit = () => {
+        let v = Math.floor(Number(input.value));
+        if (!Number.isFinite(v)) return;
+        v = Math.max(0, Math.min(max, v));
+        socket.emit('setWager', { points: v });
+      };
+      input.addEventListener('change', commit);
+      input.addEventListener('blur', commit);
+    } else {
+      input.disabled = true;
+    }
+    el.appendChild(input);
+    $('wagerHint').textContent = `Final question — stake any whole number from 0 up to your score (${max}). Correct doubles it in, wrong loses it. The question appears once every player has wagered.`;
+    return;
+  }
+
+  const opts = Array.isArray(st.wagerOptions) && st.wagerOptions.length ? st.wagerOptions : [1, 2, 3, 4];
+  for (const v of opts) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    let cls = 'wbtn';
+    if (usedSet.has(v)) cls += ' used';
+    else if (current === v) cls += ' selected';
+    b.className = cls;
+    b.innerHTML = `${v}<small>pts</small>`;
+    if (!usedSet.has(v) && st.phase === 'question') {
+      b.onclick = () => socket.emit('setWager', { points: v });
+    } else {
+      b.disabled = true;
+    }
+    el.appendChild(b);
+  }
+  $('wagerHint').textContent = `Pick your stake (${opts.join(' / ')}) — each chip can only be used once per round. No pick = no points at stake.`;
+}
+
+function questionLabel(st) {
+  return st.isFinal ? '🏆 Final question' : `Round ${st.currentRound} · Q${st.questionInRound}/${st.questionsPerRound}`;
+}
+
+function renderQuestion(st) {
+  const q = st.question;
+  $('qNum').textContent = questionLabel(st);
+  const me = myPlayer(st);
+  const w = me ? me.wager : null;
+  $('qPts').textContent = w != null ? `stake: ${w} pt${w > 1 ? 's' : ''}` : '';
+  $('qCat').textContent = q.category || 'Trivia';
+
+  // Final question before everyone has wagered: show the category + wager box,
+  // but keep the actual question text hidden.
+  const finalHidden = st.isFinal && st.phase === 'question' && !q.text;
+  $('qText').textContent = finalHidden
+    ? '🔒 The question will appear once every player has set their wager…'
+    : q.text;
+
+  renderWagers(st);
+
+  const optsEl = $('opts');
+  optsEl.innerHTML = '';
+  if (finalHidden) {
+    $('freeForm').classList.add('hidden');
+    $('lockedNote').classList.add('hidden');
+    return;
+  }
+  if (q.isMultipleChoice) {
+    q.options.forEach((label, i) => {
+      const b = document.createElement('button');
+      b.className = 'opt';
+      b.innerHTML = `<span class="key">${'abcd'[i]}</span><span>${esc(label)}</span>`;
+      if (myAnswer === i) b.classList.add('selected');
+      b.onclick = () => {
+        if (st.phase !== 'question') return;
+        myAnswer = i;
+        socket.emit('answer', { value: i });
+        optsEl.querySelectorAll('.opt').forEach((o, j) => o.classList.toggle('selected', j === i));
+        $('lockedNote').classList.remove('hidden');
+      };
+      optsEl.appendChild(b);
+    });
+  } else {
+    $('freeForm').classList.remove('hidden');
+    if (typeof myAnswer === 'string') $('freeInput').value = myAnswer;
+  }
+
+  const answeredNow = me ? !!me.answered : false;
+  $('lockedNote').classList.toggle('hidden', !(st.phase === 'question' && answeredNow));
+}
+
+function renderReveal(st) {
+  const q = st.question;
+  $('rNum').textContent = questionLabel(st);
+  const me = myPlayer(st);
+  const w = me ? me.wager : null;
+  $('rPts').textContent = w != null ? `stake: ${w} pt${w > 1 ? 's' : ''}` : '';
+  $('rCat').textContent = q.category || 'Trivia';
+  $('rText').textContent = q.text;
+
+  const optsEl = $('rOpts');
+  optsEl.innerHTML = '';
+  if (q.isMultipleChoice) {
+    q.options.forEach((label, i) => {
+      const b = document.createElement('div');
+      b.className = 'opt';
+      let cls = [];
+      if (i === q.correctIndex) cls.push('correct');
+      if (myAnswer === i && i !== q.correctIndex) cls.push('wrongpick');
+      b.classList.add(...cls);
+      b.innerHTML = `<span class="key">${'abcd'[i]}</span><span>${esc(label)}</span>`;
+      optsEl.appendChild(b);
+    });
+  } else {
+    const line = $('rAnswerLine');
+    line.classList.remove('hidden');
+    line.innerHTML = `Answer: <b>${esc(q.answerRaw || '—')}</b>`;
+  }
+
+  // my result banner
+  const res = $('myResult');
+  if (me && me.correct !== undefined) {
+    res.classList.remove('hidden', 'good', 'bad');
+    res.classList.add(me.correct ? 'good' : 'bad');
+    let delta;
+    if (st.isFinal) {
+      delta = w != null && w > 0 ? ` ${me.correct ? '+' : '−'}${w}` : '';
+    } else {
+      delta = me.correct && w != null ? ` +${w}` : '';
+    }
+    res.innerHTML = (me.correct ? CHECK_SVG + ` Correct!${delta} points` : X_SVG + ` Not quite.${delta ? `${delta} points` : ''}`);
+  } else {
+    res.classList.remove('hidden', 'good', 'bad');
+    res.classList.add('bad');
+    res.innerHTML = X_SVG + ' No answer submitted.';
+  }
+
+  $('revealBoard').innerHTML = boardHtml(st.players, st.phase);
+}
+
+socket.on('state', (st) => {
+  window.state = st;
+  // Resolve my identity: from the join ack, or by matching a known name.
+  if (!meId && meName) {
+    const m = st.players.find(p => p.name.toLowerCase() === meName.toLowerCase());
+    if (m) meId = m.id;
+  }
+  if (!meId) return; // still on the join screen
+
+  switch (st.phase) {
+    case 'lobby':
+      $('lobbyName').textContent = `Trivia Night — ${myPlayer(st).name}`;
+      $('lobbyBoard').innerHTML = boardHtml(st.players, st.phase);
+      show('lobby');
+      break;
+    case 'question':
+      if (st.question && st.question.id !== lastQuestionId) {
+        myAnswer = null;
+        lastQuestionId = st.question.id;
+        $('freeInput').value = '';
+      }
+      renderQuestion(st);
+      show('question');
+      break;
+    case 'reveal':
+      if (st.question) renderReveal(st);
+      show('reveal');
+      break;
+    case 'roundEnd': {
+      const done = st.currentRound || 0;
+      $('reTitle').textContent = `Round ${done} complete`;
+      document.querySelector('#view-roundend .sub').textContent =
+        done >= st.totalRounds ? 'Get ready — the final question is coming!' : 'Waiting for the host to start the next round…';
+      $('roundEndBoard').innerHTML = boardHtml(st.players, st.phase);
+      show('roundend');
+      break;
+    }
+    case 'ended':
+      $('finalBoard').innerHTML = boardHtml(st.players, st.phase);
+      show('ended');
+      break;
+  }
+});
+
+// Join flow
+function doJoin() {
+  const name = $('name').value.trim();
+  if (!name) return;
+  try { localStorage.setItem('tn_name', name); } catch (e) {}
+  meName = name;
+  socket.emit('join', { name });
+}
+$('joinBtn').onclick = doJoin;
+$('name').addEventListener('keydown', (e) => { if (e.key === 'Enter') doJoin(); });
+
+socket.on('joined', ({ playerId }) => {
+  meId = playerId;
+});
+
+$('freeForm').onsubmit = (e) => {
+  e.preventDefault();
+  const v = $('freeInput').value.trim();
+  if (!v || myAnswer !== null) return;
+  myAnswer = v;
+  socket.emit('answer', { value: v });
+};
+
+// Initial view: join screen. If we have a saved name, auto-join on load.
+show('join');
+if ($('name').value.trim()) doJoin();
+</script>
+</body>
+</html>

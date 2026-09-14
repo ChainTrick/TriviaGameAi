@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Trivia Night — Host</title>
+<style>
+  :root {
+    --bg: #0b1220;
+    --accent: #3b82f6;
+    --accent-soft: rgba(59, 130, 246, 0.16);
+    --text: #e6edf7;
+    --muted: #8fa0b8;
+    --glass: rgba(255, 255, 255, 0.055);
+    --glass-border: rgba(255, 255, 255, 0.10);
+    --good: #34d399;
+    --bad: #f87171;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+    background:
+      radial-gradient(1000px 520px at 85% -10%, rgba(59, 130, 246, 0.14), transparent 60%),
+      var(--bg);
+    color: var(--text); min-height: 100vh; padding: 28px 20px 60px;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 20px; }
+
+  .card {
+    background: var(--glass); border: 1px solid var(--glass-border); border-radius: 18px;
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); padding: 22px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .brand svg { width: 30px; height: 30px; color: var(--accent); }
+  .brand h1 { font-size: 19px; font-weight: 650; }
+
+  /* setup */
+  .setup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+  input[type="number"] {
+    width: 100%; padding: 11px 13px; font-size: 16px; color: var(--text);
+    background: rgba(255,255,255,.06); border: 1px solid var(--glass-border); border-radius: 10px; outline: none;
+  }
+  input[type="number"]:focus { border-color: var(--accent); }
+  .check-row { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 14px; color: var(--muted); cursor: pointer; user-select: none; }
+  .check-row input { accent-color: var(--accent); width: 16px; height: 16px; }
+
+  button.primary {
+    padding: 13px 22px; font-size: 15.5px; font-weight: 600; color: #fff; border: none; border-radius: 11px;
+    background: linear-gradient(180deg, rgba(59,130,246,.9), rgba(59,130,246,.7)); cursor: pointer; transition: transform .08s, opacity .15s;
+  }
+  button.primary:hover { opacity: .92; }
+  button.primary:active { transform: scale(.98); }
+  button.ghost {
+    padding: 12px 18px; font-size: 14.5px; font-weight: 600; color: var(--text); cursor: pointer;
+    background: rgba(255,255,255,.05); border: 1px solid var(--glass-border); border-radius: 11px; transition: border-color .12s;
+  }
+  button.ghost:hover { border-color: rgba(59,130,246,.5); }
+  button.danger-ghost { color: #fca5a5; }
+
+  /* join card */
+  .join-card { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
+  .qr-box { width: 190px; height: 190px; border-radius: 14px; background: #fff; padding: 8px; flex-shrink: 0; display: grid; place-items: center; }
+  .qr-box img, .qr-box canvas { width: 100%; height: 100%; image-rendering: pixelated; border-radius: 6px; }
+  .join-info h2 { font-size: 17px; margin-bottom: 8px; }
+  .join-url { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 14.5px; color: var(--accent); background: rgba(59,130,246,.1); padding: 9px 12px; border-radius: 9px; display: inline-block; margin-bottom: 10px; word-break: break-all; }
+  .join-info p { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+
+  /* game area */
+  .game-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+  .chip { display: inline-flex; font-size: 12.5px; color: var(--accent); background: var(--accent-soft); border: 1px solid rgba(59,130,246,.3); padding: 5px 12px; border-radius: 999px; }
+  .qtext { font-size: 18px; line-height: 1.55; margin-bottom: 16px; white-space: pre-wrap; }
+  .opts { display: grid; gap: 9px; margin-bottom: 14px; }
+  .opt { text-align: left; padding: 12px 14px; font-size: 15px; color: var(--text); background: rgba(255,255,255,.05); border: 1px solid var(--glass-border); border-radius: 12px; display: flex; gap: 11px; align-items: center; line-height: 1.4; }
+  .opt .key { width: 24px; height: 24px; flex-shrink: 0; border-radius: 7px; display: grid; place-items: center; font-size: 12.5px; font-weight: 700; color: var(--accent); background: rgba(59,130,246,.14); }
+  .opt.correct { border-color: var(--good); background: rgba(52,211,153,.14); }
+  .opt.correct .key { color: var(--good); background: rgba(52,211,153,.18); }
+  .answer-line { font-size: 14.5px; color: var(--muted); margin-bottom: 10px; }
+  .answer-line b { color: var(--text); }
+
+  /* scoreboard */
+  .board h3, .players-card h3 { font-size: 12.5px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 10px; }
+  .row { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px; background: rgba(255,255,255,.04); margin-bottom: 6px; }
+  .row.offline { opacity: .55; }
+  .rank { width: 22px; font-size: 13px; color: var(--muted); text-align: center; flex-shrink: 0; }
+  .pname { flex: 1; font-size: 14.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pscore { font-size: 14.5px; font-weight: 700; color: var(--accent); min-width: 42px; text-align: right; }
+  .answered-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.15); flex-shrink: 0; }
+  .answered-dot.on { background: var(--good); box-shadow: 0 0 6px rgba(52,211,153,.7); }
+  .pwager { font-size: 12.5px; color: var(--accent); background: var(--accent-soft); border: 1px solid rgba(59,130,246,.3); padding: 2px 8px; border-radius: 999px; flex-shrink: 0; }
+  .mark { font-size: 13px; margin-left: 6px; font-weight: 700; }
+  .mark.good { color: var(--good); }
+  .mark.bad { color: var(--bad); }
+
+  /* manual points */
+  .pt-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  select.pt-select { padding: 9px 10px; font-size: 14px; color: var(--text); background: rgba(255,255,255,.06); border: 1px solid var(--glass-border); border-radius: 9px; outline: none; flex: 1; }
+  select.pt-select option { background: #131c30; }
+  .pt-btns { display: flex; gap: 6px; }
+  button.mini { padding: 8px 12px; font-size: 14px; font-weight: 700; border-radius: 9px; border: 1px solid var(--glass-border); background: rgba(255,255,255,.06); color: var(--text); cursor: pointer; }
+  button.mini.plus { color: var(--good); }
+  button.mini.minus { color: #fca5a5; }
+
+  .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  .hidden { display: none !important; }
+  .empty-note { font-size: 14px; color: var(--muted); padding: 8px 2px; }
+
+  @media (max-width: 700px) {
+    .setup-grid { grid-template-columns: 1fr 1fr; }
+    .join-card { justify-content: center; text-align: center; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="card">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9.5 7h5M9.5 11h5M9.5 15h3"/></svg>
+      <div><h1>Trivia Night — Host</h1></div>
+    </div>
+
+    <!-- SETUP -->
+    <div id="setup" class="hidden">
+      <div class="setup-grid">
+        <div class="field"><label for="roundsCount">Rounds</label><input id="roundsCount" type="number" min="1" max="20" value="4"></div>
+        <div class="field"><label for="perRoundCount">Questions / round</label><input id="perRoundCount" type="number" min="1" max="763" value="4"></div>
+      </div>
+      <p style="font-size:13px;color:var(--muted);margin-top:12px;line-height:1.5">Scoring is wager-based: players stake chips per question (each chip once per round, right or wrong). Rounds 1 &amp; 3 offer 1–4 pts, rounds 2 &amp; 4 offer 2/4/6/8 pts — correct = +stake, wrong = no penalty. After all rounds there's a <b>final question</b>: each player may wager any amount up to their whole score (correct doubles it in, wrong loses it). Players see the final question only after everyone has set a stake.</p>
+      <label class="check-row"><input id="shuffleOn" type="checkbox" checked /> Shuffle questions</label>
+      <div class="controls">
+        <button id="startBtn" class="primary">Start game</button>
+      </div>
+    </div>
+
+    <!-- GAME -->
+    <div id="gameArea" class="hidden">
+      <div class="game-head">
+        <span id="roundChip" class="chip"></span>
+        <span id="qNumChip" class="chip"></span>
+      </div>
+      <div id="qCat" class="chip hidden" style="margin-bottom:12px"></div>
+      <div id="finalWagerNote" class="chip hidden" style="margin-bottom:12px"></div>
+      <div id="qText" class="qtext"></div>
+      <div id="opts" class="opts"></div>
+      <div id="answerLine" class="answer-line hidden"></div>
+
+      <div class="controls">
+        <button id="revealBtn" class="primary">Reveal answer</button>
+        <button id="nextBtn" class="ghost">Next question →</button>
+        <button id="skipBtn" class="ghost danger-ghost">Skip (no points)</button>
+      </div>
+    </div>
+
+    <!-- ROUND END -->
+    <div id="roundEndArea" class="hidden">
+      <h2 style="font-size:18px;margin-bottom:6px" id="reTitleHost">Round complete</h2>
+      <p style="color:var(--muted);font-size:14.5px;margin-bottom:14px">Standings below — start the next round when ready.</p>
+      <div class="controls"><button id="nextRoundBtn" class="primary">Start next round →</button></div>
+    </div>
+
+    <!-- ENDED -->
+    <div id="endedArea" class="hidden">
+      <h2 style="font-size:18px;margin-bottom:6px">Game complete 🏁</h2>
+      <p style="color:var(--muted);font-size:14.5px">Final standings below — start a new game when ready.</p>
+    </div>
+  </div>
+
+  <!-- JOIN -->
+  <div class="card join-card">
+    <div class="qr-box"><img id="qrImg" alt="Join QR code"></div>
+    <div class="join-info">
+      <h2>Players: scan to join</h2>
+      <div class="join-url" id="joinUrl"></div>
+      <p>Everyone on the same Wi-Fi scans this code (or opens the link), enters a team name, and answers live. You control every question from here.</p>
+    </div>
+  </div>
+
+  <!-- PLAYERS -->
+  <div class="card players-card">
+    <h3 id="playersTitle">Players</h3>
+    <div id="playerList"></div>
+    <div id="manualPoints" class="hidden" style="margin-top:14px">
+      <label style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px">Manual points (bonus / corrections)</label>
+      <div class="pt-row">
+        <select id="ptPlayer" class="pt-select"></select>
+        <button id="ptMinus10" class="mini minus">−10</button>
+        <button id="ptPlus5" class="mini plus">+5</button>
+        <button id="ptPlus10" class="mini plus">+10</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io({ query: { role: 'host' } });
+let st = null;
+const $ = (id) => document.getElementById(id);
+function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+socket.on('state', (s) => {
+  st = s;
+  render();
+});
+
+function boardRows(players, phase) {
+  if (!players.length) return '<div class="empty-note">No players yet — scan the QR code to join.</div>';
+  let html = '';
+  const showAnswered = phase === 'question';
+  const showWager = phase === 'question' || phase === 'reveal';
+  players.forEach((p, i) => {
+    const dot = showAnswered ? `<span class="answered-dot${p.answered ? ' on' : ''}" title="${p.answered ? 'answered' : 'not yet'}"></span>` : '';
+    let mark = '';
+    if (phase === 'reveal') {
+      if (p.correct === true) mark = '<span class="mark good">✓</span>';
+      else if (p.correct === false) mark = '<span class="mark bad">✗</span>';
+    }
+    const wcell = showWager && p.wager != null ? `<span class="pwager" title="stake on this question">${p.wager}pt</span>` : '';
+    html += `<div class="row${p.online === false ? ' offline' : ''}"><span class="rank">${i + 1}</span>${dot}<span class="pname">${esc(p.name)}${mark}${p.online === false ? ' <small>(offline)</small>' : ''}</span>${wcell}<span class="pscore">${p.score}</span></div>`;
+  });
+  return html;
+}
+
+function render() {
+  if (!st) return;
+  $('joinUrl').textContent = st.joinUrl;
+  const qr = $('qrImg');
+  if (st.qrDataUrl && qr.src !== st.qrDataUrl) qr.src = st.qrDataUrl;
+
+  // setup vs game vs round-end vs ended
+  $('setup').classList.toggle('hidden', !(st.phase === 'lobby' || st.phase === 'ended'));
+  $('gameArea').classList.toggle('hidden', !(st.phase === 'question' || st.phase === 'reveal'));
+  $('roundEndArea').classList.toggle('hidden', st.phase !== 'roundEnd');
+  $('endedArea').classList.toggle('hidden', st.phase !== 'ended');
+
+  if (st.phase === 'roundEnd') {
+    $('reTitleHost').textContent = `Round ${st.currentRound} of ${st.totalRounds} complete`;
+    $('nextRoundBtn').textContent = st.currentRound >= st.totalRounds ? 'Play final question 🏆' : 'Start next round →';
+  }
+
+  if (st.question && (st.phase === 'question' || st.phase === 'reveal')) {
+    const q = st.question;
+    if (st.isFinal) {
+      $('roundChip').textContent = '🏆 Final question';
+      $('qNumChip').textContent = `#${st.questionNumber}/${st.totalQuestions + 1} · wager up to your score`;
+    } else {
+      $('roundChip').textContent = `Round ${st.currentRound}/${st.totalRounds}`;
+      $('qNumChip').textContent = `Q${st.questionInRound}/${st.questionsPerRound} · #${st.questionNumber}/${st.totalQuestions}`;
+    }
+    $('qCat').classList.toggle('hidden', !q.category);
+    $('qCat').textContent = q.category || '';
+
+    // Final question: show how many players still need to set a stake.
+    if (st.isFinal && st.phase === 'question') {
+      const pending = st.players.filter((p) => p.wager == null).length;
+      $('finalWagerNote').classList.remove('hidden');
+      $('finalWagerNote').textContent = pending > 0
+        ? `⏳ ${pending} player${pending === 1 ? '' : 's'} still to wager — players see the question once everyone has`
+        : '✅ All players have wagered — the question is visible';
+    } else {
+      $('finalWagerNote').classList.add('hidden');
+    }
+
+    $('qText').textContent = q.text;
+
+    const optsEl = $('opts');
+    optsEl.innerHTML = '';
+    if (q.isMultipleChoice) {
+      q.options.forEach((label, i) => {
+        const d = document.createElement('div');
+        d.className = 'opt' + ((st.phase === 'reveal' && i === q.correctIndex) ? ' correct' : '');
+        d.innerHTML = `<span class="key">${'abcd'[i]}</span><span>${esc(label)}</span>`;
+        optsEl.appendChild(d);
+      });
+    } else {
+      $('answerLine').classList.remove('hidden');
+      $('answerLine').innerHTML = `Answer: <b>${esc(q.answerRaw || '—')}</b> (free-text question)`;
+    }
+
+    // reveal button only during question phase
+    $('revealBtn').style.display = st.phase === 'question' ? '' : 'none';
+    $('nextBtn').textContent = st.isFinal ? 'Finish game 🏁' : 'Next question →';
+  }
+
+  // players
+  $('playersTitle').textContent = `Players (${st.players.length})`;
+  $('playerList').innerHTML = boardRows(st.players, st.phase);
+
+  // manual points select
+  const sel = $('ptPlayer');
+  if (st.players.length) {
+    $('manualPoints').classList.remove('hidden');
+    if (!sel.options.length || [...sel.options].every(o => o.value === '')) {
+      sel.innerHTML = st.players.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
+    } else {
+      // keep selection valid
+      const cur = sel.value;
+      if (!st.players.some(p => p.id === cur)) sel.selectedIndex = 0;
+    }
+  } else {
+    $('manualPoints').classList.add('hidden');
+    sel.innerHTML = '';
+  }
+}
+
+$('startBtn').onclick = () => {
+  socket.emit('startGame', {
+    rounds: Number($('roundsCount').value) || 4,
+    perRound: Number($('perRoundCount').value) || 4,
+    shuffleOn: $('shuffleOn').checked,
+    keepScores: false,
+  });
+};
+
+$('revealBtn').onclick = () => socket.emit('reveal');
+$('nextBtn').onclick = () => socket.emit('nextQuestion');
+$('nextRoundBtn').onclick = () => socket.emit('startNextRound');
+$('skipBtn').onclick = () => {
+  if (confirm('Skip this question without awarding points?')) socket.emit('skipQuestion');
+};
+
+function manualPts(pts) {
+  const id = $('ptPlayer').value;
+  if (!id) return;
+  socket.emit('awardPoints', { playerId: id, points: pts });
+}
+$('ptMinus10').onclick = () => manualPts(-10);
+$('ptPlus5').onclick = () => manualPts(5);
+$('ptPlus10').onclick = () => manualPts(10);
+
+// keyboard shortcuts for the host
+document.addEventListener('keydown', (e) => {
+  if (!st || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+  if (st.phase === 'question' && (e.key === 'r' || e.key === 'R')) socket.emit('reveal');
+  if ((st.phase === 'reveal') && (e.key === 'n' || e.key === 'N' || e.key === 'Enter')) socket.emit('nextQuestion');
+  if (st.phase === 'roundEnd' && (e.key === 'n' || e.key === 'N' || e.key === 'Enter')) socket.emit('startNextRound');
+});
+</script>
+</body>
+</html>
