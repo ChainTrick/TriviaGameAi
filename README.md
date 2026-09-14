@@ -7,7 +7,7 @@ their phones by scanning a **QR code**. Everything updates in real time.
 ## Quick start
 
 ```bash
-cd /home/cachy/Projects/trivia_stuff/trivia_app
+cd into the folder where you saved all the files from this repo
 npm install        # already done if node_modules exists
 node server.js
 ```
