@@ -124,7 +124,7 @@
         <div class="field"><label for="roundsCount">Rounds</label><input id="roundsCount" type="number" min="1" max="20" value="4"></div>
         <div class="field"><label for="perRoundCount">Questions / round</label><input id="perRoundCount" type="number" min="1" max="763" value="4"></div>
       </div>
-      <p style="font-size:13px;color:var(--muted);margin-top:12px;line-height:1.5">Scoring is wager-based and a stake is <b>required</b>: players must pick a chip before they can answer (no stake = the question is forfeited). Each chip value can be used once per round, right or wrong. Rounds 1 &amp; 3 offer 1–4 pts, rounds 2 &amp; 4 offer 2/4/6/8 pts — correct = +stake, wrong = no penalty. After all rounds there's a <b>final question</b>: each player must wager any amount up to their whole score (correct doubles it in, wrong loses it). Players see the final question only after everyone has set a stake.</p>
+      <p style="font-size:13px;color:var(--muted);margin-top:12px;line-height:1.5">Scoring is wager-based and a stake is <b>required</b>: players must pick a chip before they can answer (no stake = the question is forfeited). Each chip value can be used once per round, right or wrong. Before every round starts — including round 1 — both you and the players see a message screen announcing which chips that round offers: rounds 1 &amp; 3 offer 1–4 pts, rounds 2 &amp; 4 offer 2/4/6/8 pts (correct = +stake, wrong = no penalty). After all rounds there's a <b>final question</b>: each player must wager any amount up to their whole score (correct doubles it in, wrong loses it). Players see the final question only after everyone has set a stake.</p>
       <label class="check-row"><input id="shuffleOn" type="checkbox" checked /> Shuffle questions</label>
       <div class="controls">
         <button id="startBtn" class="primary">Start game</button>
@@ -150,6 +150,14 @@
       </div>
     </div>
 
+    <!-- ROUND INTRO -->
+    <div id="introArea" class="hidden">
+      <h2 style="font-size:18px;margin-bottom:6px" id="introTitleHost">Round 2 of 4</h2>
+      <p style="color:var(--muted);font-size:14.5px;margin-bottom:10px;line-height:1.6" id="introMsgHost"></p>
+      <div class="chip hidden" id="introChipsHost" style="margin-bottom:14px;font-size:13.5px;padding:8px 16px;display:inline-flex"></div>
+      <div class="controls"><button id="startRoundBtn" class="primary">Start round →</button></div>
+    </div>
+
     <!-- ROUND END -->
     <div id="roundEndArea" class="hidden">
       <h2 style="font-size:18px;margin-bottom:6px" id="reTitleHost">Round complete</h2>
@@ -160,7 +168,12 @@
     <!-- ENDED -->
     <div id="endedArea" class="hidden">
       <h2 style="font-size:18px;margin-bottom:6px">Game complete 🏁</h2>
-      <p style="color:var(--muted);font-size:14.5px">Final standings below — start a new game when ready.</p>
+      <p style="color:var(--muted);font-size:14.5px;margin-bottom:10px">Final standings below — start a new game when ready.</p>
+      <div id="hostWinnerBanner" style="text-align:center;margin:6px 0 12px">
+        <div style="font-size:12px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:4px">🏆 Winner</div>
+        <div id="hostWinnerName" style="font-size:30px;font-weight:800;line-height:1.15;background:linear-gradient(90deg,#7dd3fc,#3b82f6);-webkit-background-clip:text;background-clip:text;color:transparent"></div>
+      </div>
+      <div id="hostFinalBoard" class="board"></div>
     </div>
   </div>
 
@@ -226,15 +239,40 @@ function render() {
   const qr = $('qrImg');
   if (st.qrDataUrl && qr.src !== st.qrDataUrl) qr.src = st.qrDataUrl;
 
-  // setup vs game vs round-end vs ended
+  // setup vs game vs round-intro vs round-end vs ended
   $('setup').classList.toggle('hidden', !(st.phase === 'lobby' || st.phase === 'ended'));
   $('gameArea').classList.toggle('hidden', !(st.phase === 'question' || st.phase === 'reveal'));
+  $('introArea').classList.toggle('hidden', st.phase !== 'roundIntro');
   $('roundEndArea').classList.toggle('hidden', st.phase !== 'roundEnd');
   $('endedArea').classList.toggle('hidden', st.phase !== 'ended');
+
+  if (st.phase === 'roundIntro') {
+    const rnd = st.introRound || (st.currentRound + 1);
+    $('introTitleHost').textContent = `Round ${rnd} of ${st.totalRounds}`;
+    $('introMsgHost').textContent = rnd % 2 === 0
+      ? 'This round offers chips worth 2, 4, 6 or 8 points. Players see this message too — press Start when ready.'
+      : 'This round offers chips worth 1, 2, 3 or 4 points. Players see this message too — press Start when ready.';
+    const chipsEl = $('introChipsHost');
+    if (Array.isArray(st.roundWagerOptions) && st.roundWagerOptions.length) {
+      chipsEl.textContent = `Chips this round: ${st.roundWagerOptions.join(' / ')} pts`;
+      chipsEl.classList.remove('hidden');
+    } else {
+      chipsEl.classList.add('hidden');
+    }
+  }
 
   if (st.phase === 'roundEnd') {
     $('reTitleHost').textContent = `Round ${st.currentRound} of ${st.totalRounds} complete`;
     $('nextRoundBtn').textContent = st.currentRound >= st.totalRounds ? 'Play final question 🏆' : 'Start next round →';
+  }
+
+  if (st.phase === 'ended') {
+    // Leaderboard with the winner's name in large letters.
+    const sorted = [...st.players].sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
+    const topScore = sorted.length ? sorted[0].score : 0;
+    const winners = sorted.filter(p => p.score === topScore);
+    $('hostWinnerName').textContent = winners.map(p => p.name).join(' & ');
+    $('hostFinalBoard').innerHTML = boardRows(sorted, 'ended');
   }
 
   if (st.question && (st.phase === 'question' || st.phase === 'reveal')) {
@@ -314,6 +352,7 @@ $('startBtn').onclick = () => {
 $('revealBtn').onclick = () => socket.emit('reveal');
 $('nextBtn').onclick = () => socket.emit('nextQuestion');
 $('nextRoundBtn').onclick = () => socket.emit('startNextRound');
+$('startRoundBtn').onclick = () => socket.emit('startNextRound');
 $('skipBtn').onclick = () => {
   if (confirm('Skip this question without awarding points?')) socket.emit('skipQuestion');
 };
@@ -334,7 +373,7 @@ document.addEventListener('keydown', (e) => {
   if (!st || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
   if (st.phase === 'question' && (e.key === 'r' || e.key === 'R')) socket.emit('reveal');
   if ((st.phase === 'reveal') && (e.key === 'n' || e.key === 'N' || e.key === 'Enter')) socket.emit('nextQuestion');
-  if (st.phase === 'roundEnd' && (e.key === 'n' || e.key === 'N' || e.key === 'Enter')) socket.emit('startNextRound');
+  if ((st.phase === 'roundIntro' || st.phase === 'roundEnd') && (e.key === 'n' || e.key === 'N' || e.key === 'Enter')) socket.emit('startNextRound');
 });
 </script>
 </body>

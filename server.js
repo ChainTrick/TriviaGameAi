@@ -107,11 +107,12 @@ try {
 // Game state
 // ---------------------------------------------------------------------------
 const state = {
-  phase: 'lobby', // lobby | question | reveal | roundEnd | ended
+  phase: 'lobby', // lobby | question | reveal | roundIntro | roundEnd | ended
   totalRounds: 4,
   questionsPerRound: 4,
   gameQuestions: [],
   qIndex: -1,
+  introRound: null, // which round the current "roundIntro" screen is announcing
   players: new Map(), // id -> {id, name, normName, score, socketId|null, answered, answer, correct, wager}
 };
 
@@ -270,9 +271,16 @@ function buildState(role) {
     currentRound: finalQuestion ? state.totalRounds : (state.qIndex >= 0 ? roundOf(state.qIndex) : 0),
     questionInRound: finalQuestion ? state.questionsPerRound + 1 : (state.qIndex >= 0 ? (state.qIndex % state.questionsPerRound) + 1 : 0),
     isFinal: !!finalQuestion,
+    // The round the current screen belongs to. During a "roundIntro" pause this
+    // is the round about to start (so both host and players see its chip pool).
+    introRound: state.introRound,
     questionNumber: finalQuestion ? totalQuestionCount() + 1 : state.qIndex + 1,
     totalQuestions: totalQuestionCount(),
     wagerOptions: currentWagerOptions(),
+    // Chips offered by the round shown on screen (intro round while paused).
+    roundWagerOptions: state.introRound != null
+      ? wagerOptionsForRound(state.introRound)
+      : currentWagerOptions(),
     finalWagerOpen: !!finalQuestion && state.phase === 'question', // players may set their stake now
     joinUrl,
     qrDataUrl,
@@ -351,9 +359,13 @@ io.on('connection', (socket) => {
 
     socket.on('answer', ({ value }) => {
       const p = state.players.get(socket.data.playerId);
-      if (!p || state.phase !== 'question' || p.answered) return;
+      if (!p || state.phase !== 'question') return;
+      // A stake is REQUIRED before an answer counts — no wager, no play.
+      if (p.wager == null) return;
       const q = activeQuestion();
       if (!q) return;
+      // Players may change their answer any time before the host reveals:
+      // whatever they have locked in at reveal time is what gets scored.
       if (typeof value === 'number') {
         if (value < 0 || value >= q.options.length) return;
         p.answer = Math.floor(value);
@@ -402,9 +414,12 @@ io.on('connection', (socket) => {
     const pool = shuffleOn ? shuffle(QUESTIONS) : [...QUESTIONS];
     state.gameQuestions = pool.slice(0, need);
     finalQuestion = null; // picked again after the last round
-    state.qIndex = 0;
+    state.qIndex = -1;
     resetQuestionFlags();
-    state.phase = 'question';
+    // Show the "Round 1" message screen first — it tells everyone which chips
+    // this round offers (1–4) before any question is played.
+    state.introRound = 1;
+    state.phase = 'roundIntro';
     console.log(`Game started: ${r} rounds x ${qpr} questions (${need} total)`);
     broadcastState();
   });
@@ -455,28 +470,24 @@ io.on('connection', (socket) => {
   function advance() {
     if (state.phase !== 'question' && state.phase !== 'reveal') return;
     const total = totalQuestionCount();
-    // The final question is always last — after it the game ends.
-    if (finalQuestion) { endGame(); return; }
+    // The final question is always last — but it must be REVEALED first so its
+    // wager is scored. "Next" before reveal does nothing (host should press Reveal).
+    if (finalQuestion) {
+      if (state.phase === 'reveal') endGame();
+      return;
+    }
     const nextIdx = state.qIndex + 1;
     if (nextIdx >= total) {
       startFinalQuestion();
       return;
     }
-    // Crossing into a new round?
+    // Crossing into a new round? Pause on the "Round N" message screen so both
+    // host and players see which chips the upcoming round offers before it starts.
     if (nextIdx % state.questionsPerRound === 0) {
       const finishedRound = Math.floor(state.qIndex / state.questionsPerRound) + 1;
-      // Round 2 starts automatically — no host pause needed.
-      if (finishedRound === 1) {
-        state.qIndex = nextIdx;
-        resetQuestionFlags();
-        state.phase = 'question';
-        console.log(`Auto-advancing to round ${roundOf(state.qIndex)}`);
-        broadcastState();
-        return;
-      }
-      // Any other boundary: pause so the host can start it.
-      state.phase = 'roundEnd';
-      console.log(`Round ${roundOf(state.qIndex)} complete — awaiting next round`);
+      state.introRound = finishedRound + 1;
+      state.phase = 'roundIntro';
+      console.log(`Round ${finishedRound} complete — showing intro for round ${state.introRound}`);
       broadcastState();
       return;
     }
@@ -487,12 +498,13 @@ io.on('connection', (socket) => {
   }
 
   socket.on('startNextRound', () => {
-    if (state.phase !== 'roundEnd') return;
+    if (state.phase !== 'roundIntro' && state.phase !== 'roundEnd') return;
     const total = totalQuestionCount();
     // After the last regular round, this button starts the final question.
     if (state.qIndex + 1 >= total) { startFinalQuestion(); return; }
     state.qIndex += 1; // first question of the new round
     resetQuestionFlags();
+    state.introRound = null;
     state.phase = 'question';
     console.log(`Round ${roundOf(state.qIndex)} started`);
     broadcastState();
