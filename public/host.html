@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>TriviaGameAi — Host</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1220'/%3E%3Cpath d='M20 14h24a5 5 0 0 1 5 5v26a5 5 0 0 1-5 5H20a5 5 0 0 1-5-5V19a5 5 0 0 1 5-5z' fill='none' stroke='%233b82f6' stroke-width='4'/%3E%3Cpath d='M24 24h16M24 32h16M24 40h9' stroke='%237dd3fc' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E" />
 <style>
   :root {
     --bg: #0b1220;
@@ -35,15 +36,40 @@
   .brand h1 { font-size: 19px; font-weight: 650; }
 
   /* setup */
-  .setup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
   .field label { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
   input[type="number"] {
     width: 100%; padding: 11px 13px; font-size: 16px; color: var(--text);
     background: rgba(255,255,255,.06); border: 1px solid var(--glass-border); border-radius: 10px; outline: none;
   }
   input[type="number"]:focus { border-color: var(--accent); }
-  .check-row { display: flex; align-items: center; gap: 8px; margin-top: 14px; font-size: 14px; color: var(--muted); cursor: pointer; user-select: none; }
-  .check-row input { accent-color: var(--accent); width: 16px; height: 16px; }
+
+  /* category picker */
+  .cat-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .cat-chip {
+    font-size: 13.5px; color: var(--text); cursor: pointer; user-select: none;
+    background: rgba(255,255,255,.05); border: 1px solid var(--glass-border);
+    padding: 7px 13px; border-radius: 999px; transition: all .12s; line-height: 1.2;
+  }
+  .cat-chip small { color: var(--muted); font-size: 11.5px; margin-left: 4px; }
+  .cat-chip:hover { border-color: rgba(59,130,246,.5); }
+  .cat-chip.on { background: var(--accent-soft); border-color: var(--accent); color: #fff; box-shadow: 0 0 0 1px var(--accent) inset; }
+  .cat-chip.on small { color: rgba(255,255,255,.7); }
+
+  /* upcoming categories on the round-intro screen */
+  .upcoming-cats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .upcat { font-size: 13px; color: var(--text); background: rgba(255,255,255,.05); border: 1px solid var(--glass-border); padding: 6px 12px; border-radius: 999px; }
+  .upcat b { color: var(--accent); font-weight: 700; margin-right: 5px; }
+
+  /* song-artist bonus row in the host player list */
+  .bonus-row { display: flex; align-items: center; gap: 8px; padding: 6px 12px 9px 44px; font-size: 13px; color: var(--muted); }
+  .bonus-row .guess { color: var(--text); font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+  .bonus-btn { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 8px; cursor: pointer; border: 1px solid var(--glass-border); background: rgba(255,255,255,.05); color: var(--text); flex-shrink: 0; }
+  .bonus-btn.yes { color: var(--good); border-color: rgba(52,211,153,.45); background: rgba(52,211,153,.1); }
+  .bonus-btn.no { color: #fca5a5; border-color: rgba(248,113,113,.4); background: rgba(248,113,113,.08); }
+
+  /* tiny hidden-away restart link */
+  a.tiny-link { font-size: 11.5px; color: var(--muted); text-decoration: none; opacity: .75; cursor: pointer; }
+  a.tiny-link:hover { color: #fca5a5; opacity: 1; text-decoration: underline; }
 
   button.primary {
     padding: 13px 22px; font-size: 15.5px; font-weight: 600; color: #fff; border: none; border-radius: 11px;
@@ -58,13 +84,10 @@
   button.ghost:hover { border-color: rgba(59,130,246,.5); }
   button.danger-ghost { color: #fca5a5; }
 
-  /* join card */
-  .join-card { display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
-  .qr-box { width: 190px; height: 190px; border-radius: 14px; background: #fff; padding: 8px; flex-shrink: 0; display: grid; place-items: center; }
-  .qr-box img, .qr-box canvas { width: 100%; height: 100%; image-rendering: pixelated; border-radius: 6px; }
-  .join-info h2 { font-size: 17px; margin-bottom: 8px; }
-  .join-url { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 14.5px; color: var(--accent); background: rgba(59,130,246,.1); padding: 9px 12px; border-radius: 9px; display: inline-block; margin-bottom: 10px; word-break: break-all; }
-  .join-info p { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+  /* join line — tiny, one row */
+  .join-line { font-size: 12.5px; color: var(--muted); padding: 4px 2px; }
+  a.join-link { color: var(--accent); text-decoration: none; }
+  a.join-link:hover { text-decoration: underline; }
 
   /* game area */
   .game-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
@@ -104,8 +127,7 @@
   .empty-note { font-size: 14px; color: var(--muted); padding: 8px 2px; }
 
   @media (max-width: 700px) {
-    .setup-grid { grid-template-columns: 1fr 1fr; }
-    .join-card { justify-content: center; text-align: center; }
+    .bonus-row { padding-left: 12px; }
   }
 </style>
 </head>
@@ -120,12 +142,12 @@
 
     <!-- SETUP -->
     <div id="setup" class="hidden">
-      <div class="setup-grid">
-        <div class="field"><label for="roundsCount">Rounds</label><input id="roundsCount" type="number" min="1" max="20" value="4"></div>
-        <div class="field"><label for="perRoundCount">Questions / round</label><input id="perRoundCount" type="number" min="1" max="763" value="4"></div>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.55"><b>Fixed format:</b> 4 rounds of 4 questions, then a final double-or-nothing question (wager up to your whole score). Players must stake a chip before answering — each chip value can be used once per round. Rounds 1 &amp; 3 offer chips worth 1–4 pts; rounds 2 &amp; 4 offer 2/4/6/8 pts.</p>
+      <div class="field">
+        <label>Question categories</label>
+        <div id="catGrid" class="cat-grid"></div>
+        <div id="catNote" style="font-size:12.5px;color:var(--muted);margin-top:8px"></div>
       </div>
-      <p style="font-size:13px;color:var(--muted);margin-top:12px;line-height:1.5">Scoring is wager-based and a stake is <b>required</b>: players must pick a chip before they can answer (no stake = the question is forfeited). Each chip value can be used once per round, right or wrong. Before every round starts — including round 1 — both you and the players see a message screen announcing which chips that round offers: rounds 1 &amp; 3 offer 1–4 pts, rounds 2 &amp; 4 offer 2/4/6/8 pts (correct = +stake, wrong = no penalty). After all rounds there's a <b>final question</b>: each player must wager any amount up to their whole score (correct doubles it in, wrong loses it). Players see the final question only after everyone has set a stake.</p>
-      <label class="check-row"><input id="shuffleOn" type="checkbox" checked /> Shuffle questions</label>
       <div class="controls">
         <button id="startBtn" class="primary">Start game</button>
       </div>
@@ -143,10 +165,23 @@
       <div id="opts" class="opts"></div>
       <div id="answerLine" class="answer-line hidden"></div>
 
-      <div class="controls">
+      <div class="controls" style="align-items:center">
         <button id="revealBtn" class="primary">Reveal answer</button>
-        <button id="nextBtn" class="ghost">Next question →</button>
-        <button id="skipBtn" class="ghost danger-ghost">Skip (no points)</button>
+        <button id="nextBtn" class="ghost" style="margin-left:auto;padding:8px 14px;font-size:13.5px">Next question →</button>
+      </div>
+    </div>
+
+    <!-- FINAL WAGERING (host sees full question; players see only their wager screen) -->
+    <div id="finalWagerArea" class="hidden">
+      <h2 style="font-size:18px;margin-bottom:6px">🏆 Final question — waiting for wagers</h2>
+      <p style="color:var(--muted);font-size:14.5px;margin-bottom:14px;line-height:1.6">Players see only their wager screen right now — the question below is hidden from them until you press <b>Show final question</b>. Everyone must lock in a stake first.</p>
+      <div id="fwqCat" class="chip hidden" style="margin-bottom:10px"></div>
+      <div id="fwqText" class="qtext"></div>
+      <div id="fwqOpts" class="opts"></div>
+      <h3 style="font-size:12.5px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:18px 0 10px">Wager status</h3>
+      <div id="fwPlayerList"></div>
+      <div class="controls">
+        <button id="showFinalBtn" class="primary">Show final question →</button>
       </div>
     </div>
 
@@ -154,15 +189,20 @@
     <div id="introArea" class="hidden">
       <h2 style="font-size:18px;margin-bottom:6px" id="introTitleHost">Round 2 of 4</h2>
       <p style="color:var(--muted);font-size:14.5px;margin-bottom:10px;line-height:1.6" id="introMsgHost"></p>
+      <div class="upcoming-cats hidden" id="introUpcomingCats"></div>
       <div class="chip hidden" id="introChipsHost" style="margin-bottom:14px;font-size:13.5px;padding:8px 16px;display:inline-flex"></div>
-      <div class="controls"><button id="startRoundBtn" class="primary">Start round →</button></div>
+      <div class="controls">
+        <button id="startRoundBtn" class="primary">Start round →</button>
+      </div>
     </div>
 
     <!-- ROUND END -->
     <div id="roundEndArea" class="hidden">
       <h2 style="font-size:18px;margin-bottom:6px" id="reTitleHost">Round complete</h2>
       <p style="color:var(--muted);font-size:14.5px;margin-bottom:14px">Standings below — start the next round when ready.</p>
-      <div class="controls"><button id="nextRoundBtn" class="primary">Start next round →</button></div>
+      <div class="controls">
+        <button id="nextRoundBtn" class="primary">Start next round →</button>
+      </div>
     </div>
 
     <!-- ENDED -->
@@ -174,16 +214,6 @@
         <div id="hostWinnerName" style="font-size:30px;font-weight:800;line-height:1.15;background:linear-gradient(90deg,#7dd3fc,#3b82f6);-webkit-background-clip:text;background-clip:text;color:transparent"></div>
       </div>
       <div id="hostFinalBoard" class="board"></div>
-    </div>
-  </div>
-
-  <!-- JOIN -->
-  <div class="card join-card">
-    <div class="qr-box"><img id="qrImg" alt="Join QR code"></div>
-    <div class="join-info">
-      <h2>Players: scan to join</h2>
-      <div class="join-url" id="joinUrl"></div>
-      <p>Everyone on the same Wi-Fi scans this code (or opens the link), enters a team name, and answers live. You control every question from here.</p>
     </div>
   </div>
 
@@ -200,6 +230,9 @@
       </div>
     </div>
   </div>
+
+  <!-- JOIN (tiny) — tucked at the very bottom -->
+  <div class="join-line">Players open to join — <a id="qrLink" class="join-link" href="/qr" target="_blank" rel="noopener">open QR code ↗</a><span style="margin:0 6px">·</span><a id="restartTinyBtn" class="tiny-link" title="Wipes the game and all players — rarely needed">restart game</a></div>
 
 </div>
 
@@ -229,22 +262,80 @@ function boardRows(players, phase) {
     }
     const wcell = showWager && p.wager != null ? `<span class="pwager" title="stake on this question">${p.wager}pt</span>` : '';
     html += `<div class="row${p.online === false ? ' offline' : ''}"><span class="rank">${i + 1}</span>${dot}<span class="pname">${esc(p.name)}${mark}${p.online === false ? ' <small>(offline)</small>' : ''}</span>${wcell}<span class="pscore">${p.score}</span></div>`;
+    // Song-artist bonus guess for the current question — host judges it.
+    if (phase === 'question' && p.bonusGuess != null) {
+      html += `<div class="bonus-row"><span>🎵 <b style="color:var(--text);font-weight:600">${esc(p.name)}</b> guesses:</span><span class="guess">"${esc(p.bonusGuess)}"</span>` +
+        `<button class="bonus-btn yes" data-bid="${p.id}" data-ok="1">✓ correct (+1)</button>` +
+        `<button class="bonus-btn no" data-bid="${p.id}" data-ok="0">✗ missed</button></div>`;
+    }
   });
   return html;
 }
 
+// Judge a song-artist bonus guess (host only).
+function judgeBonus(playerId, correct) {
+  socket.emit('judgeBonus', { playerId, correct: !!correct });
+}
+
+let prevPhase = null; // for transition detection (game end / reset)
 function render() {
   if (!st) return;
-  $('joinUrl').textContent = st.joinUrl;
-  const qr = $('qrImg');
-  if (st.qrDataUrl && qr.src !== st.qrDataUrl) qr.src = st.qrDataUrl;
 
-  // setup vs game vs round-intro vs round-end vs ended
+  // When a game ends — or the host resets back to the lobby — clear the
+  // category picks so every category is available again for the next game.
+  const enteringEnded = st.phase === 'ended' && prevPhase !== 'ended';
+  const returningToLobby = st.phase === 'lobby' && prevPhase !== null && prevPhase !== 'lobby';
+  if (enteringEnded || returningToLobby) selectedCats.clear();
+  prevPhase = st.phase;
+
+  // setup vs game vs final-wagering vs round-intro vs round-end vs ended
   $('setup').classList.toggle('hidden', !(st.phase === 'lobby' || st.phase === 'ended'));
   $('gameArea').classList.toggle('hidden', !(st.phase === 'question' || st.phase === 'reveal'));
+  $('finalWagerArea').classList.toggle('hidden', st.phase !== 'finalWagering');
   $('introArea').classList.toggle('hidden', st.phase !== 'roundIntro');
   $('roundEndArea').classList.toggle('hidden', st.phase !== 'roundEnd');
   $('endedArea').classList.toggle('hidden', st.phase !== 'ended');
+
+  if (st.phase === 'finalWagering' && st.question) {
+    // Host-only view: the full final question + live wager status per player.
+    const q = st.question;
+    $('fwqCat').classList.toggle('hidden', !q.category);
+    $('fwqCat').textContent = q.category || '';
+    $('fwqText').textContent = q.text;
+    const fwOpts = $('fwqOpts');
+    fwOpts.innerHTML = '';
+    if (q.isMultipleChoice) {
+      q.options.forEach((label, i) => {
+        const d = document.createElement('div');
+        d.className = 'opt';
+        d.innerHTML = `<span class="key">${'abcd'[i]}</span><span>${esc(label)}</span>`;
+        fwOpts.appendChild(d);
+      });
+    } else {
+      fwOpts.innerHTML = `<div class="answer-line">Free-text question — answer: <b>${esc(q.answerRaw || '—')}</b></div>`;
+    }
+    // Wager status list: who has locked in, and for how much.
+    const rows = st.players.map((p) => {
+      const done = p.wager != null;
+      return `<div class="row${p.online === false ? ' offline' : ''}">` +
+        `<span class="rank">${done ? '<span style="color:var(--good);font-weight:700">✓</span>' : '<span style="color:var(--muted)">⏳</span>'}</span>` +
+        `<span class="pname">${esc(p.name)}${p.online === false ? ' <small>(offline)</small>' : ''}</span>` +
+        (done ? `<span class="pwager" title="locked in final wager">wagered ${p.wager} pt</span>` : '<span style="font-size:12.5px;color:var(--muted)">waiting to lock in…</span>') +
+        `<span class="pscore">${p.score}</span></div>`;
+    }).join('');
+    $('fwPlayerList').innerHTML = rows || '<div class="empty-note">No players joined yet.</div>';
+    // The reveal button only unlocks once EVERY player has a stake.
+    const allIn = !!st.allPlayersWagered && st.players.length > 0;
+    $('showFinalBtn').disabled = !allIn;
+    if (allIn) {
+      $('showFinalBtn').textContent = 'Show final question →';
+    } else if (!st.players.length) {
+      $('showFinalBtn').textContent = 'No players joined yet…';
+    } else {
+      const n = st.players.filter((p) => p.wager == null).length;
+      $('showFinalBtn').textContent = `Waiting for ${n} more wager${n === 1 ? '' : 's'}…`;
+    }
+  }
 
   if (st.phase === 'roundIntro') {
     const rnd = st.introRound || (st.currentRound + 1);
@@ -252,6 +343,15 @@ function render() {
     $('introMsgHost').textContent = rnd % 2 === 0
       ? 'This round offers chips worth 2, 4, 6 or 8 points. Players see this message too — press Start when ready.'
       : 'This round offers chips worth 1, 2, 3 or 4 points. Players see this message too — press Start when ready.';
+    // The 4 categories coming up in this round.
+    const upEl = $('introUpcomingCats');
+    if (Array.isArray(st.upcomingCategories) && st.upcomingCategories.length) {
+      upEl.innerHTML = `<span style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-right:4px">Coming up:</span>` +
+        st.upcomingCategories.map((c, i) => `<span class="upcat"><b>Q${i + 1}</b>${esc(c)}</span>`).join('');
+      upEl.classList.remove('hidden');
+    } else {
+      upEl.classList.add('hidden');
+    }
     const chipsEl = $('introChipsHost');
     if (Array.isArray(st.roundWagerOptions) && st.roundWagerOptions.length) {
       chipsEl.textContent = `Chips this round: ${st.roundWagerOptions.join(' / ')} pts`;
@@ -287,13 +387,11 @@ function render() {
     $('qCat').classList.toggle('hidden', !q.category);
     $('qCat').textContent = q.category || '';
 
-    // Final question: show how many players still need to set a stake.
+    // Final question: wagers were locked in during the finalWagering phase, so
+    // by the time the question is shown every player already has a stake.
     if (st.isFinal && st.phase === 'question') {
-      const pending = st.players.filter((p) => p.wager == null).length;
       $('finalWagerNote').classList.remove('hidden');
-      $('finalWagerNote').textContent = pending > 0
-        ? `⏳ ${pending} player${pending === 1 ? '' : 's'} still to wager — players see the question once everyone has`
-        : '✅ All players have wagered — the question is visible';
+      $('finalWagerNote').textContent = '✅ All players locked in their final wager — good luck!';
     } else {
       $('finalWagerNote').classList.add('hidden');
     }
@@ -323,6 +421,9 @@ function render() {
   $('playersTitle').textContent = `Players (${st.players.length})`;
   $('playerList').innerHTML = boardRows(st.players, st.phase);
 
+  // category picker (setup screen)
+  if (st.phase === 'lobby' || st.phase === 'ended') renderCatGrid();
+
   // manual points select
   const sel = $('ptPlayer');
   if (st.players.length) {
@@ -340,22 +441,54 @@ function render() {
   }
 }
 
+// Category picker — host chooses which categories questions are drawn from.
+let selectedCats = new Set();
+function renderCatGrid() {
+  const grid = $('catGrid');
+  if (!st || !Array.isArray(st.categories)) return;
+  grid.innerHTML = st.categories.map((c) =>
+    `<span class="cat-chip${selectedCats.has(c.name) ? ' on' : ''}" data-cat="${esc(c.name)}">${esc(c.name)}<small>${c.count}</small></span>`
+  ).join('');
+  const total = selectedCats.size
+    ? st.categories.filter((c) => selectedCats.has(c.name)).reduce((n, c) => n + c.count, 0)
+    : st.categories.reduce((n, c) => n + c.count, 0);
+  $('catNote').textContent = selectedCats.size
+    ? `Drawing from ${total} questions in the ${selectedCats.size} selected categor${selectedCats.size === 1 ? 'y' : 'ies'} — everything else is excluded.`
+    : 'Nothing selected yet — all categories are eligible. Tap chips to tailor the game (e.g. skip Sports).';
+}
+
+$('catGrid').addEventListener('click', (e) => {
+  const chip = e.target.closest('.cat-chip');
+  if (!chip) return;
+  const name = chip.dataset.cat;
+  if (selectedCats.has(name)) selectedCats.delete(name); else selectedCats.add(name);
+  renderCatGrid();
+});
+
 $('startBtn').onclick = () => {
-  socket.emit('startGame', {
-    rounds: Number($('roundsCount').value) || 4,
-    perRound: Number($('perRoundCount').value) || 4,
-    shuffleOn: $('shuffleOn').checked,
-    keepScores: false,
-  });
+  socket.emit('startGame', { keepScores: false, categories: [...selectedCats] });
 };
 
 $('revealBtn').onclick = () => socket.emit('reveal');
 $('nextBtn').onclick = () => socket.emit('nextQuestion');
+$('showFinalBtn').onclick = () => socket.emit('showFinalQuestion');
 $('nextRoundBtn').onclick = () => socket.emit('startNextRound');
 $('startRoundBtn').onclick = () => socket.emit('startNextRound');
-$('skipBtn').onclick = () => {
-  if (confirm('Skip this question without awarding points?')) socket.emit('skipQuestion');
-};
+
+// "Restart game" — wipes the game AND every player, exactly like restarting
+// the service. Hidden away as a tiny link in the footer (rarely needed).
+function restartGame() {
+  if (!confirm('Restart everything? All scores and ALL joined players will be wiped — just like restarting the service.')) return;
+  socket.emit('resetAll');
+}
+$('restartTinyBtn').onclick = restartGame;
+
+// Song-artist bonus judging buttons (delegated — rows are re-rendered live).
+$('playerList').addEventListener('click', (e) => {
+  const btn = e.target.closest('.bonus-btn');
+  if (!btn) return;
+  judgeBonus(btn.dataset.bid, btn.dataset.ok === '1');
+});
 
 function applyManualPoints() {
   const id = $('ptPlayer').value;

@@ -1,4 +1,4 @@
-// TriviaGameAi — host-controlled trivia over a local network.
+// TriviaGameAi — host-controlled trivia over the internet (Cloudflare Tunnel).
 // Host device runs this server + opens /host; players scan a QR code to join /.
 import express from 'express';
 import http from 'http';
@@ -10,7 +10,7 @@ import QRCode from 'qrcode';
 import { Server as SocketIOServer } from 'socket.io';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const QUESTIONS_FILE = process.env.QUESTIONS_FILE || path.join(__dirname, 'trivia_latest.json');
+const QUESTIONS_FILE = process.env.QUESTIONS_FILE || path.join(__dirname, 'trivia_sorted_categories.json');
 const PORT = Number(process.env.PORT || 8090);
 
 // ---------------------------------------------------------------------------
@@ -104,12 +104,49 @@ try {
 }
 
 // ---------------------------------------------------------------------------
+// Categories — the host picks which ones a game draws from. The JSON file has
+// inconsistent casing ("music" vs "Music"), so we normalize each label and
+// group variants under one canonical name (first-seen spelling wins).
+// ---------------------------------------------------------------------------
+function normCat(s) { return String(s ?? '').trim().toLowerCase(); }
+
+const CATEGORIES = []; // [{ name, count }] — display order: first appearance in file
+{
+  const seen = new Map(); // normalized -> index into CATEGORIES
+  for (const q of QUESTIONS) {
+    const key = normCat(q.category);
+    if (!key) continue;
+    let idx = seen.get(key);
+    if (idx === undefined) {
+      idx = CATEGORIES.length;
+      seen.set(key, idx);
+      CATEGORIES.push({ name: q.category.trim(), count: 0 });
+    }
+    CATEGORIES[idx].count += 1;
+  }
+}
+
+// True when a question's category is among the host's selected categories.
+function inSelectedCategories(q) {
+  if (!state.selectedCategories.length) return true; // nothing selected = all
+  const key = normCat(q.category);
+  return state.selectedCategories.some((c) => normCat(c) === key);
+}
+
+// The questions a game may draw from, given the host's category selection.
+function poolForSelected() {
+  if (!state.selectedCategories.length) return QUESTIONS;
+  return QUESTIONS.filter(inSelectedCategories);
+}
+
+// ---------------------------------------------------------------------------
 // Game state
 // ---------------------------------------------------------------------------
 const state = {
-  phase: 'lobby', // lobby | question | reveal | roundIntro | roundEnd | ended
+  phase: 'lobby', // lobby | question | finalWagering | reveal | roundIntro | roundEnd | ended
   totalRounds: 4,
   questionsPerRound: 4,
+  selectedCategories: [], // host's category picks; empty = all categories
   gameQuestions: [],
   qIndex: -1,
   introRound: null, // which round the current "roundIntro" screen is announcing
@@ -119,6 +156,13 @@ const state = {
 function totalQuestionCount() { return state.totalRounds * state.questionsPerRound; }
 // Which round (1-based) a global question index falls in.
 function roundOf(qi) { return Math.floor(qi / state.questionsPerRound) + 1; }
+
+// The categories of the questions coming up in round `rnd` (1-based), in play
+// order — shown on the "upcoming round" screen so everyone knows what's next.
+function upcomingCategories(rnd) {
+  const start = (rnd - 1) * state.questionsPerRound;
+  return state.gameQuestions.slice(start, start + state.questionsPerRound).map((q) => q.category);
+}
 
 // Wager chips available for a given round: odd rounds use 1–4, even rounds
 // (2, 4, …) use 2/4/6/8. The final question is special — see buildState.
@@ -131,6 +175,14 @@ function wagerOptionsForRound(rnd) {
 // the start of every new round, so a chip spent in round 1 is available again
 // in round 2 (and vice versa). It also resets when a new game starts.
 let wagersUsed = {}; // { [playerId]: { round: number|null, used: Set } }
+
+// Song-artist bonus guesses: players may submit a guess (max 30 chars) on any
+// question. The host sees it next to their name and judges it — "correct" adds
+// +1 point, "missed" does not. Cleared when the question advances or resets.
+let bonusGuesses = {}; // { [playerId]: string } for the CURRENT question only
+// The host's verdict on each pending guess — shown to that player as a
+// confirmation ("You got the song artist right!" / "Sorry, you missed it").
+let bonusResults = {}; // { [playerId]: 'correct' | 'missed' } for the CURRENT question
 
 function currentRoundForChips() {
   if (finalQuestion) return null; // no chips on the final question
@@ -199,6 +251,8 @@ function resetQuestionFlags() {
     p.correct = null;
     p.wager = null; // points wagered on the current question
   }
+  bonusGuesses = {}; // song-artist guesses are per-question only
+  bonusResults = {}; // and so are the host's verdicts on them
 }
 
 // The chip list to expose for a player: chips spent in the CURRENT round, or
@@ -216,6 +270,34 @@ const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'player.html')));
 app.get('/host', (req, res) => res.sendFile(path.join(__dirname, 'public', 'host.html')));
+app.get('/qr', (req, res) => res.sendFile(path.join(__dirname, 'public', 'qr.html')));
+
+// Full reset — wipes the game AND every player, exactly like restarting the
+// service. Called by the host's "Restart game" buttons.
+function fullReset() {
+  state.players.clear();
+  wagersUsed = {}; // fresh chip pools
+  bonusGuesses = {}; // no pending song-artist guesses
+  state.gameQuestions = [];
+  finalQuestion = null;
+  state.qIndex = -1;
+  state.introRound = null;
+  state.selectedCategories = []; // back to "all categories" like a fresh boot
+  state.totalRounds = 4; // back to the defaults a fresh boot starts with
+  state.questionsPerRound = 4;
+  resetQuestionFlags();
+  state.phase = 'lobby';
+  // Kick every live player back to the join screen, then detach them: they
+  // no longer exist, so stop sending them states. (A refresh auto-rejoins.)
+  for (const s of liveSockets) {
+    if (s.data.role === 'player') {
+      s.emit('resetAll');
+      s.data.joined = false;
+      delete s.data.playerId;
+    }
+  }
+  console.log('Full reset — game and all players cleared');
+}
 
 function getLanIp() {
   const ifaces = os.networkInterfaces();
@@ -228,7 +310,10 @@ function getLanIp() {
 }
 
 const lanIp = getLanIp();
-const joinUrl = `http://${lanIp}:${PORT}/`;
+// When PUBLIC_URL is set (e.g. https://mybox.ts.net), the join URL / QR use it,
+// so players on other networks can reach the game through Tailscale serve/funnel.
+const publicUrl = process.env.PUBLIC_URL ? String(process.env.PUBLIC_URL).replace(/\/+$/, '') : null;
+const joinUrl = publicUrl ? `${publicUrl}/` : `http://${lanIp}:${PORT}/`;
 let qrDataUrl = '';
 try {
   qrDataUrl = await QRCode.toDataURL(joinUrl, { width: 560, margin: 2 });
@@ -245,6 +330,11 @@ app.get('/qr.png', async (req, res) => {
   }
 });
 
+// Small JSON endpoint so the /qr popup page can show the join URL as text.
+app.get('/join-info', (req, res) => {
+  res.json({ joinUrl });
+});
+
 const server = http.createServer(app);
 const io = new SocketIOServer(server);
 const liveSockets = new Set(); // sockets currently connected (any role)
@@ -254,26 +344,33 @@ io.use((socket, next) => {
   next();
 });
 
-function buildState(role) {
+function buildState(role, playerId = null) {
   const q = activeQuestion();
   const isHost = role === 'host';
   const showAnswer = isHost || state.phase === 'reveal' || state.phase === 'ended';
-  // Final question: PLAYERS see the category + wager input first; the actual
-  // question text/options are hidden from them until EVERY player has set a
-  // wager. The host always sees the full question so they can run the game.
-  const allWagered = finalQuestion && state.players.size > 0 &&
+  // Final question flow: during the "finalWagering" phase players see ONLY the
+  // wager screen (question text/options hidden from everyone but the host).
+  // The host clicks "Show final question" to reveal it to all players.
+  const inFinalWagering = !!finalQuestion && state.phase === 'finalWagering';
+  const hideFinalText = !isHost && inFinalWagering;
+  const allPlayersWagered = !!finalQuestion && state.players.size > 0 &&
     [...state.players.values()].every((p) => p.wager != null);
-  const hideFinalText = !isHost && !!finalQuestion && state.phase === 'question' && !allWagered;
   return {
     phase: state.phase,
     totalRounds: state.totalRounds,
     questionsPerRound: state.questionsPerRound,
+    // All available categories (with counts) for the host's setup screen.
+    categories: CATEGORIES.map((c) => ({ name: c.name, count: c.count })),
+    selectedCategories: [...state.selectedCategories],
     currentRound: finalQuestion ? state.totalRounds : (state.qIndex >= 0 ? roundOf(state.qIndex) : 0),
     questionInRound: finalQuestion ? state.questionsPerRound + 1 : (state.qIndex >= 0 ? (state.qIndex % state.questionsPerRound) + 1 : 0),
     isFinal: !!finalQuestion,
     // The round the current screen belongs to. During a "roundIntro" pause this
     // is the round about to start (so both host and players see its chip pool).
     introRound: state.introRound,
+    // Categories of the 4 questions coming up in the announced round — shown on
+    // the upcoming-round screen so everyone knows what's next.
+    upcomingCategories: state.introRound != null ? upcomingCategories(state.introRound) : null,
     questionNumber: finalQuestion ? totalQuestionCount() + 1 : state.qIndex + 1,
     totalQuestions: totalQuestionCount(),
     wagerOptions: currentWagerOptions(),
@@ -281,7 +378,8 @@ function buildState(role) {
     roundWagerOptions: state.introRound != null
       ? wagerOptionsForRound(state.introRound)
       : currentWagerOptions(),
-    finalWagerOpen: !!finalQuestion && state.phase === 'question', // players may set their stake now
+    finalWagerOpen: !!finalQuestion && state.phase === 'finalWagering', // players may set their stake now
+    allPlayersWagered, // host UI: every player has locked in a final wager
     joinUrl,
     qrDataUrl,
     question: q ? {
@@ -300,9 +398,16 @@ function buildState(role) {
         score: p.score,
         online: !!p.socketId,
         answered: state.phase === 'question' ? p.answered : undefined,
-        wager: (state.phase === 'question' || state.phase === 'reveal') ? p.wager : undefined,
+        wager: (state.phase === 'finalWagering' || state.phase === 'question' || state.phase === 'reveal') ? p.wager : undefined,
         wagersUsed: wagerStateFor(p), // chips already spent in the current round
         correct: (isHost || state.phase === 'reveal') && p.correct !== null ? p.correct : undefined,
+        // Song-artist bonus guess for the CURRENT question — host judges it.
+        bonusGuess: isHost && state.phase === 'question' && bonusGuesses[p.id] != null
+          ? bonusGuesses[p.id]
+          : undefined,
+        // The host's verdict on THIS player's own song-artist guess — shown only
+        // to that player ("You got the song artist right!" / "Sorry, you missed it.").
+        bonusResult: p.id === playerId && bonusResults[p.id] ? bonusResults[p.id] : undefined,
       }))
       .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name)),
   };
@@ -312,7 +417,8 @@ function broadcastState() {
   for (const socket of liveSockets) {
     const role = socket.data.role;
     if (role === 'player' && !socket.data.joined) continue; // not joined yet
-    socket.emit('state', buildState(role));
+    // Pass the player's own id so their personal bonusResult is included.
+    socket.emit('state', buildState(role, role === 'player' ? socket.data.playerId : null));
   }
 }
 
@@ -380,15 +486,17 @@ io.on('connection', (socket) => {
 
     socket.on('setWager', ({ points }) => {
       const p = state.players.get(socket.data.playerId);
-      if (!p || state.phase !== 'question') return;
+      if (!p) return;
       const w = Math.floor(Number(points));
       // Final question: any whole number from 0 up to the player's score.
-      if (finalQuestion) {
+      // Set during the "finalWagering" phase, before the question is shown.
+      if (finalQuestion && state.phase === 'finalWagering') {
         if (w < 0 || w > p.score) return;
         p.wager = w;
         broadcastState();
         return;
       }
+      if (state.phase !== 'question') return;
       const rnd = currentRoundForChips();
       if (!rnd) return;
       const opts = wagerOptionsForRound(rnd);
@@ -400,19 +508,60 @@ io.on('connection', (socket) => {
       p.wager = w;
       broadcastState();
     });
+
+    // Song-artist bonus guess: max 30 chars, one per player per question.
+    // The host sees it next to their name and judges it with judgeBonus.
+    socket.on('bonusGuess', ({ text }) => {
+      const p = state.players.get(socket.data.playerId);
+      if (!p || state.phase !== 'question') return;
+      const guess = String(text ?? '').trim().slice(0, 30);
+      if (!guess) return;
+      bonusGuesses[p.id] = guess;
+      broadcastState();
+    });
   }
 
+  // Host judges a player's song-artist bonus guess: "correct" adds +1 point.
+  socket.on('judgeBonus', ({ playerId, correct }) => {
+    if (socket.data.role !== 'host') return;
+    const p = state.players.get(playerId);
+    if (!p || !bonusGuesses[playerId]) return;
+    const guess = bonusGuesses[playerId];
+    delete bonusGuesses[playerId]; // judged — no longer pending
+    bonusResults[playerId] = correct === true ? 'correct' : 'missed'; // shown to that player
+    if (correct === true) {
+      p.score += 1;
+      console.log(`Bonus +1 for ${p.name} (song artist: "${guess}")`);
+    } else {
+      console.log(`Bonus missed for ${p.name} ("${guess}")`);
+    }
+    broadcastState();
+  });
+
   // Host controls.
-  socket.on('startGame', ({ rounds = 4, perRound = 4, shuffleOn = true, keepScores = false }) => {
-    const r = Math.max(1, Math.min(Number(rounds) || 4, 20));
-    const qpr = Math.max(1, Math.min(Number(perRound) || 4, QUESTIONS.length));
-    state.totalRounds = r;
-    state.questionsPerRound = qpr;
+  socket.on('resetAll', () => {
+    if (socket.data.role !== 'host') return;
+    fullReset();
+    broadcastState();
+  });
+
+  socket.on('startGame', ({ keepScores = false, categories }) => {
+    // Fixed format: always 4 rounds of 4 questions. The host's category picks
+    // decide WHICH pool the questions are drawn from (empty = all categories).
+    const sel = Array.isArray(categories) ? categories.map((c) => String(c ?? '').trim()).filter(Boolean) : [];
+    state.selectedCategories = sel;
+    state.totalRounds = 4;
+    state.questionsPerRound = 4;
     if (!keepScores) for (const p of state.players.values()) p.score = 0;
     wagersUsed = {}; // fresh chip pools — every round of the new game starts clean
-    const need = Math.min(r * qpr, QUESTIONS.length);
-    const pool = shuffleOn ? shuffle(QUESTIONS) : [...QUESTIONS];
-    state.gameQuestions = pool.slice(0, need);
+    const pool = poolForSelected();
+    const need = Math.min(state.totalRounds * state.questionsPerRound, pool.length);
+    if (need < state.totalRounds * state.questionsPerRound) {
+      console.warn(`Only ${pool.length} questions match the selected categories — game will be shorter`);
+    }
+    // Always randomized; a question is never repeated within a game.
+    const picked = shuffle(pool);
+    state.gameQuestions = picked.slice(0, need);
     finalQuestion = null; // picked again after the last round
     state.qIndex = -1;
     resetQuestionFlags();
@@ -420,7 +569,7 @@ io.on('connection', (socket) => {
     // this round offers (1–4) before any question is played.
     state.introRound = 1;
     state.phase = 'roundIntro';
-    console.log(`Game started: ${r} rounds x ${qpr} questions (${need} total)`);
+    console.log(`Game started: 4 rounds x 4 questions (${need} total, categories: ${sel.length ? sel.join(', ') : 'all'})`);
     broadcastState();
   });
 
@@ -457,14 +606,28 @@ io.on('connection', (socket) => {
   // the stake into their total; wrong loses it (double-or-nothing).
   function startFinalQuestion() {
     const usedIds = new Set(state.gameQuestions.map((q) => q.id));
-    const candidates = QUESTIONS.filter((q) => !usedIds.has(q.id));
+    // Draw from the host's selected categories too — a sports-free game stays
+    // sports-free. Fall back to any unused question if the pool is exhausted.
+    let candidates = poolForSelected().filter((q) => !usedIds.has(q.id));
+    if (!candidates.length) candidates = QUESTIONS.filter((q) => !usedIds.has(q.id));
     finalQuestion = (candidates.length ? shuffle(candidates) : shuffle(QUESTIONS))[0];
     state.qIndex = totalQuestionCount() - 1; // last regular index; advance() ends the game from here
     resetQuestionFlags();
-    state.phase = 'question';
-    console.log('Final question — players may wager up to their score!');
+    // Players see a "waiting for players to wager" screen — the question text
+    // stays hidden (even from them) until the host clicks "Show final question".
+    state.phase = 'finalWagering';
+    console.log('Final question — waiting for all players to lock in their wager!');
     broadcastState();
   }
+
+  // Host confirms every player has a stake and reveals the final question to
+  // all players (they can now answer).
+  socket.on('showFinalQuestion', () => {
+    if (!finalQuestion || state.phase !== 'finalWagering') return;
+    state.phase = 'question';
+    console.log('Final question revealed to all players');
+    broadcastState();
+  });
 
   // Advance to the next question, or pause at a round boundary / start the final question.
   function advance() {
@@ -510,12 +673,6 @@ io.on('connection', (socket) => {
     broadcastState();
   });
 
-  socket.on('skipQuestion', () => {
-    if (state.phase !== 'question' && state.phase !== 'reveal') return;
-    // Advance without revealing/awarding — same round-boundary rules.
-    advance();
-  });
-
   socket.on('awardPoints', ({ playerId, points }) => {
     const p = state.players.get(playerId);
     if (!p) return;
@@ -543,9 +700,10 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, '0.0.0.0', () => {
+  const hostPage = publicUrl ? `${publicUrl}/host` : `http://${lanIp}:${PORT}/host`;
   console.log('────────────────────────────────────────────');
   console.log(`TriviaGameAi running`);
-  console.log(`  Host page : http://${lanIp}:${PORT}/host`);
+  console.log(`  Host page : ${hostPage}`);
   console.log(`  Players   : ${joinUrl}  (QR at /qr.png)`);
   console.log('────────────────────────────────────────────');
 });

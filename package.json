@@ -1,7 +1,7 @@
 {
   "name": "triviagameai",
   "version": "1.0.0",
-  "description": "TriviaGameAi — QR-code trivia over your local network: host controls questions/scoring, players join by scanning a QR code.",
+  "description": "TriviaGameAi — live trivia over the internet: host controls questions/scoring, players join by scanning a QR code or opening the link.",
   "type": "module",
   "main": "server.js",
   "scripts": {

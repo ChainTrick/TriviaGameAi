@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>TriviaGameAi</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1220'/%3E%3Cpath d='M20 14h24a5 5 0 0 1 5 5v26a5 5 0 0 1-5 5H20a5 5 0 0 1-5-5V19a5 5 0 0 1 5-5z' fill='none' stroke='%233b82f6' stroke-width='4'/%3E%3Cpath d='M24 24h16M24 32h16M24 40h9' stroke='%237dd3fc' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E" />
 <style>
   :root {
     --bg: #0b1220;
@@ -121,6 +122,20 @@
   .answer-line { margin-top: 16px; font-size: 15px; color: var(--muted); }
   .answer-line b { color: var(--text); font-weight: 600; }
 
+  /* song-artist bonus guess */
+  .bonus-box { margin-top: 20px; padding: 14px 16px; border-radius: 13px; background: rgba(59,130,246,.08); border: 1px solid rgba(59,130,246,.28); }
+  .bonus-box label { font-size: 12.5px; color: var(--accent); text-transform: none; letter-spacing: .2px; margin-bottom: 8px; font-weight: 600; }
+  .bonus-row { display: flex; gap: 8px; align-items: center; }
+  .bonus-input { flex: 1; padding: 11px 14px !important; font-size: 15px !important; border-radius: 10px !important; }
+  .bonus-send { flex-shrink: 0; padding: 11px 16px; font-size: 13.5px; font-weight: 700; color: #fff; background: linear-gradient(180deg, rgba(59,130,246,.9), rgba(59,130,246,.7)); border: none; border-radius: 10px; cursor: pointer; }
+  .bonus-send:disabled { opacity: .45; cursor: default; }
+  .bonus-note { margin-top: 8px; font-size: 12.5px; color: var(--good); display: flex; align-items: center; gap: 6px; }
+  .bonus-note svg { width: 15px; height: 15px; }
+
+  /* upcoming categories on the round-intro screen */
+  .upcoming-cats { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .upcoming-cat { font-size: 13px; color: var(--text); background: rgba(255,255,255,.06); border: 1px solid var(--glass-border); padding: 7px 14px; border-radius: 999px; }
+
   /* scoreboard */
   .board { margin-top: 24px; }
   .board h3 { font-size: 12.5px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 10px; }
@@ -189,6 +204,31 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
       Answer locked in — you can change it any time before the host reveals…
     </div>
+
+    <!-- Song-artist bonus guess (bottom of every question) -->
+    <div id="bonusBox" class="bonus-box">
+      <label>+1 Bonus Point if you know the artist of the song playing.</label>
+      <div class="bonus-row">
+        <input id="bonusInput" type="text" maxlength="30" placeholder="Artist name…" autocomplete="off" />
+        <button id="bonusSendBtn" class="bonus-send" type="button">Send</button>
+      </div>
+    </div>
+    <div id="bonusResultQ" class="result-banner hidden"></div>
+  </div>
+
+  <!-- FINAL WAGERING -->
+  <div id="view-finalwager" class="card hidden">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.5A1.5 1.5 0 0 0 3 7.5C3 9.4 4.2 11 6 11.4M17 6h2.5A1.5 1.5 0 0 1 21 7.5c0 1.9-1.2 3.5-3 3.4"/></svg>
+      <div><h1>🏆 Final question</h1><span class="sub">Waiting for players to wager…</span></div>
+    </div>
+    <div class="waiting"><div class="pulse"></div>The final question is hidden until every player has locked in a stake.<br/>Once everyone is in, the host will show it.</div>
+    <div class="wager-row">
+      <span class="wager-label">Your wager</span>
+      <div class="wagers" id="fwWagers"></div>
+    </div>
+    <p class="wager-hint" id="fwHint"></p>
+    <div id="fwBoard" class="board"></div>
   </div>
 
   <!-- REVEAL -->
@@ -199,6 +239,7 @@
     <div id="rOpts" class="opts"></div>
     <div id="rAnswerLine" class="answer-line hidden"></div>
     <div id="myResult" class="result-banner hidden"></div>
+    <div id="bonusResultR" class="result-banner hidden"></div>
     <div id="revealBoard" class="board"></div>
   </div>
 
@@ -210,6 +251,7 @@
     </div>
     <div class="waiting"><div class="pulse"></div><span id="reMsg">Take a breath — the next round is coming.</span></div>
     <div id="introChips" class="chip hidden" style="display:inline-flex;margin:0 auto 14px;font-size:13.5px;padding:8px 16px"></div>
+    <div id="upcomingCats" class="upcoming-cats hidden"></div>
     <div id="roundEndBoard" class="board"></div>
   </div>
 
@@ -241,7 +283,7 @@ try { $('name').value = localStorage.getItem('tn_name') || ''; } catch (e) {}
 
 const $ = (id) => document.getElementById(id);
 function show(view) {
-  for (const v of ['join', 'lobby', 'question', 'reveal', 'roundend', 'ended']) {
+  for (const v of ['join', 'lobby', 'question', 'finalwager', 'reveal', 'roundend', 'ended']) {
     $('view-' + v).classList.toggle('hidden', v !== view);
   }
 }
@@ -318,6 +360,41 @@ function renderWagers(st) {
   $('wagerHint').textContent = `REQUIRED — pick your stake (${opts.join(' / ')}) before answering; each chip can only be used once per round.`;
 }
 
+function renderFinalWager(st) {
+  const me = myPlayer(st);
+  const max = me ? Math.max(0, me.score) : 0;
+  const current = me && me.wager != null ? me.wager : null;
+  const el = $('fwWagers');
+  el.innerHTML = '';
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.min = '0';
+  input.max = String(max);
+  input.value = current != null ? String(current) : '';
+  input.style.cssText = 'flex:1;padding:12px 14px;font-size:16px;color:var(--text);background:rgba(255,255,255,.06);border:1px solid var(--glass-border);border-radius:12px;outline:none';
+  input.placeholder = `0–${max}`;
+  const commit = () => {
+    let v = Math.floor(Number(input.value));
+    if (!Number.isFinite(v)) return;
+    v = Math.max(0, Math.min(max, v));
+    socket.emit('setWager', { points: v });
+  };
+  input.addEventListener('change', commit);
+  input.addEventListener('blur', commit);
+  el.appendChild(input);
+  $('fwHint').textContent = `Stake any whole number from 0 up to your score (${max}). Correct doubles it in, wrong loses it. You can change it until the host shows the question.`;
+  // Who has locked in and for how much — live status list.
+  const rows = st.players.map((p) => {
+    const done = p.wager != null;
+    return `<div class="row${p.id === meId ? ' me' : ''}${p.online === false ? ' offline' : ''}">` +
+      `<span class="rank">${done ? '<span style="color:var(--good);font-weight:700">✓</span>' : '<span style="color:var(--muted)">⏳</span>'}</span>` +
+      `<span class="pname">${esc(p.name)}${p.id === meId ? ' (you)' : ''}${p.online === false ? ' <small>(offline)</small>' : ''}</span>` +
+      (done ? `<span class="pwager">wagered ${p.wager} pt</span>` : '<span style="font-size:12.5px;color:var(--muted)">waiting to lock in…</span>') +
+      `<span class="pscore">${p.score}</span></div>`;
+  }).join('');
+  $('fwBoard').innerHTML = rows || '<div class="empty-note">No players joined yet.</div>';
+}
+
 function questionLabel(st) {
   return st.isFinal ? '🏆 Final question' : `Round ${st.currentRound} · Q${st.questionInRound}/${st.questionsPerRound}`;
 }
@@ -347,8 +424,12 @@ function renderQuestion(st) {
   if (finalHidden) {
     $('freeForm').classList.add('hidden');
     $('lockedNote').classList.add('hidden');
+    // No question text yet — no song playing to guess either.
+    $('bonusBox').classList.add('hidden');
+    $('bonusResultQ').classList.add('hidden');
     return;
   }
+  $('bonusBox').classList.remove('hidden');
   if (q.isMultipleChoice) {
     q.options.forEach((label, i) => {
       const b = document.createElement('button');
@@ -375,6 +456,26 @@ function renderQuestion(st) {
 
   const answeredNow = me ? !!me.answered : false;
   $('lockedNote').classList.toggle('hidden', !(st.phase === 'question' && answeredNow));
+
+  // Song-artist bonus guess box — bottom of every question. The player may
+  // change their guess any time until the host judges it (correct / missed).
+  const judged = !!(me && me.bonusResult);
+  $('bonusInput').disabled = judged;
+  $('bonusSendBtn').disabled = judged;
+  renderBonusResult($('bonusResultQ'), me ? me.bonusResult : null);
+}
+
+// The host's verdict on my song-artist guess — shown as a confirmation banner.
+function renderBonusResult(el, result) {
+  if (!result) { el.classList.add('hidden'); return; }
+  el.classList.remove('hidden', 'good', 'bad');
+  if (result === 'correct') {
+    el.classList.add('good');
+    el.innerHTML = CHECK_SVG + ' You got the the song artist right!';
+  } else {
+    el.classList.add('bad');
+    el.innerHTML = X_SVG + ' Sorry, you missed the song.';
+  }
 }
 
 function renderReveal(st) {
@@ -428,6 +529,9 @@ function renderReveal(st) {
   }
 
   $('revealBoard').innerHTML = boardHtml(st.players, st.phase);
+
+  // My song-artist verdict (if the host already judged it) — shown here too.
+  renderBonusResult($('bonusResultR'), me ? me.bonusResult : null);
 }
 
 socket.on('state', (st) => {
@@ -450,9 +554,15 @@ socket.on('state', (st) => {
         myAnswer = null;
         lastQuestionId = st.question.id;
         $('freeInput').value = '';
+        $('bonusInput').value = ''; // fresh guess for the new question
       }
       renderQuestion(st);
       show('question');
+      break;
+    case 'finalWagering':
+      // Wagers are locked in here — the question itself stays hidden.
+      renderFinalWager(st);
+      show('finalwager');
       break;
     case 'reveal':
       if (st.question) renderReveal(st);
@@ -482,6 +592,14 @@ socket.on('state', (st) => {
         chipsEl.classList.remove('hidden');
       } else {
         chipsEl.classList.add('hidden');
+      }
+      // The 4 categories coming up in this round, so players know what's next.
+      const catsEl = $('upcomingCats');
+      if (Array.isArray(st.upcomingCategories) && st.upcomingCategories.length) {
+        catsEl.innerHTML = st.upcomingCategories.map((c) => `<span class="upcoming-cat">${esc(c || 'Trivia')}</span>`).join('');
+        catsEl.classList.remove('hidden');
+      } else {
+        catsEl.classList.add('hidden');
       }
       $('roundEndBoard').innerHTML = boardHtml(st.players, st.phase);
       show('roundend');
@@ -514,6 +632,25 @@ $('name').addEventListener('keydown', (e) => { if (e.key === 'Enter') doJoin(); 
 socket.on('joined', ({ playerId }) => {
   meId = playerId;
 });
+
+// Host pressed "Restart game" — everything was wiped, back to the join screen.
+socket.on('resetAll', () => {
+  meId = null;
+  myAnswer = null;
+  lastQuestionId = null;
+  $('freeInput').value = '';
+  $('bonusInput').value = '';
+  show('join');
+});
+
+// Song-artist bonus guess — max 30 chars, sent to the host for judging.
+function sendBonusGuess() {
+  const v = $('bonusInput').value.trim();
+  if (!v) return;
+  socket.emit('bonusGuess', { text: v });
+}
+$('bonusSendBtn').onclick = sendBonusGuess;
+$('bonusInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendBonusGuess(); });
 
 $('freeForm').onsubmit = (e) => {
   e.preventDefault();

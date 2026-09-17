@@ -1,8 +1,9 @@
-# TriviaGameAi — QR-code trivia over your local network
+# TriviaGameAi — live trivia over the internet
 
 A self-contained Node.js + Socket.IO app for live trivia nights. One device acts as
 the **host** (controls questions, reveals answers, awards points); players join from
-their phones by scanning a **QR code**. Everything updates in real time.
+their phones by scanning a **QR code** or opening the link — no shared network needed
+if you expose the server with a public URL. Everything updates in real time.
 
 🌐 Website: [TriviaGameAi.com](https://triviagameai.com)
 
@@ -38,10 +39,68 @@ node server.js
 
 That's it! The server listens on port **8090** and prints:
 
-- Host page : `http://<LAN-IP>:8090/host`  ← open this on your host device (laptop/phone)
-- Players   : `http://<LAN-IP>:8090/`      ← encoded in the QR code shown on the host page
+- Host page : `http://<LAN-IP>:8090/host` (or your `PUBLIC_URL`/host path if set) ← open this on your host device (laptop/phone)
+- Players   : the join URL, e.g. `https://your-public-url.example.com/` — shown as a link on the host page
 
-Open the host page, press **Start game**, and players scan the big QR to join.
+Open the host page, press **Start game**, and players tap the join link or "Show QR code"
+(which opens a new window with the QR) to join from anywhere.
+
+## Running it as a background service (Linux)
+
+You can run the server as a systemd **user** service so it auto-starts on login.
+Create `~/.config/systemd/user/triviagame.service` with your own paths and URL:
+
+```ini
+[Unit]
+Description=TriviaGameAi — trivia game server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/path/to/this/folder
+Environment=PORT=8090
+# Optional: set your public URL here so the QR code points at it.
+# Environment=PUBLIC_URL=https://your-public-url.example.com
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target
+```
+
+Then install and start it:
+
+```bash
+systemctl --user daemon-reload
+systemctl --user enable --now triviagame     # start now + auto-start on login
+```
+
+Manage it with:
+
+```bash
+systemctl --user status triviagame          # is it running?
+journalctl --user -u triviagame -f          # live logs (Ctrl-C to stop watching)
+systemctl --user restart triviagame         # apply changes / bounce the server
+systemctl --user stop triviagame            # stop it
+```
+
+> Note: a user service only runs while your account is logged in. If you want it to
+> survive logout, either keep a session open or move the unit to
+> `/etc/systemd/system/` (root) and adjust `WorkingDirectory` accordingly.
+
+## Public URL / QR code
+
+The host page's QR encodes whatever `PUBLIC_URL` is set to:
+
+- **LAN only** (default): no env var → QR uses your LAN IP, e.g. `http://192.168.x.x:8090/`.
+- **Public**: set `PUBLIC_URL=https://your-public-url.example.com` so players on other
+  networks can join through whatever tunnel or reverse proxy you use (Cloudflare
+  Tunnel, Tailscale serve/funnel, etc.).
+
+To change it, edit the `Environment=PUBLIC_URL=...` line in your installed unit and run
+`systemctl --user daemon-reload && systemctl --user restart triviagame`.
 
 ## Screenshots
 
@@ -99,8 +158,8 @@ it safe (+1). The host panel shows every player's live stake and ✓/✗ result 
 
 ## Question file
 
-Questions load from `trivia_latest.json` in this folder (257 multiple-choice
-questions). To use a different file, set the `QUESTIONS_FILE` env var or edit
+Questions load from `trivia_sorted_categories.json` in this folder (257 multiple-choice
+questions, consolidated into 13 standardized categories). To use a different file, set the `QUESTIONS_FILE` env var or edit
 the `QUESTIONS_FILE` constant at the top of `server.js`.
 
 ## Endpoints
@@ -108,8 +167,10 @@ the `QUESTIONS_FILE` constant at the top of `server.js`.
 | Path | What it is |
 |------|-----------|
 | `/`      | Player page (what phones load from the QR) |
-| `/host`  | Host control panel + QR code |
+| `/host`  | Host control panel + join link / "Show QR code" button |
+| `/qr`    | Standalone QR popup page (opened in a new window by the host) |
 | `/qr.png`| The join QR as a PNG (800px, for printing) |
+| `/join-info` | JSON with the current join URL (used by `/qr`) |
 
 ## Tests
 

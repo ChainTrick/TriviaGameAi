@@ -11,6 +11,9 @@ yarn-error.log*
 .env
 .env.*
 
+# Local service config (contains your tunnel URL — keep private)
+triviagame.service
+
 # OS / editor cruft
 .DS_Store
 Thumbs.db
