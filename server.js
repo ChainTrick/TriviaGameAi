@@ -549,7 +549,11 @@ function buildState(role, playerId = null) {
 function broadcastState() {
   for (const socket of liveSockets) {
     const role = socket.data.role;
-    if (role === 'player' && !socket.data.joined) continue; // not joined yet
+    if (role === 'player' && !socket.data.joined) {
+      // Not joined yet — still send the venue name so the join screen can show it.
+      socket.emit('title', { title: state.title || '' });
+      continue;
+    }
     // Pass the player's own id so their personal bonusResult is included.
     socket.emit('state', buildState(role, role === 'player' ? socket.data.playerId : null));
   }
@@ -562,7 +566,9 @@ io.on('connection', (socket) => {
   if (socket.data.role === 'host') {
     socket.emit('state', buildState('host'));
   } else {
-    // Player: wait for join event.
+    // Player: wait for join event. Send the current venue name right away so
+    // the join screen can show it before they type their team name.
+    socket.emit('title', { title: state.title || '' });
     socket.on('join', ({ name }) => {
       const clean = String(name ?? '').trim().slice(0, 24);
       if (!clean) return;

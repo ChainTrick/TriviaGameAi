@@ -182,7 +182,7 @@
   <div id="view-join" class="card hidden">
     <div class="brand">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9.5 7h5M9.5 11h5M9.5 15h3"/></svg>
-      <div><h1>AiTriviaGame</h1><span class="sub">Join the game</span></div>
+      <div><h1 id="joinName">AiTriviaGame</h1><span class="sub">Join the game</span></div>
     </div>
     <label for="name">Team name</label>
     <input id="name" type="text" maxlength="24" placeholder="e.g. Blue Team" autocomplete="off" />
@@ -669,6 +669,18 @@ socket.on('state', (st) => {
     }
   }
 });
+
+// Venue name for players who haven't joined yet — the server sends it on connect
+// and whenever the host edits it, so the join screen can show it (fallback: AiTriviaGame).
+let venueName = '';
+function applyVenue(t) {
+  venueName = t || '';
+  $('joinName').textContent = venueName || 'AiTriviaGame';
+  const v = $('venueTitle');
+  if (venueName) { v.textContent = venueName; v.classList.remove('hidden'); }
+  else v.classList.add('hidden');
+}
+socket.on('title', ({ title }) => applyVenue(title));
 
 // Join flow
 function doJoin() {
