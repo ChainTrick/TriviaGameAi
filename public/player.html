@@ -176,6 +176,16 @@
     overflow-wrap: anywhere;
   }
 
+  /* round category strip — sits under the venue title on every player page */
+  .cat-strip { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin-bottom: 14px; }
+  .cat-pill { font-size: 12.5px; font-weight: 600; padding: 4px 11px; border-radius: 999px; line-height: 1.3; overflow-wrap: anywhere; }
+  /* current category — highlighted */
+  .cat-pill.current { background: rgba(59,130,246,.18); border: 1px solid var(--accent); color: #dbeafe; }
+  /* upcoming categories — grayed out but visible */
+  .cat-pill.upcoming { background: rgba(148,163,184,.10); border: 1px solid rgba(148,163,184,.25); color: var(--muted); opacity: .75; }
+  /* previous categories — crossed out but still visible */
+  .cat-pill.done { background: transparent; border: 1px solid rgba(148,163,184,.20); color: var(--faint, #64748b); text-decoration: line-through; opacity: .8; }
+
   .meta-line { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); margin-bottom: 14px; }
   .hidden { display: none !important; }
 </style>
@@ -185,6 +195,9 @@
 
   <!-- Venue/game name — set by the host on the new-game screen; shown at the top of every player page -->
   <div id="venueTitle" class="venue-title hidden"></div>
+
+  <!-- Round category strip — current highlighted, upcoming grayed out, previous crossed out -->
+  <div id="catStrip" class="cat-strip hidden"></div>
 
   <!-- JOIN -->
   <div id="view-join" class="card hidden">
@@ -333,6 +346,21 @@ const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" st
 const X_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
 function myPlayer(st) { return meId ? st.players.find(p => p.id === meId) : null; }
+
+// Category strip at the top of every player page: all categories of the round,
+// current highlighted, upcoming grayed out, previous crossed out but visible.
+function renderCatStrip(st) {
+  const el = $('catStrip');
+  if (!Array.isArray(st.roundCategories) || !st.roundCategories.length) {
+    el.classList.add('hidden');
+    return;
+  }
+  el.innerHTML = st.roundCategories.map((c, i) => {
+    const label = c.isFinal ? `🏆 ${esc(c.name || 'Trivia')}` : esc(c.name || 'Trivia');
+    return `<span class="cat-pill ${c.status}" title="${c.isFinal ? 'Final question' : 'Question ' + (i + 1)}">${label}</span>`;
+  }).join('');
+  el.classList.remove('hidden');
+}
 
 // Browser tab title for every screen — follows the venue name set by the host,
 // so a rename updates every open player page live.
@@ -622,6 +650,10 @@ socket.on('state', (st) => {
   const venueEl = $('venueTitle');
   if (st.title) { venueEl.textContent = st.title; venueEl.classList.remove('hidden'); }
   else venueEl.classList.add('hidden');
+
+  // Category strip under the venue title — current highlighted, upcoming grayed,
+  // previous crossed out. Shown on every screen of a joined player page.
+  renderCatStrip(st);
 
   // The browser tab title follows the venue name on EVERY screen, so a rename
   // by the host updates every open player page live.

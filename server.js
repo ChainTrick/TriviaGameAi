@@ -497,6 +497,25 @@ function buildState(role, playerId = null) {
     // The final question's category — shown on the wager screen so players know
     // what they're staking on before the text is revealed.
     finalCategory: !!finalQuestion && state.phase === 'finalWagering' ? finalQuestion.category : undefined,
+    // Every category of the round currently on screen (or the announced intro
+    // round), each tagged done / current / upcoming — drives the strip at the
+    // top of every player page. null = no game in progress yet.
+    roundCategories: (() => {
+      if (!state.gameQuestions.length && !finalQuestion) return null; // no game built yet
+      const lastRound = state.totalRounds;
+      let rnd, curPos;
+      if (state.introRound != null) { rnd = state.introRound; curPos = 0; }
+      else if (finalQuestion) { rnd = lastRound; curPos = state.questionsPerRound + 1; }
+      else { rnd = roundOf(state.qIndex); curPos = (state.qIndex % state.questionsPerRound) + 1; }
+      const cats = questionsInRound(rnd).map((q, i) => ({
+        name: q.category,
+        status: state.phase === 'ended' ? 'done' : (i + 1 < curPos ? 'done' : (i + 1 === curPos ? 'current' : 'upcoming')),
+      }));
+      if (finalQuestion) {
+        cats.push({ name: finalQuestion.category, status: state.phase === 'ended' ? 'done' : 'current', isFinal: true });
+      }
+      return cats;
+    })(),
     // Song-artist guesses still waiting on the host's verdict. Reveal is blocked
     // until this is empty, so the host UI shouts about it during a question.
     pendingBonusCount: bonusPending().length,
