@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>TriviaGameAi</title>
+<title>AiTriviaGame</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1220'/%3E%3Cpath d='M20 14h24a5 5 0 0 1 5 5v26a5 5 0 0 1-5 5H20a5 5 0 0 1-5-5V19a5 5 0 0 1 5-5z' fill='none' stroke='%233b82f6' stroke-width='4'/%3E%3Cpath d='M24 24h16M24 32h16M24 40h9' stroke='%237dd3fc' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E" />
 <style>
   :root {
@@ -168,7 +168,7 @@
   <div id="view-join" class="card hidden">
     <div class="brand">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9.5 7h5M9.5 11h5M9.5 15h3"/></svg>
-      <div><h1>TriviaGameAi</h1><span class="sub">Join the game</span></div>
+      <div><h1>AiTriviaGame</h1><span class="sub">Join the game</span></div>
     </div>
     <label for="name">Team name</label>
     <input id="name" type="text" maxlength="24" placeholder="e.g. Blue Team" autocomplete="off" />
@@ -181,7 +181,7 @@
   <div id="view-lobby" class="card hidden">
     <div class="brand">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.6 3.7-5.5 7-5.5s6.2 1.9 7 5.5"/></svg>
-      <div><h1 id="lobbyName">TriviaGameAi</h1><span class="sub">Waiting for the host to start…</span></div>
+      <div><h1 id="lobbyName">AiTriviaGame</h1><span class="sub">Waiting for the host to start…</span></div>
     </div>
     <div class="waiting"><div class="pulse"></div>The host is setting up.<br/>Get ready — questions are coming. Between questions, name the artist of the song the venue is playing for +1.</div>
     <div id="lobbyBoard" class="board"></div>
@@ -231,6 +231,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.5A1.5 1.5 0 0 0 3 7.5C3 9.4 4.2 11 6 11.4M17 6h2.5A1.5 1.5 0 0 1 21 7.5c0 1.9-1.2 3.5-3 3.4"/></svg>
       <div><h1>🏆 Final question</h1><span class="sub">Waiting for players to wager…</span></div>
     </div>
+    <div id="fwCat" class="chip hidden"></div>
     <div class="waiting"><div class="pulse"></div>The final question is hidden until every player has locked in a stake.<br/>Once everyone is in, the host will show it.</div>
     <div class="wager-row">
       <span class="wager-label">Your wager</span>
@@ -336,7 +337,9 @@ function renderWagers(st) {
     input.value = current != null ? String(current) : '';
     input.style.cssText = 'flex:1;padding:12px 14px;font-size:16px;color:var(--text);background:rgba(255,255,255,.06);border:1px solid var(--glass-border);border-radius:12px;outline:none';
     input.placeholder = `0–${max}`;
-    if (st.phase === 'question') {
+    // Once the question TEXT is on screen, the stake is locked — no changes.
+    const revealed = !!(st.question && st.question.text);
+    if (!revealed) {
       const commit = () => {
         let v = Math.floor(Number(input.value));
         if (!Number.isFinite(v)) return;
@@ -349,7 +352,11 @@ function renderWagers(st) {
       input.disabled = true;
     }
     el.appendChild(input);
-    $('wagerHint').textContent = `Final question — REQUIRED: stake any whole number from 0 up to your score (${max}). Correct doubles it in, wrong loses it. The question appears once every player has wagered.`;
+    $('wagerHint').textContent = revealed
+      ? (current != null
+        ? `Stake locked: ${current} pt — no changes once the question is shown.`
+        : 'No stake set — this question was forfeited.')
+      : `Final question — REQUIRED: stake any whole number from 0 up to your score (${max}). Correct doubles it in, wrong loses it. The question appears once every player has wagered.`;
     return;
   }
 
@@ -395,6 +402,14 @@ function renderFinalWager(st) {
   input.addEventListener('blur', commit);
   el.appendChild(input);
   $('fwHint').textContent = `Stake any whole number from 0 up to your score (${max}). Correct doubles it in, wrong loses it. You can change it until the host shows the question.`;
+  // The category of the hidden final question — shown so players know what they're staking on.
+  const catEl = $('fwCat');
+  if (st.finalCategory) {
+    catEl.textContent = st.finalCategory;
+    catEl.classList.remove('hidden');
+  } else {
+    catEl.classList.add('hidden');
+  }
   // Who has locked in and for how much — live status list.
   const rows = st.players.map((p) => {
     const done = p.wager != null;
@@ -559,7 +574,7 @@ socket.on('state', (st) => {
 
   switch (st.phase) {
     case 'lobby':
-      $('lobbyName').textContent = `TriviaGameAi — ${myPlayer(st).name}`;
+      $('lobbyName').textContent = `AiTriviaGame — ${myPlayer(st).name}`;
       $('lobbyBoard').innerHTML = boardHtml(st.players, st.phase);
       show('lobby');
       break;

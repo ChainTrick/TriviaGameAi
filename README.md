@@ -1,4 +1,4 @@
-# TriviaGameAi — live trivia for restaurants & bars
+# AiTriviaGame — live trivia for restaurants & bars
 
 A self-contained Node.js + Socket.IO app for running **trivia night at a restaurant or
 bar**. One device acts as the **host** (controls questions, reveals answers, awards
@@ -10,8 +10,6 @@ Built for the venue: the **song coming out of the house system between questions
 of the game**. While the music plays, players type the **artist** into a bonus box on
 their phone — name it and the host confirms it for **+1 point**. See
 [The venue song](#the-venue-song-1-bonus-point).
-
-🌐 Website: [TriviaGameAi.com](https://triviagameai.com)
 
 ## What's inside
 
@@ -112,8 +110,9 @@ song-artist bonus box at the bottom for the track the venue is playing:
 
 ![Player question screen](Screenshot_player.png)
 
-**Player (phone) — final question wager screen.** The final question stays hidden while
-players stake up to their whole score; the board shows who has locked in:
+**Player (phone) — final question wager screen.** The final question stays hidden
+while players stake up to their whole score; its **category** is shown on the screen,
+and the board shows who has locked in:
 
 ![Player wager screen](Screenshot_player_wager.png)
 
@@ -137,8 +136,10 @@ configurable — every game is the same shape so it fits a trivia-night slot.
    with live standings).
 5. After the final round, one **final question** is played: each player may wager
    any whole number of points from 0 up to their current score (double-or-nothing —
-   correct adds it, wrong subtracts it). Then the game ends and final standings show
-   to everyone.
+   correct adds it, wrong subtracts it). The wager screen shows the question's
+   **category** while the text stays hidden; once the host reveals the question the
+   stake is locked and can no longer be changed. Then the game ends and final
+   standings show to everyone.
 
 Throughout, players can drop a **song-artist guess** for the +1 bonus (see above). The
 host can also award **manual bonus points** — any positive or negative amount, via
@@ -180,7 +181,7 @@ Create `~/.config/systemd/user/triviagame.service` with your own paths and URL:
 
 ```ini
 [Unit]
-Description=TriviaGameAi — trivia game server
+Description=AiTriviaGame — trivia game server
 After=network-online.target
 Wants=network-online.target
 
@@ -268,12 +269,12 @@ coding service, everything ran on one desktop:
 
 - **CPU:** AMD Ryzen 7 5700X
 - **GPU:** NVIDIA GeForce RTX 5060 Ti
-- **Model:** Qwen3.8-27B
+- **LLM:** [LM Studio](https://lmstudio.ai) running `qwen3.8-27b-gsq-rco@iq3_s`
 - **Agent:** [Hermes](https://hermes-agent.nousresearch.com/docs)
 
 ## Support the project — GitHub Sponsors
 
-TriviaGameAi is free and stays free. If your restaurant or bar runs trivia night with it
+AiTriviaGame is free and stays free. If your restaurant or bar runs trivia night with it
 and you'd like to say thanks, tips are welcome in crypto:
 
 | Coin | Address |

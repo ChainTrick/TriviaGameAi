@@ -1,4 +1,4 @@
-// TriviaGameAi — host-controlled trivia over the internet (Cloudflare Tunnel).
+// AiTriviaGame — host-controlled trivia over the internet (Cloudflare Tunnel).
 // Host device runs this server + opens /host; players scan a QR code to join /.
 import express from 'express';
 import http from 'http';
@@ -492,6 +492,9 @@ function buildState(role, playerId = null) {
       : currentWagerOptions(),
     finalWagerOpen: !!finalQuestion && state.phase === 'finalWagering', // players may set their stake now
     allPlayersWagered, // host UI: every player has locked in a final wager
+    // The final question's category — shown on the wager screen so players know
+    // what they're staking on before the text is revealed.
+    finalCategory: !!finalQuestion && state.phase === 'finalWagering' ? finalQuestion.category : undefined,
     // Song-artist guesses still waiting on the host's verdict. Reveal is blocked
     // until this is empty, so the host UI shouts about it during a question.
     pendingBonusCount: bonusPending().length,
@@ -618,8 +621,10 @@ io.on('connection', (socket) => {
       const w = Math.floor(Number(points));
       if (!Number.isFinite(w)) return; // junk stakes are ignored
       // Final question: any whole number from 0 up to the player's score.
-      // Set during the "finalWagering" phase, before the question is shown.
-      if (finalQuestion && state.phase === 'finalWagering') {
+      // Set during the "finalWagering" phase, before the question is shown —
+      // once the host reveals it, the stake is locked and can't be changed.
+      if (finalQuestion) {
+        if (state.phase !== 'finalWagering') return;
         if (w < 0 || w > p.score) return;
         p.wager = w;
         broadcastState();
@@ -895,7 +900,7 @@ io.on('connection', (socket) => {
 server.listen(PORT, '0.0.0.0', () => {
   const hostPage = publicUrl ? `${publicUrl}/host` : `http://${lanIp}:${PORT}/host`;
   console.log('────────────────────────────────────────────');
-  console.log(`TriviaGameAi running`);
+  console.log(`AiTriviaGame running`);
   console.log(`  Host page : ${hostPage}`);
   console.log(`  Players   : ${joinUrl}  (QR at /qr.png)`);
   console.log('────────────────────────────────────────────');
