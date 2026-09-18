@@ -131,6 +131,8 @@
   .bonus-send:disabled { opacity: .45; cursor: default; }
   .bonus-note { margin-top: 8px; font-size: 12.5px; color: var(--good); display: flex; align-items: center; gap: 6px; }
   .bonus-note svg { width: 15px; height: 15px; }
+  .bonus-fineprint { margin-top: 4px; font-size: 10.5px; color: var(--muted); line-height: 1.35; }
+  .join-note { margin-top: 14px; font-size: 12.5px; color: var(--muted); line-height: 1.55; text-align: center; }
 
   /* upcoming categories on the round-intro screen */
   .upcoming-cats { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
@@ -171,6 +173,8 @@
     <label for="name">Team name</label>
     <input id="name" type="text" maxlength="24" placeholder="e.g. Blue Team" autocomplete="off" />
     <button id="joinBtn" class="primary">Join game</button>
+    <p class="join-note">Bar &amp; restaurant trivia — 4 rounds of 4 questions, each round a different set of categories.
+      Between questions the venue plays a song: name the artist in the bonus box for +1 point (the host confirms it).</p>
   </div>
 
   <!-- LOBBY -->
@@ -179,7 +183,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.6 3.7-5.5 7-5.5s6.2 1.9 7 5.5"/></svg>
       <div><h1 id="lobbyName">TriviaGameAi</h1><span class="sub">Waiting for the host to start…</span></div>
     </div>
-    <div class="waiting"><div class="pulse"></div>The host is setting up.<br/>Get ready — questions are coming.</div>
+    <div class="waiting"><div class="pulse"></div>The host is setting up.<br/>Get ready — questions are coming. Between questions, name the artist of the song the venue is playing for +1.</div>
     <div id="lobbyBoard" class="board"></div>
   </div>
 
@@ -208,9 +212,14 @@
     <!-- Song-artist bonus guess (bottom of every question) -->
     <div id="bonusBox" class="bonus-box">
       <label>+1 Bonus Point if you know the artist of the song playing.</label>
+      <p class="bonus-fineprint">Counts whether or not you get the main question right.</p>
       <div class="bonus-row">
         <input id="bonusInput" type="text" maxlength="30" placeholder="Artist name…" autocomplete="off" />
         <button id="bonusSendBtn" class="bonus-send" type="button">Send</button>
+      </div>
+      <div id="bonusNote" class="bonus-note hidden">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+        Sent — the host will confirm if you got the artist.
       </div>
     </div>
     <div id="bonusResultQ" class="result-banner hidden"></div>
@@ -277,11 +286,14 @@ let meId = null;
 let meName = null; // set on join; used to re-identify after refresh
 let myAnswer = null; // number (option idx) or string, once locked
 let lastQuestionId = null;
-
-// Remember team name across refreshes.
-try { $('name').value = localStorage.getItem('tn_name') || ''; } catch (e) {}
+let bonusSent = false; // did I send a song-artist guess for this question?
 
 const $ = (id) => document.getElementById(id);
+
+// Remember team name across refreshes (must run AFTER $ is defined — the const
+// is in the temporal dead zone above, so calling $() earlier would throw).
+try { $('name').value = localStorage.getItem('tn_name') || ''; } catch (e) {}
+
 function show(view) {
   for (const v of ['join', 'lobby', 'question', 'finalwager', 'reveal', 'roundend', 'ended']) {
     $('view-' + v).classList.toggle('hidden', v !== view);
@@ -463,6 +475,8 @@ function renderQuestion(st) {
   $('bonusInput').disabled = judged;
   $('bonusSendBtn').disabled = judged;
   renderBonusResult($('bonusResultQ'), me ? me.bonusResult : null);
+  // "Sent — waiting on the host" confirmation (hidden once the verdict lands).
+  $('bonusNote').classList.toggle('hidden', !(bonusSent && !judged));
 }
 
 // The host's verdict on my song-artist guess — shown as a confirmation banner.
@@ -471,10 +485,10 @@ function renderBonusResult(el, result) {
   el.classList.remove('hidden', 'good', 'bad');
   if (result === 'correct') {
     el.classList.add('good');
-    el.innerHTML = CHECK_SVG + ' You got the the song artist right!';
+    el.innerHTML = CHECK_SVG + ' You got the song artist right! +1 point';
   } else {
     el.classList.add('bad');
-    el.innerHTML = X_SVG + ' Sorry, you missed the song.';
+    el.innerHTML = X_SVG + ' Sorry, you missed the song artist.';
   }
 }
 
@@ -553,6 +567,7 @@ socket.on('state', (st) => {
       if (st.question && st.question.id !== lastQuestionId) {
         myAnswer = null;
         lastQuestionId = st.question.id;
+        bonusSent = false; // fresh question, fresh song guess
         $('freeInput').value = '';
         $('bonusInput').value = ''; // fresh guess for the new question
       }
@@ -638,6 +653,7 @@ socket.on('resetAll', () => {
   meId = null;
   myAnswer = null;
   lastQuestionId = null;
+  bonusSent = false;
   $('freeInput').value = '';
   $('bonusInput').value = '';
   show('join');
@@ -648,6 +664,8 @@ function sendBonusGuess() {
   const v = $('bonusInput').value.trim();
   if (!v) return;
   socket.emit('bonusGuess', { text: v });
+  bonusSent = true;
+  $('bonusNote').classList.remove('hidden');
 }
 $('bonusSendBtn').onclick = sendBonusGuess;
 $('bonusInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendBonusGuess(); });

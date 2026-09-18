@@ -140,12 +140,21 @@ function poolForSelected() {
 }
 
 // ---------------------------------------------------------------------------
+// Game format — FIXED, not host-configurable: 4 rounds of 4 questions, then a
+// final double-or-nothing question. The host only chooses which CATEGORIES the
+// game draws from; the structure never changes.
+// ---------------------------------------------------------------------------
+const ROUNDS = 4;
+const QUESTIONS_PER_ROUND = 4;
+const TOTAL_QUESTIONS = ROUNDS * QUESTIONS_PER_ROUND; // 16 regular questions
+
+// ---------------------------------------------------------------------------
 // Game state
 // ---------------------------------------------------------------------------
 const state = {
   phase: 'lobby', // lobby | question | finalWagering | reveal | roundIntro | roundEnd | ended
-  totalRounds: 4,
-  questionsPerRound: 4,
+  totalRounds: ROUNDS,
+  questionsPerRound: QUESTIONS_PER_ROUND,
   selectedCategories: [], // host's category picks; empty = all categories
   gameQuestions: [],
   qIndex: -1,
@@ -153,15 +162,22 @@ const state = {
   players: new Map(), // id -> {id, name, normName, score, socketId|null, answered, answer, correct, wager}
 };
 
-function totalQuestionCount() { return state.totalRounds * state.questionsPerRound; }
+function totalQuestionCount() { return TOTAL_QUESTIONS; }
 // Which round (1-based) a global question index falls in.
 function roundOf(qi) { return Math.floor(qi / state.questionsPerRound) + 1; }
 
 // The categories of the questions coming up in round `rnd` (1-based), in play
 // order — shown on the "upcoming round" screen so everyone knows what's next.
 function upcomingCategories(rnd) {
+  return questionsInRound(rnd).map((q) => q.category);
+}
+
+// The questions belonging to round `rnd` (1-based) — the round rnd is however
+// many questions the builder actually managed to place (4 unless the pool ran dry).
+function questionsInRound(rnd) {
+  if (rnd < 1) return [];
   const start = (rnd - 1) * state.questionsPerRound;
-  return state.gameQuestions.slice(start, start + state.questionsPerRound).map((q) => q.category);
+  return state.gameQuestions.slice(start, start + state.questionsPerRound);
 }
 
 // Wager chips available for a given round: odd rounds use 1–4, even rounds
@@ -177,12 +193,27 @@ function wagerOptionsForRound(rnd) {
 let wagersUsed = {}; // { [playerId]: { round: number|null, used: Set } }
 
 // Song-artist bonus guesses: players may submit a guess (max 30 chars) on any
-// question. The host sees it next to their name and judges it — "correct" adds
-// +1 point, "missed" does not. Cleared when the question advances or resets.
+// question — it's their shot at naming the artist of the song playing in the
+// venue between questions. The host sees it next to their name and MUST judge
+// every pending guess ("correct" / "missed") before the answer can be revealed;
+// correct adds +1 point, missed does not (independent of the main question).
 let bonusGuesses = {}; // { [playerId]: string } for the CURRENT question only
 // The host's verdict on each pending guess — shown to that player as a
 // confirmation ("You got the song artist right!" / "Sorry, you missed it").
-let bonusResults = {}; // { [playerId]: 'correct' | 'missed' } for the CURRENT question
+// Stored as { result: 'correct'|'missed', guess } so the host can see what was
+// judged after the fact too.
+let bonusResults = {}; // { [playerId]: { result, guess } } for the CURRENT question
+
+// Every still-unjudged song-artist guess, with the player it belongs to. The
+// host must clear this list before the current answer can be revealed.
+function bonusPending() {
+  const out = [];
+  for (const [pid, guess] of Object.entries(bonusGuesses)) {
+    const p = state.players.get(pid);
+    if (p) out.push({ id: pid, name: p.name, guess });
+  }
+  return out;
+}
 
 function currentRoundForChips() {
   if (finalQuestion) return null; // no chips on the final question
@@ -213,6 +244,46 @@ function currentWagerOptions() {
 // The final question, played after all rounds: each player may wager any whole
 // number of points from 0 up to their current score (double-or-nothing style).
 let finalQuestion = null; // normalized question object or null
+
+// ---------------------------------------------------------------------------
+// Round helpers — the game is built up front as 4 rounds x 4 questions, but a
+// thin category selection can leave a round short (or empty). These keep the
+// "where in the game am I" math honest in that case.
+// ---------------------------------------------------------------------------
+// How many questions the game actually has — normally 16, fewer only when the
+// selected category pool runs dry mid-build.
+function gameLength() { return state.gameQuestions.length; }
+
+// The next question index after the current one, skipping past any round that
+// ended up empty (can happen in a short game).
+function nextIdx() {
+  let i = state.qIndex + 1;
+  while (i < state.gameQuestions.length && questionsInRound(roundOf(i)).length === 0) i++;
+  return i;
+}
+
+// The last question index an announced round occupies — 0 when the round is
+// empty (short game), so a stale intro screen can't rewind the game.
+function firstIdxOfRound(rnd) {
+  const start = (rnd - 1) * state.questionsPerRound;
+  return Math.min(Math.max(start, 0), Math.max(state.gameQuestions.length - 1, 0));
+}
+
+function assertRoundFits() {
+  if (gameLength() < totalQuestionCount()) {
+    console.warn(`Short game: ${gameLength()} of ${totalQuestionCount()} questions placed — selected categories ran out of questions`);
+  }
+}
+
+// Show the "Round N" message screen (announces the chips the round offers).
+function startRoundIntro(round, finishedRound) {
+  state.introRound = round;
+  state.phase = 'roundIntro';
+  console.log(finishedRound
+    ? `Round ${finishedRound} complete — showing intro for round ${round}`
+    : `Showing intro for round ${round}`);
+  broadcastState();
+}
 
 function activeQuestion() {
   if (finalQuestion) return finalQuestion;
@@ -256,7 +327,8 @@ function resetQuestionFlags() {
 }
 
 // The chip list to expose for a player: chips spent in the CURRENT round, or
-// an empty list on the final question / outside a game.
+// an empty list outside a round (lobby, final question, game over) — otherwise
+// stale chips would read back as "already staked" on the final question.
 function wagerStateFor(p) {
   const rnd = currentRoundForChips();
   if (!rnd) return [];
@@ -369,10 +441,13 @@ function buildState(role, playerId = null) {
     // is the round about to start (so both host and players see its chip pool).
     introRound: state.introRound,
     // Categories of the 4 questions coming up in the announced round — shown on
-    // the upcoming-round screen so everyone knows what's next.
+    // the upcoming-round screen so everyone knows what's next. (Never repeats a
+    // category: a round is always 4 distinct categories.)
     upcomingCategories: state.introRound != null ? upcomingCategories(state.introRound) : null,
-    questionNumber: finalQuestion ? totalQuestionCount() + 1 : state.qIndex + 1,
-    totalQuestions: totalQuestionCount(),
+    questionsThisRound: state.introRound != null ? questionsInRound(state.introRound).length : null,
+    questionNumber: finalQuestion ? gameLength() + 1 : state.qIndex + 1,
+    // The size of the game actually built (16 in a normal game).
+    totalQuestions: gameLength() || totalQuestionCount(),
     wagerOptions: currentWagerOptions(),
     // Chips offered by the round shown on screen (intro round while paused).
     roundWagerOptions: state.introRound != null
@@ -380,6 +455,18 @@ function buildState(role, playerId = null) {
       : currentWagerOptions(),
     finalWagerOpen: !!finalQuestion && state.phase === 'finalWagering', // players may set their stake now
     allPlayersWagered, // host UI: every player has locked in a final wager
+    // Song-artist guesses still waiting on the host's verdict. Reveal is blocked
+    // until this is empty, so the host UI shouts about it during a question.
+    pendingBonusCount: bonusPending().length,
+    pendingBonusNames: isHost ? bonusPending().map((p) => p.name) : undefined,
+    // Host-only: the song guesses already judged on this question, so the panel
+    // keeps showing what was called correct/missed during the reveal too.
+    bonusJudged: isHost ? Object.entries(bonusResults).map(([pid, r]) => ({
+      id: pid,
+      name: state.players.get(pid)?.name ?? '?',
+      guess: r.guess,
+      result: r.result,
+    })) : undefined,
     joinUrl,
     qrDataUrl,
     question: q ? {
@@ -407,7 +494,7 @@ function buildState(role, playerId = null) {
           : undefined,
         // The host's verdict on THIS player's own song-artist guess — shown only
         // to that player ("You got the song artist right!" / "Sorry, you missed it.").
-        bonusResult: p.id === playerId && bonusResults[p.id] ? bonusResults[p.id] : undefined,
+        bonusResult: p.id === playerId && bonusResults[p.id] ? bonusResults[p.id].result : undefined,
       }))
       .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name)),
   };
@@ -488,6 +575,7 @@ io.on('connection', (socket) => {
       const p = state.players.get(socket.data.playerId);
       if (!p) return;
       const w = Math.floor(Number(points));
+      if (!Number.isFinite(w)) return; // junk stakes are ignored
       // Final question: any whole number from 0 up to the player's score.
       // Set during the "finalWagering" phase, before the question is shown.
       if (finalQuestion && state.phase === 'finalWagering') {
@@ -528,7 +616,7 @@ io.on('connection', (socket) => {
     if (!p || !bonusGuesses[playerId]) return;
     const guess = bonusGuesses[playerId];
     delete bonusGuesses[playerId]; // judged — no longer pending
-    bonusResults[playerId] = correct === true ? 'correct' : 'missed'; // shown to that player
+    bonusResults[playerId] = { result: correct === true ? 'correct' : 'missed', guess }; // shown to that player
     if (correct === true) {
       p.score += 1;
       console.log(`Bonus +1 for ${p.name} (song artist: "${guess}")`);
@@ -550,18 +638,45 @@ io.on('connection', (socket) => {
     // decide WHICH pool the questions are drawn from (empty = all categories).
     const sel = Array.isArray(categories) ? categories.map((c) => String(c ?? '').trim()).filter(Boolean) : [];
     state.selectedCategories = sel;
-    state.totalRounds = 4;
-    state.questionsPerRound = 4;
+    state.totalRounds = ROUNDS;                 // fixed format — never host-tunable
+    state.questionsPerRound = QUESTIONS_PER_ROUND;
     if (!keepScores) for (const p of state.players.values()) p.score = 0;
     wagersUsed = {}; // fresh chip pools — every round of the new game starts clean
-    const pool = poolForSelected();
-    const need = Math.min(state.totalRounds * state.questionsPerRound, pool.length);
-    if (need < state.totalRounds * state.questionsPerRound) {
-      console.warn(`Only ${pool.length} questions match the selected categories — game will be shorter`);
+
+    // Build the whole game up front:
+    //  • every question used AT MOST ONCE (nothing repeats during a game)
+    //  • the order of the questions within a round is random
+    //  • no category repeats inside a round — each round is 4 unique categories
+    //    (the pool is shuffled first, so which question of a category gets picked
+    //    is random; categories are picked most-supplied-first so a tiny category
+    //    can't paint the builder into a corner)
+    const byCat = new Map(); // normalized category -> [unused questions, shuffled]
+    for (const q of shuffle(poolForSelected())) {
+      const key = normCat(q.category) || 'uncategorized';
+      if (!byCat.has(key)) byCat.set(key, []);
+      byCat.get(key).push(q);
     }
-    // Always randomized; a question is never repeated within a game.
-    const picked = shuffle(pool);
-    state.gameQuestions = picked.slice(0, need);
+    state.gameQuestions = [];
+    for (let r = 0; r < state.totalRounds; r++) {
+      const usedCats = new Set();
+      for (let placed = 0; placed < state.questionsPerRound; placed++) {
+        // Pick (at random) among the unused categories that still have the most
+        // questions left — keeps every round's 4 categories distinct.
+        const avail = [...byCat.entries()]
+          .filter(([key, list]) => !usedCats.has(key) && list.length)
+          .sort((a, b) => b[1].length - a[1].length);
+        if (!avail.length) break; // pool exhausted — game will be shorter than planned
+        const best = avail[0][1].length;
+        const top = avail.filter(([, list]) => list.length === best);
+        const [key] = top[Math.floor(Math.random() * top.length)];
+        usedCats.add(key);
+        state.gameQuestions.push(byCat.get(key).pop());
+      }
+    }
+    if (gameLength() < totalQuestionCount()) {
+      console.warn(`Only ${gameLength()} of ${totalQuestionCount()} questions available — the selected categories ran out of questions`);
+    }
+
     finalQuestion = null; // picked again after the last round
     state.qIndex = -1;
     resetQuestionFlags();
@@ -569,12 +684,21 @@ io.on('connection', (socket) => {
     // this round offers (1–4) before any question is played.
     state.introRound = 1;
     state.phase = 'roundIntro';
-    console.log(`Game started: 4 rounds x 4 questions (${need} total, categories: ${sel.length ? sel.join(', ') : 'all'})`);
+    console.log(`Game started: ${gameLength()} questions in ${state.totalRounds} rounds (categories: ${sel.length ? sel.join(', ') : 'all'})`);
     broadcastState();
   });
 
   socket.on('reveal', () => {
     if (state.phase !== 'question') return;
+    // EVERY song-artist guess must be judged by the host first — the answer can't
+    // be revealed (no peeking, no early points from the main question) while any
+    // player is still waiting on a verdict.
+    const pending = Object.keys(bonusGuesses).length;
+    if (pending) {
+      console.log(`Reveal blocked — ${pending} song-artist guess${pending === 1 ? '' : 'es'} still waiting to be judged`);
+      broadcastState();
+      return;
+    }
     const q = activeQuestion();
     for (const p of state.players.values()) {
       // A wager is REQUIRED to play a question: no stake set -> the question
@@ -632,29 +756,27 @@ io.on('connection', (socket) => {
   // Advance to the next question, or pause at a round boundary / start the final question.
   function advance() {
     if (state.phase !== 'question' && state.phase !== 'reveal') return;
-    const total = totalQuestionCount();
     // The final question is always last — but it must be REVEALED first so its
     // wager is scored. "Next" before reveal does nothing (host should press Reveal).
     if (finalQuestion) {
       if (state.phase === 'reveal') endGame();
       return;
     }
-    const nextIdx = state.qIndex + 1;
-    if (nextIdx >= total) {
+    assertRoundFits();
+    // Whole game played = move on to the final question.
+    if (state.qIndex + 1 >= state.gameQuestions.length) {
       startFinalQuestion();
       return;
     }
     // Crossing into a new round? Pause on the "Round N" message screen so both
     // host and players see which chips the upcoming round offers before it starts.
-    if (nextIdx % state.questionsPerRound === 0) {
-      const finishedRound = Math.floor(state.qIndex / state.questionsPerRound) + 1;
-      state.introRound = finishedRound + 1;
-      state.phase = 'roundIntro';
-      console.log(`Round ${finishedRound} complete — showing intro for round ${state.introRound}`);
-      broadcastState();
+    const finishedRound = roundOf(state.qIndex);
+    const nextRound = roundOf(state.qIndex + 1);
+    if (nextRound !== finishedRound) {
+      startRoundIntro(nextRound, finishedRound);
       return;
     }
-    state.qIndex = nextIdx;
+    state.qIndex = nextIdx();
     resetQuestionFlags();
     state.phase = 'question';
     broadcastState();
@@ -662,14 +784,18 @@ io.on('connection', (socket) => {
 
   socket.on('startNextRound', () => {
     if (state.phase !== 'roundIntro' && state.phase !== 'roundEnd') return;
-    const total = totalQuestionCount();
-    // After the last regular round, this button starts the final question.
-    if (state.qIndex + 1 >= total) { startFinalQuestion(); return; }
-    state.qIndex += 1; // first question of the new round
+    assertRoundFits();
+    // The announced round is the next one to play — but if there's nothing left
+    // to play (short game), go straight to the final question instead.
+    const rnd = state.introRound || (state.qIndex >= 0 ? roundOf(state.qIndex) + 1 : 1);
+    const round = questionsInRound(rnd);
+    if (!round.length) { startFinalQuestion(); return; }
+    // First question of the announced round (or the next slotted question).
+    state.qIndex = firstIdxOfRound(rnd);
     resetQuestionFlags();
     state.introRound = null;
     state.phase = 'question';
-    console.log(`Round ${roundOf(state.qIndex)} started`);
+    console.log(`Round ${rnd} started`);
     broadcastState();
   });
 

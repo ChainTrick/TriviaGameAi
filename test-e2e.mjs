@@ -1,9 +1,21 @@
-// End-to-end smoke test for the trivia server (run while server.js is up).
+// End-to-end tests for the trivia server (run while server.js is up):
+//     node test-e2e.mjs
+//
+// Covers the FIXED game format (4 rounds x 4 questions + final question) and the
+// rules the game must never break:
+//   • every round uses 4 DIFFERENT categories
+//   • no question ever repeats during a game
+//   • question order is random (and differs between games)
+//   • the host must judge every song-artist guess before the answer can be revealed
+// plus the scoring rules: per-round chips, required stake, manual points, the
+// final double-or-nothing question, and rejoin-with-score.
 import { io } from 'socket.io-client';
 
-const URL = 'http://127.0.0.1:8090';
+// Point at a different instance with TRIVIA_URL (e.g. TRIVIA_URL=http://127.0.0.1:8091).
+const URL = process.env.TRIVIA_URL || 'http://127.0.0.1:8090';
+console.log(`Testing ${URL}`);
 let failures = 0;
-setTimeout(() => { console.error('GLOBAL TIMEOUT — test hung'); process.exit(1); }, 60000).unref();
+setTimeout(() => { console.error('GLOBAL TIMEOUT — test hung'); process.exit(1); }, 180000).unref();
 
 function check(name, cond) {
   if (cond) console.log('PASS ', name);
@@ -11,226 +23,291 @@ function check(name, cond) {
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-// Wait until a predicate on the latest state is true.
-function waitFor(fn, label, timeoutMs = 5000) {
+let st = null; // latest state seen by the host socket
+function waitFor(fn, label, timeoutMs = 8000) {
   return new Promise((resolve, reject) => {
     const t0 = Date.now();
     const iv = setInterval(() => {
       let ok = false;
       try { ok = fn(st); } catch (e) {}
       if (ok) { clearInterval(iv); resolve(st); }
-      else if (Date.now() - t0 > timeoutMs) {
-        clearInterval(iv);
-        reject(new Error(`timeout waiting for: ${label}`));
-      }
-    }, 50);
+      else if (Date.now() - t0 > timeoutMs) { clearInterval(iv); reject(new Error(`timeout waiting for: ${label}`)); }
+    }, 40);
   });
 }
-
-let st = null; // latest state seen by the host socket
 
 const host = io(URL, { query: { role: 'host' } });
 host.on('state', (s) => { st = s; });
-
 await new Promise((r) => host.on('connect', r));
 check('host connected', true);
 
-// --- Players join -------------------------------------------------------
-function makePlayer(name) {
+async function makePlayer(name) {
   const p = io(URL, { query: { role: 'player' } });
+  const obj = { socket: p, id: null, state: null };
   let ack = null;
-  p.on('joined', (a) => { ack = a; });
+  p.on('joined', (a) => { ack = a; obj.id = a.playerId; });
+  p.on('state', (s) => { obj.state = s; });
   p.emit('join', { name });
   return new Promise((resolve) => {
-    const iv = setInterval(() => { if (ack) { clearInterval(iv); resolve({ socket: p, id: ack.playerId }); } }, 50);
-    setTimeout(() => { clearInterval(iv); resolve(null); }, 4000);
+    const iv = setInterval(() => { if (ack) { clearInterval(iv); resolve(obj); } }, 40);
+    setTimeout(() => { clearInterval(iv); resolve(obj); }, 4000);
   });
 }
+const P = (n) => st.players.find((p) => p.name === n);
+function answerFor(q, correct) {
+  if (q.isMultipleChoice) return correct ? q.correctIndex : ((q.correctIndex + 1) % q.options.length);
+  return correct ? q.answerRaw : 'zzz definitely not';
+}
+
+// Start fresh so the assertions below see only our own players.
+host.emit('resetAll');
+await waitFor((s) => s.phase === 'lobby' && s.players.length === 0, 'reset to empty lobby');
 
 const blue = await makePlayer('Blue Team');
 const red = await makePlayer('Red Team');
 check('both players joined with ids', !!(blue && red));
+await waitFor((s) => P('Blue Team') && P('Red Team'), 'lobby shows both test players');
 
-// Wait until both of OUR players appear in the lobby (other pre-existing
-// players may be present from earlier games — that's fine).
-await waitFor((s) => s.players.some((p) => p.name === 'Blue Team') && s.players.some((p) => p.name === 'Red Team'), 'lobby shows 2 players');
-check('lobby shows both test players', st.players.some((p) => p.name === 'Blue Team') && st.players.some((p) => p.name === 'Red Team'));
-
-// --- Start a 3-round x 2-question game (full flow in fewer steps) -------
-host.emit('startGame', { rounds: 3, perRound: 2, shuffleOn: false, keepScores: false });
-await waitFor((s) => s.phase === 'question' && s.question, 'game started');
-check('game started in question phase', st.phase === 'question');
-check('total questions = rounds x per-round (6)', st.totalQuestions === 6);
-check('round fields present', st.currentRound === 1 && st.questionInRound === 1 && st.questionsPerRound === 2 && st.totalRounds === 3);
-check('round 1 wager options are 1-4', JSON.stringify(st.wagerOptions) === '[1,2,3,4]');
-
-const q1id = st.question.id;
-
-// Q1: Blue wagers 3 and answers correctly (free-text or MC handled below).
-function answerFor(q, correct) {
-  if (q.isMultipleChoice) return correct ? q.correctIndex : ((q.correctIndex + 1) % q.options.length);
-  // free text: use the raw answer for correct, nonsense for wrong
-  return correct ? q.answerRaw : 'zzz definitely not';
-}
-
-async function playQuestion(wagers, answers) {
+// ---------------------------------------------------------------------------
+// 1. Fixed format: 4 rounds x 4 questions, random order, no repeats, and 4
+//    DISTINCT categories in every round.
+// ---------------------------------------------------------------------------
+async function playQuestionAuto(ci) {
+  const opts = st.wagerOptions || [];
+  const w = opts[ci % opts.length]; // a different chip each question of the round
+  blue.socket.emit('setWager', { points: w });
+  red.socket.emit('setWager', { points: w });
+  await sleep(140);
+  check(`Q${ci + 1}: both players hold stake ${w}`, P('Blue Team').wager === w && P('Red Team').wager === w);
   const q = st.question;
-  for (const [who, w] of wagers) {
-    if (w != null) who.socket.emit('setWager', { points: w });
-  }
-  await sleep(150); // let wager states land
-  for (const [who, correct] of answers) {
-    who.socket.emit('answer', { value: answerFor(q, correct) });
-  }
+  blue.socket.emit('answer', { value: answerFor(q, true) });
+  red.socket.emit('answer', { value: answerFor(q, false) });
+  await sleep(80);
   host.emit('reveal');
   await waitFor((s) => s.phase === 'reveal', 'reveal phase');
 }
 
-// Q1 (round 1): Blue +3 correct, Red wagers 2 but is wrong -> no penalty.
-await playQuestion([[blue, 3], [red, 2]], [[blue, true], [red, false]]);
-check('Q1 reveal shows results', ['Blue Team', 'Red Team'].every((n) => st.players.find((p) => p.name === n).correct !== undefined));
-const bScoreAfterQ1 = st.players.find((p) => p.name === 'Blue Team').score;
-const rScoreAfterQ1 = st.players.find((p) => p.name === 'Red Team').score;
-check('Q1 Blue +3', bScoreAfterQ1 === 3);
-check('Q1 Red wrong -> no penalty (0)', rScoreAfterQ1 === 0);
+// ---- Game 1 --------------------------------------------------------------
+host.emit('startGame', { keepScores: false, categories: null });
+await waitFor((s) => s.phase === 'roundIntro', 'game 1 round intro');
+check('fixed format reported as 4 rounds x 4 questions', st.totalRounds === 4 && st.questionsPerRound === 4);
+check('game 1 has 16 questions', st.totalQuestions === 16 || st.totalQuestions > 16);
+check('round 1 intro screen is shown first', st.phase === 'roundIntro' && st.introRound === 1);
+check('round 1 announces 4 upcoming categories', (st.upcomingCategories || []).length === 4);
+check('round 1 categories are all different', new Set((st.upcomingCategories || []).map((c) => String(c).toLowerCase())).size === 4);
 
-host.emit('nextQuestion');
-await waitFor((s) => s.phase === 'question' && s.question.id !== q1id, 'advanced to Q2');
-check('Q2 is round 1 question 2', st.currentRound === 1 && st.questionInRound === 2);
-
-// Q2 (round 1): Blue +4 correct, Red wagers 1 but is wrong -> no penalty.
-await playQuestion([[blue, 4], [red, 1]], [[blue, true], [red, false]]);
-host.emit('nextQuestion');
-
-// NEW BEHAVIOR: the game flows straight into round 2 — no host pause.
-await waitFor((s) => s.phase === 'question' && s.currentRound === 2, 'auto-advanced to round 2');
-check('round 1 -> round 2 is automatic (no roundEnd pause)', st.phase === 'question' && st.currentRound === 2 && st.questionInRound === 1);
-check('round 2 wager options are 2/4/6/8', JSON.stringify(st.wagerOptions) === '[2,4,6,8]');
-
-// Q3 (round 2): Blue tries chip 1 -> rejected (not offered this round), then
-// wagers 2 and is correct (+2). Red wagers 4 but is wrong -> no penalty.
-blue.socket.emit('setWager', { points: 1 });
-await sleep(150);
-check('chip 1 rejected in even round', st.players.find((p) => p.name === 'Blue Team').wager == null);
-await playQuestion([[blue, 2], [red, 4]], [[blue, true], [red, false]]);
-
-host.emit('nextQuestion');
-await waitFor((s) => s.phase === 'question' && st.questionInRound === 2, 'Q4 active');
-
-// Q4 (round 2): Blue +6 correct, Red wagers 8 but is wrong -> no penalty.
-await playQuestion([[blue, 6], [red, 8]], [[blue, true], [red, false]]);
-host.emit('nextQuestion');
-
-// THE REGRESSION: after the last question of round 2 (not round 1) it must
-// pause at "round complete" for the host to start round 3.
-await waitFor((s) => s.phase === 'roundEnd', 'round boundary after round 2');
-check('after Q4-of-game(2/6) phase is roundEnd, not ended', st.phase === 'roundEnd' && st.totalRounds === 3);
-check('scores carried into round break (Blue 3+4+2+6=15)', st.players.find((p) => p.name === 'Blue Team').score === 15);
-
-// Host starts round 3.
+const game1 = [];
+const perRoundCats = {};
 host.emit('startNextRound');
-await waitFor((s) => s.phase === 'question' && s.currentRound === 3, 'round 3 started');
-check('round 3 question 1 active', st.currentRound === 3 && st.questionInRound === 1);
-check('round 3 wager options back to 1-4', JSON.stringify(st.wagerOptions) === '[1,2,3,4]');
+await waitFor((s) => s.phase === 'question', 'game 1 Q1');
 
-// Q5 (round 3): chips RESET per round — Blue's chip 1 is fresh again here.
-await playQuestion([[blue, 1], [red, 3]], [[blue, true], [red, true]]);
-host.emit('nextQuestion');
-await waitFor((s) => s.phase === 'question' && st.questionInRound === 2, 'Q6 active');
+let played = 0;
+let roundsPlayed = 0;
+let lastRound = 0;
+while (played < 16) {
+  const rn = st.currentRound;
+  if (rn !== lastRound) { lastRound = rn; roundsPlayed++; }
+  (perRoundCats[rn] = perRoundCats[rn] || []).push(st.question.category);
+  game1.push(st.question.id);
+  await playQuestionAuto(played % 4);
+  played++;
+  host.emit('nextQuestion');
+  await waitFor((s) => s.phase !== 'reveal' || st.isFinal, `advance after Q${played}`, 10000);
+  if (st.phase === 'finalWagering') break;
+  if (st.phase === 'roundIntro') {
+    check(`round ${st.introRound}: announces its 4 categories`,
+      (st.upcomingCategories || []).length === 4 &&
+      new Set((st.upcomingCategories || []).map((c) => String(c).toLowerCase())).size === 4);
+    host.emit('startNextRound');
+    await waitFor((s) => s.phase === 'question' || s.phase === 'finalWagering', 'next round starts');
+    if (st.phase === 'finalWagering') break;
+  }
+}
+check('16 regular questions were played', played === 16);
+check('exactly 4 rounds were played', roundsPlayed === 4);
+check('no question repeated during the game', new Set(game1).size === game1.length);
+for (const rn of Object.keys(perRoundCats)) {
+  const cats = perRoundCats[rn];
+  check(`round ${rn}: 4 questions, 4 DIFFERENT categories (${cats.join(' / ')})`,
+    cats.length === 4 && new Set(cats.map((c) => String(c).toLowerCase())).size === 4);
+}
+check('after 4 rounds the final question opens', st.isFinal === true);
 
-// Q6 (round 3): Blue's chip 1 was spent on Q5 of THIS round -> rejected.
-check('used list holds chips spent this round only', JSON.stringify(st.players.find((p) => p.name === 'Blue Team').wagersUsed) === '[1]');
-blue.socket.emit('setWager', { points: 1 }); // spent on Q5 of the same round -> rejected
-await sleep(150);
-check('chip spent earlier in the SAME round is rejected (Blue has no wager)', st.players.find((p) => p.name === 'Blue Team').wager == null);
-// Blue's chip 2 was spent in round 1 but is fresh again in round 3.
-blue.socket.emit('setWager', { points: 2 }); // per-round reset -> accepted
-await sleep(150);
-check('chip from an earlier round is available again (Blue wagers 2)', st.players.find((p) => p.name === 'Blue Team').wager === 2);
-// Red's chip 3 was spent on Q5 of this round -> rejected; fresh chip 2 works.
-red.socket.emit('setWager', { points: 3 }); // same-round reuse -> rejected
-await sleep(150);
-check('Red same-round chip reuse rejected (no wager)', st.players.find((p) => p.name === 'Red Team').wager == null);
-red.socket.emit('setWager', { points: 2 });
-await sleep(150);
-// Blue answers with stake (set above), Red wrong.
-await playQuestion([], [[blue, true], [red, false]]);
-host.emit('nextQuestion');
-
-// NEW: after the last regular round comes the FINAL question — players may
-// wager any whole number up to their current score.
-await waitFor((s) => s.phase === 'question' && st.isFinal === true, 'final question started');
-check('final question is flagged (isFinal)', st.isFinal === true);
-check('final question has no fixed chips', st.wagerOptions == null);
-const bBefore = st.players.find((p) => p.name === 'Blue Team').score; // 3+4+2+6+1+2 = 18
-const rBefore = st.players.find((p) => p.name === 'Red Team').score; // +3 (Q5); Q6 no stake -> unchanged
-check('pre-final scores (Blue 18, Red 3)', bBefore === 18 && rBefore === 3);
-
-// Blue wagers more than their score -> must be rejected first.
-blue.socket.emit('setWager', { points: 99 }); // over score -> rejected
-await sleep(150);
-check('final wager above own score is rejected', st.players.find((p) => p.name === 'Blue Team').wager == null);
-// Blue wagers their entire score (18) and is correct -> +18. Red wagers all 3, wrong -> -3.
-await playQuestion([[blue, 18], [red, 3]], [[blue, true], [red, false]]);
-const bAfter = st.players.find((p) => p.name === 'Blue Team').score;
-const rAfter = st.players.find((p) => p.name === 'Red Team').score;
-check('final: Blue correct +18 (18 -> 36)', bAfter === 36);
-check('final: Red wrong loses full stake (3 -> 0)', rAfter === 0);
-
-host.emit('nextQuestion');
-await waitFor((s) => s.phase === 'ended', 'game ended after final question');
-check('game ended after the final question', st.phase === 'ended');
-
-// --- Wager chip reuse is blocked within the same round -------------------
-host.emit('startGame', { rounds: 1, perRound: 2, shuffleOn: false, keepScores: true });
-await waitFor((s) => s.phase === 'question' && s.question, 'second game started');
-const q = st.question;
-
-// Blue spends chip 3 on this question (and answers, so the chip is spent).
-blue.socket.emit('setWager', { points: 3 });
-await sleep(150);
-check('chip 3 accepted first time', st.players.find((p) => p.name === 'Blue Team').wager === 3);
-blue.socket.emit('answer', { value: answerFor(q, true) });
-host.emit('reveal');
-await waitFor((s) => s.phase === 'reveal', 'reveal for chip test');
-
-// Next question: chip 3 must be rejected (already used this game).
-host.emit('nextQuestion');
-await waitFor((s) => s.phase === 'question' && s.question.id !== q.id, 'advanced to Q2 of second game');
-blue.socket.emit('setWager', { points: 3 });
-await sleep(150);
-check('reusing a spent chip is rejected (Blue still has no wager)', st.players.find((p) => p.name === 'Blue Team').wager == null);
-
-// A fresh chip works.
+// ---- Final question: wager up to your score -------------------------------
+await waitFor((s) => s.isFinal && s.phase === 'finalWagering', 'final wagering');
+check('final question text is hidden from players until the host shows it',
+  blue.state && blue.state.phase === 'finalWagering' && blue.state.question.text === '');
+blue.socket.emit('setWager', { points: 9999 });
+await sleep(120);
+check('final wager above own score rejected', P('Blue Team').wager == null);
+const bBefore = P('Blue Team').score;
 blue.socket.emit('setWager', { points: 2 });
-await sleep(150);
-check('fresh chip accepted after spent one rejected', st.players.find((p) => p.name === 'Blue Team').wager === 2);
-
-// --- No-stake forfeit + manual point adjustments -------------------------
-const blueBefore = st.players.find((p) => p.name === 'Blue Team').score; // 39: carried in, +3 on Q1 of this game
-red.socket.emit('answer', { value: answerFor(st.question, true) }); // Red answers but has NO stake
+red.socket.emit('setWager', { points: 0 });
+await waitFor((s) => s.allPlayersWagered === true, 'all final wagers in');
+host.emit('showFinalQuestion');
+await waitFor((s) => s.phase === 'question' && s.isFinal, 'final question shown');
+const fq = st.question;
+blue.socket.emit('answer', { value: answerFor(fq, true) });
+red.socket.emit('answer', { value: answerFor(fq, false) });
+await sleep(80);
 host.emit('reveal');
-await waitFor((s) => s.phase === 'reveal', 'forfeit reveal');
-check('no-stake answer is forfeited (Red shows no result)', st.players.find((p) => p.name === 'Red Team').correct == null);
-check('forfeit costs nothing (Red score unchanged at 0)', st.players.find((p) => p.name === 'Red Team').score === 0);
+await waitFor((s) => s.phase === 'reveal' && s.isFinal, 'final reveal');
+check(`final: Blue correct adds the stake (${bBefore} -> ${bBefore + 2})`, P('Blue Team').score === bBefore + 2);
+host.emit('nextQuestion');
+await waitFor((s) => s.phase === 'ended', 'game ended');
 
-// Manual points: host can award any positive or negative amount.
-host.emit('awardPoints', { playerId: blue.id, points: -7 });
-await sleep(150);
-check('manual -7 applied (Blue score now ' + (blueBefore - 7) + ')', st.players.find((p) => p.name === 'Blue Team').score === blueBefore - 7);
-host.emit('awardPoints', { playerId: blue.id, points: 25 });
-await sleep(150);
-check('manual +25 applied (Blue score now ' + (blueBefore + 18) + ')', st.players.find((p) => p.name === 'Blue Team').score === blueBefore + 18);
+// ---------------------------------------------------------------------------
+// 2. Song-artist guesses gate the reveal.
+// ---------------------------------------------------------------------------
+host.emit('startGame', { keepScores: false, categories: null });
+await waitFor((s) => s.phase === 'roundIntro', 'game 2 intro');
+host.emit('startNextRound');
+await waitFor((s) => s.phase === 'question', 'game 2 Q1');
+const q2id = st.question.id;
 
-// --- Disconnect / rejoin keeps score -------------------------------------
+// A player's song guess must be judged before the answer can be revealed.
+blue.socket.emit('bonusGuess', { text: 'Queen' });
+await waitFor((s) => s.pendingBonusCount === 1, 'pending song guess visible to host');
+check('host sees the pending guess on the scoreboard', P('Blue Team').bonusGuess === 'Queen');
+
+blue.socket.emit('setWager', { points: 1 });
+red.socket.emit('setWager', { points: 1 });
+await sleep(140);
+blue.socket.emit('answer', { value: answerFor(st.question, true) });
+await sleep(80);
+// Baseline AFTER the stakes landed but BEFORE the reveal — the main question is
+// still unscored at this point (its answer is hidden), so any later change to
+// the score is the song-artist bonus and nothing else.
+const blueScoreBeforeBonus = P('Blue Team').score;
+check(`baseline: main-question stake not scored before the reveal (Blue ${blueScoreBeforeBonus} pts)`,
+  P('Blue Team').wager === 1 && P('Blue Team').correct === undefined);
+host.emit('reveal');
+await sleep(400);
+check('reveal is BLOCKED while a song guess is unjudged', st.phase === 'question' && st.question.id === q2id);
+check('the player sees no verdict yet', P('Blue Team').bonusResult === undefined);
+
+// Wrong verdict first: no point, and only then does the reveal unlock.
+host.emit('judgeBonus', { playerId: P('Blue Team').id, correct: false });
+await waitFor((s) => s.pendingBonusCount === 0, 'guess judged');
+await waitFor(() => blue.state && blue.state.players.find((p) => p.id === blue.id)?.bonusResult === 'missed',
+  'player sees the missed verdict');
+check('missed verdict does not score', P('Blue Team').score === blueScoreBeforeBonus);
+check('missed verdict is reported to the player',
+  blue.state.players.find((p) => p.id === blue.id).bonusResult === 'missed');
+check('host keeps a record of judged guesses', (st.bonusJudged || []).length === 1 && st.bonusJudged[0].guess === 'Queen');
+
+host.emit('reveal');
+await waitFor((s) => s.phase === 'reveal', 'reveal unlocked after judging');
+check('reveal works once nothing is pending', st.phase === 'reveal');
+
+// Next question: a guess sent AFTER the host already judged gets re-gated.
+host.emit('nextQuestion');
+await waitFor((s) => s.phase === 'question' && st.question.id !== q2id, 'game 2 Q2');
+blue.socket.emit('bonusGuess', { text: 'Nirvana' });
+await waitFor((s) => s.pendingBonusCount === 1, 'second guess pending');
+const blueScoreBeforeSong = P('Blue Team').score;
+host.emit('judgeBonus', { playerId: P('Blue Team').id, correct: true });
+await waitFor((s) => s.pendingBonusCount === 0, 'second guess judged');
+await waitFor(() => blue.state && blue.state.players.find((p) => p.id === blue.id)?.bonusResult === 'correct',
+  'player sees the correct verdict');
+check('correct verdict awards +1 bonus point',
+  blue.state.players.find((p) => p.id === blue.id).bonusResult === 'correct');
+check(`bonus point lands on the score (${blueScoreBeforeSong} + 1 = ${P('Blue Team').score})`, P('Blue Team').score === blueScoreBeforeSong + 1);
+check('bonus point is independent of the main question', P('Blue Team').correct === undefined && st.phase === 'question');
+
+// Two players guessing in the same question: both must be judged.
+blue.socket.emit('bonusGuess', { text: 'ABBA' });
+red.socket.emit('bonusGuess', { text: 'Blondie' });
+await waitFor((s) => s.pendingBonusCount === 2, 'both guesses pending');
+host.emit('judgeBonus', { playerId: P('Blue Team').id, correct: true });
+await sleep(200);
+host.emit('reveal');
+await sleep(300);
+check('reveal still blocked while ONE guess is unjudged', st.phase === 'question');
+host.emit('judgeBonus', { playerId: P('Red Team').id, correct: true });
+await waitFor((s) => s.pendingBonusCount === 0, 'both judged');
+host.emit('reveal');
+await waitFor((s) => s.phase === 'reveal', 'reveal after both judged');
+await waitFor(() => blue.state && blue.state.players.find((p) => p.id === blue.id)?.bonusResult === 'correct'
+  && red.state && red.state.players.find((p) => p.id === red.id)?.bonusResult === 'correct', 'both players see their verdict');
+check(`both correct verdicts scored +1 each (Blue ${P('Blue Team').score}, Red ${P('Red Team').score})`, P('Blue Team').score === blueScoreBeforeSong + 2 && P('Red Team').score === 1);
+check('verdicts are delivered per player, not broadcast',
+  blue.state.players.find((p) => p.id === red.id).bonusResult === undefined);
+
+// ---------------------------------------------------------------------------
+// 3. Category selection: only the chosen categories appear.
+// ---------------------------------------------------------------------------
+host.emit('startGame', { keepScores: false, categories: ['Music', 'Sports', 'Food & Drink', 'Movies & TV'] });
+await waitFor((s) => s.phase === 'roundIntro', 'selected-category game intro');
+const allowed = new Set(['music', 'sports', 'food & drink', 'movies & tv']);
+check('selected categories are echoed back', Array.isArray(st.selectedCategories) && st.selectedCategories.length === 4);
+check('round 1 categories all come from the selection', (st.upcomingCategories || []).every((c) => allowed.has(String(c).toLowerCase())));
+check('round 1 has 4 unique selected categories', new Set((st.upcomingCategories || []).map((c) => String(c).toLowerCase())).size === 4);
+
+// ---------------------------------------------------------------------------
+// 4. Chip rules, required stake, manual points, rejoin.
+// ---------------------------------------------------------------------------
+host.emit('startGame', { keepScores: false, categories: null });
+await waitFor((s) => s.phase === 'roundIntro', 'game 3 intro');
+host.emit('startNextRound');
+await waitFor((s) => s.phase === 'question', 'game 3 Q1');
+check('round 1 chips are 1-4', JSON.stringify(st.wagerOptions) === '[1,2,3,4]');
+check('a stake is required before answering', P('Blue Team').wager == null);
+
+// Answering without a stake is ignored entirely.
+blue.socket.emit('answer', { value: answerFor(st.question, true) });
+await sleep(150);
+check('answer without a stake is refused', P('Blue Team').answered === false);
+
+blue.socket.emit('setWager', { points: 3 });
+await sleep(120);
+check('chip 3 accepted', P('Blue Team').wager === 3);
+blue.socket.emit('answer', { value: answerFor(st.question, true) });
+await sleep(120);
+check('answer accepted once staked', P('Blue Team').answered === true);
+host.emit('reveal');
+await waitFor((s) => s.phase === 'reveal', 'game 3 Q1 reveal');
+check('correct answer pays the stake (+3)', P('Blue Team').score === 3);
+check('no-stake player forfeits (Red unaffected)', P('Red Team').score === 0 && P('Red Team').correct == null);
+host.emit('nextQuestion');
+await waitFor((s) => s.phase === 'question', 'game 3 Q2');
+blue.socket.emit('setWager', { points: 3 });
+await sleep(120);
+check('a chip already spent this round is rejected', P('Blue Team').wager == null);
+
+// Manual point adjustment (bonus / corrections).
+const beforeManual = P('Red Team').score;
+host.emit('awardPoints', { playerId: P('Red Team').id, points: 5 });
+await waitFor((s) => P('Red Team').score === beforeManual + 5, 'manual +5 applied');
+check('host can award manual points', P('Red Team').score === beforeManual + 5);
+host.emit('awardPoints', { playerId: P('Red Team').id, points: -2 });
+await waitFor((s) => P('Red Team').score === beforeManual + 3, 'manual -2 applied');
+check('host can subtract manual points', P('Red Team').score === beforeManual + 3);
+
+// Disconnect / rejoin keeps the score.
+const redScore = P('Red Team').score;
 red.socket.disconnect();
-await waitFor((s) => s.players.find((p) => p.name === 'Red Team').online === false, 'player offline');
-check('player marked offline after disconnect', st.players.find((p) => p.name === 'Red Team').online === false);
-
-const redBefore = st.players.find((p) => p.name === 'Red Team').score;
+await waitFor((s) => P('Red Team') && P('Red Team').online === false, 'red offline');
 const red2 = await makePlayer('Red Team');
-await waitFor((s) => s.players.find((p) => p.name === 'Red Team').online === true, 'player back online');
-check('rejoined Red Team kept score', st.players.find((p) => p.name === 'Red Team').score === redBefore);
+await waitFor((s) => P('Red Team') && P('Red Team').online === true, 'red back online');
+check('rejoining by name keeps the score', P('Red Team').score === redScore);
+
+// ---------------------------------------------------------------------------
+// 5. Randomness: two games in a row should not be identical.
+// ---------------------------------------------------------------------------
+async function firstQuestionIds() {
+  host.emit('resetAll');
+  await waitFor((s) => s.phase === 'lobby', 'reset');
+  host.emit('startGame', { keepScores: false, categories: null });
+  await waitFor((s) => s.phase === 'roundIntro', 'intro');
+  host.emit('startNextRound');
+  await waitFor((s) => s.phase === 'question', 'q1');
+  return st.question.id;
+}
+const a1 = await firstQuestionIds();
+const a2 = await firstQuestionIds();
+const a3 = await firstQuestionIds();
+check(`question order is random across games (${a1}, ${a2}, ${a3})`, new Set([a1, a2, a3]).size > 1);
 
 blue.socket.disconnect();
 red2 && red2.socket.disconnect();

@@ -66,6 +66,18 @@
   .bonus-btn { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 8px; cursor: pointer; border: 1px solid var(--glass-border); background: rgba(255,255,255,.05); color: var(--text); flex-shrink: 0; }
   .bonus-btn.yes { color: var(--good); border-color: rgba(52,211,153,.45); background: rgba(52,211,153,.1); }
   .bonus-btn.no { color: #fca5a5; border-color: rgba(248,113,113,.4); background: rgba(248,113,113,.08); }
+  .bonus-btn.done { cursor: default; opacity: .75; }
+  /* "judge the song guesses first" gate — the answer can't be revealed while any
+     song-artist guess is still waiting on the host's verdict. */
+  .judge-alert { margin-top: 14px; padding: 11px 14px; border-radius: 11px; font-size: 13.5px; line-height: 1.5;
+    background: rgba(251,191,36,.1); border: 1px solid rgba(251,191,36,.4); color: #fde68a; display: flex; align-items: center; gap: 9px; }
+  .judge-alert svg { width: 17px; height: 17px; flex-shrink: 0; }
+  .judge-alert b { color: #fff; }
+  .judged-note { padding: 6px 12px 9px 44px; font-size: 12.5px; color: var(--muted); }
+  .judged-note .guess { color: var(--text); font-style: italic; }
+  .judged-note .ok { color: var(--good); font-weight: 700; }
+  .judged-note .no { color: #fca5a5; font-weight: 700; }
+  button.primary:disabled { opacity: .45; cursor: not-allowed; }
 
   /* tiny hidden-away restart link */
   a.tiny-link { font-size: 11.5px; color: var(--muted); text-decoration: none; opacity: .75; cursor: pointer; }
@@ -142,7 +154,7 @@
 
     <!-- SETUP -->
     <div id="setup" class="hidden">
-      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.55"><b>Fixed format:</b> 4 rounds of 4 questions, then a final double-or-nothing question (wager up to your whole score). Players must stake a chip before answering — each chip value can be used once per round. Rounds 1 &amp; 3 offer chips worth 1–4 pts; rounds 2 &amp; 4 offer 2/4/6/8 pts.</p>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.55"><b>Restaurant &amp; bar trivia — fixed format:</b> 4 rounds of 4 questions — each round uses <b>4 different categories</b>, in random order, and no question ever repeats during a game. Then a final double-or-nothing question (wager up to your whole score). Players must stake a chip before answering — each chip value can be used once per round. Rounds 1 &amp; 3 offer chips worth 1–4 pts; rounds 2 &amp; 4 offer 2/4/6/8 pts. <b>The venue's music is part of the game:</b> players can name the artist of the song playing in the room in the bonus box at the bottom of their question for +1 point — you judge every guess (✓/✗) before any answer can be revealed.</p>
       <div class="field">
         <label>Question categories</label>
         <div id="catGrid" class="cat-grid"></div>
@@ -169,6 +181,7 @@
         <button id="revealBtn" class="primary">Reveal answer</button>
         <button id="nextBtn" class="ghost" style="margin-left:auto;padding:8px 14px;font-size:13.5px">Next question →</button>
       </div>
+      <div id="judgeAlert" class="judge-alert hidden"></div>
     </div>
 
     <!-- FINAL WAGERING (host sees full question; players see only their wager screen) -->
@@ -264,12 +277,20 @@ function boardRows(players, phase) {
     html += `<div class="row${p.online === false ? ' offline' : ''}"><span class="rank">${i + 1}</span>${dot}<span class="pname">${esc(p.name)}${mark}${p.online === false ? ' <small>(offline)</small>' : ''}</span>${wcell}<span class="pscore">${p.score}</span></div>`;
     // Song-artist bonus guess for the current question — host judges it.
     if (phase === 'question' && p.bonusGuess != null) {
-      html += `<div class="bonus-row"><span>🎵 <b style="color:var(--text);font-weight:600">${esc(p.name)}</b> guesses:</span><span class="guess">"${esc(p.bonusGuess)}"</span>` +
+      html += `<div class="bonus-row"><span>🎵 <b style="color:var(--text);font-weight:600">${esc(p.name)}</b></span><span class="guess">"${esc(p.bonusGuess)}"</span>` +
         `<button class="bonus-btn yes" data-bid="${p.id}" data-ok="1">✓ correct (+1)</button>` +
         `<button class="bonus-btn no" data-bid="${p.id}" data-ok="0">✗ missed</button></div>`;
     }
   });
   return html;
+}
+
+// Song guesses ALREADY judged on this question — keep them on screen (in the
+// player list) during the reveal so the host can still see the verdicts.
+function judgedRows(players, st) {
+  if (!st || !Array.isArray(st.bonusJudged) || !st.bonusJudged.length) return '';
+  return st.bonusJudged.map((b) => `<div class="judged-note">🎵 ${esc(b.name)} — <span class="guess">"${esc(b.guess)}"</span> ` +
+    (b.result === 'correct' ? '<span class="ok">✓ correct (+1)</span>' : '<span class="no">✗ missed</span>') + '</div>').join('');
 }
 
 // Judge a song-artist bonus guess (host only).
@@ -412,14 +433,33 @@ function render() {
       $('answerLine').innerHTML = `Answer: <b>${esc(q.answerRaw || '—')}</b> (free-text question)`;
     }
 
-    // reveal button only during question phase
+    // reveal button only during question phase — and LOCKED while any player's
+    // song-artist guess is still waiting to be judged (the server refuses too).
+    const pending = st.pendingBonusCount || 0;
+    const blocked = st.phase === 'question' && pending > 0;
     $('revealBtn').style.display = st.phase === 'question' ? '' : 'none';
+    $('revealBtn').disabled = blocked;
+    $('revealBtn').textContent = blocked
+      ? `Judge ${pending} song guess${pending === 1 ? '' : 'es'} first ⚠`
+      : 'Reveal answer';
     $('nextBtn').textContent = st.isFinal ? 'Finish game 🏁' : 'Next question →';
+    // Say it loudly so the host never wonders why Reveal does nothing.
+    const alertEl = $('judgeAlert');
+    if (blocked) {
+      // Deliberately terse — just how many guesses are still waiting. The rows
+      // below show whose they are and the ✓/✗ buttons.
+      alertEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>' +
+        `<span>Waiting to judge (${pending}) song${pending === 1 ? '' : 's'}</span>`;
+      alertEl.classList.remove('hidden');
+    } else {
+      alertEl.classList.add('hidden');
+    }
   }
 
   // players
   $('playersTitle').textContent = `Players (${st.players.length})`;
-  $('playerList').innerHTML = boardRows(st.players, st.phase);
+  $('playerList').innerHTML = boardRows(st.players, st.phase) +
+    ((st.phase === 'question' || st.phase === 'reveal') ? judgedRows(st.players, st) : '');
 
   // category picker (setup screen)
   if (st.phase === 'lobby' || st.phase === 'ended') renderCatGrid();
@@ -452,9 +492,13 @@ function renderCatGrid() {
   const total = selectedCats.size
     ? st.categories.filter((c) => selectedCats.has(c.name)).reduce((n, c) => n + c.count, 0)
     : st.categories.reduce((n, c) => n + c.count, 0);
-  $('catNote').textContent = selectedCats.size
+  const warn = selectedCats.size > 0 && selectedCats.size < 4
+    ? ` ⚠ Each round needs 4 different categories — with ${selectedCats.size} selected a round can only be ${selectedCats.size} question${selectedCats.size === 1 ? '' : 's'} long.`
+    : '';
+  const allCount = st.categories.reduce((n, c) => n + c.count, 0);
+  $('catNote').textContent = (selectedCats.size
     ? `Drawing from ${total} questions in the ${selectedCats.size} selected categor${selectedCats.size === 1 ? 'y' : 'ies'} — everything else is excluded.`
-    : 'Nothing selected yet — all categories are eligible. Tap chips to tailor the game (e.g. skip Sports).';
+    : `${allCount} multiple-choice questions in ${st.categories.length} categories are all in play — tap chips to tailor the game (e.g. skip Sports).`) + warn;
 }
 
 $('catGrid').addEventListener('click', (e) => {
@@ -504,7 +548,8 @@ $('ptAmount').addEventListener('keydown', (e) => { if (e.key === 'Enter') applyM
 // keyboard shortcuts for the host
 document.addEventListener('keydown', (e) => {
   if (!st || e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
-  if (st.phase === 'question' && (e.key === 'r' || e.key === 'R')) socket.emit('reveal');
+  // R = reveal, but never while song-artist guesses are waiting on a verdict.
+  if (st.phase === 'question' && (e.key === 'r' || e.key === 'R') && !(st.pendingBonusCount > 0)) socket.emit('reveal');
   if ((st.phase === 'reveal') && (e.key === 'n' || e.key === 'N' || e.key === 'Enter')) socket.emit('nextQuestion');
   if ((st.phase === 'roundIntro' || st.phase === 'roundEnd') && (e.key === 'n' || e.key === 'N' || e.key === 'Enter')) socket.emit('startNextRound');
 });
