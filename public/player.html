@@ -134,8 +134,8 @@
   .bonus-fineprint { margin-top: 4px; font-size: 10.5px; color: var(--muted); line-height: 1.35; }
   .join-note { margin-top: 14px; font-size: 12.5px; color: var(--muted); line-height: 1.55; text-align: center; }
 
-  /* upcoming categories on the round-intro screen — numbered rows, centered */
-  .upcoming-cats { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  /* upcoming categories on the round-intro screen — numbered rows, left-aligned */
+  .upcoming-cats { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
   .upcat-row { display: inline-flex; align-items: center; gap: 10px; font-size: 15.5px; color: var(--muted); }
   .upcat-num { font-weight: 700; color: var(--accent); min-width: 86px; text-align: right; }
   .upcoming-cat { font-size: 15.5px; font-weight: 600; color: var(--text); background: rgba(255,255,255,.07); border: 1px solid var(--glass-border); padding: 9px 18px; border-radius: 999px; }
@@ -145,7 +145,9 @@
   #view-roundend .brand { justify-content: center; }
 
   /* final question category — big and centered on the wager screen */
-  .final-cat { text-align: center; margin: 6px auto 20px; font-size: clamp(30px, 7vw, 48px); font-weight: 800; line-height: 1.15; letter-spacing: .3px; color: var(--text); overflow-wrap: anywhere; }
+  .final-cat-wrap { text-align: center; margin: 6px auto 20px; }
+  .final-cat-lead { font-size: 15.5px; color: var(--muted); margin-bottom: 8px; }
+  .final-cat { font-size: clamp(30px, 7vw, 48px); font-weight: 800; line-height: 1.15; letter-spacing: .3px; color: var(--text); overflow-wrap: anywhere; }
 
   /* scoreboard */
   .board { margin-top: 24px; }
@@ -251,7 +253,10 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.5A1.5 1.5 0 0 0 3 7.5C3 9.4 4.2 11 6 11.4M17 6h2.5A1.5 1.5 0 0 1 21 7.5c0 1.9-1.2 3.5-3 3.4"/></svg>
       <div><h1>🏆 Final question</h1><span class="sub">Waiting for players to wager…</span></div>
     </div>
-    <div id="fwCat" class="final-cat hidden"></div>
+    <div id="fwCatWrap" class="final-cat-wrap hidden">
+      <p class="final-cat-lead">The upcoming category for the final question is</p>
+      <div id="fwCat" class="final-cat"></div>
+    </div>
     <div class="waiting"><div class="pulse"></div>The final question is hidden until every player has locked in a stake.<br/>Once everyone is in, the host will show it.</div>
     <div class="wager-row">
       <span class="wager-label">Your wager</span>
@@ -441,12 +446,12 @@ function renderFinalWager(st) {
   el.appendChild(input);
   $('fwHint').textContent = `Stake any whole number from 0 up to your score (${max}). Correct doubles it in, wrong loses it. You can change it until the host shows the question.`;
   // The category of the hidden final question — shown so players know what they're staking on.
-  const catEl = $('fwCat');
+  const catWrap = $('fwCatWrap');
   if (st.finalCategory) {
-    catEl.textContent = st.finalCategory;
-    catEl.classList.remove('hidden');
+    $('fwCat').textContent = st.finalCategory;
+    catWrap.classList.remove('hidden');
   } else {
-    catEl.classList.add('hidden');
+    catWrap.classList.add('hidden');
   }
   // Who has locked in and for how much — live status list.
   const rows = st.players.map((p) => {
