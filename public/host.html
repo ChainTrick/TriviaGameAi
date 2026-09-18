@@ -179,8 +179,10 @@
 
       <div class="controls" style="align-items:center">
         <button id="revealBtn" class="primary">Reveal answer</button>
-        <button id="nextBtn" class="ghost" style="margin-left:auto;padding:8px 14px;font-size:13.5px">Next question →</button>
+        <button id="skipBtn" class="ghost" style="margin-left:auto;padding:8px 14px;font-size:13.5px" title="Skip without revealing — nothing is scored and the round/question counters don't move until this question's answer is revealed">Skip (no count)</button>
+        <button id="nextBtn" class="ghost" style="padding:8px 14px;font-size:13.5px">Next question →</button>
       </div>
+      <div id="skipAlert" class="judge-alert hidden"></div>
       <div id="judgeAlert" class="judge-alert hidden"></div>
     </div>
 
@@ -433,15 +435,18 @@ function render() {
       $('answerLine').innerHTML = `Answer: <b>${esc(q.answerRaw || '—')}</b> (free-text question)`;
     }
 
-    // reveal button only during question phase — and LOCKED while any player's
-    // song-artist guess is still waiting to be judged (the server refuses too).
+    // reveal button only during the question phase — and LOCKED while any
+    // player's song-artist guess is still waiting to be judged (the server refuses too).
     const pending = st.pendingBonusCount || 0;
-    const blocked = st.phase === 'question' && pending > 0;
-    $('revealBtn').style.display = st.phase === 'question' ? '' : 'none';
+    const liveQ = st.phase === 'question';
+    const blocked = liveQ && pending > 0;
+    $('revealBtn').style.display = liveQ ? '' : 'none';
     $('revealBtn').disabled = blocked;
     $('revealBtn').textContent = blocked
       ? `Judge ${pending} song guess${pending === 1 ? '' : 'es'} first ⚠`
       : 'Reveal answer';
+    // Skip button: only while the question is still live (not yet revealed).
+    $('skipBtn').style.display = liveQ ? '' : 'none';
     $('nextBtn').textContent = st.isFinal ? 'Finish game 🏁' : 'Next question →';
     // Say it loudly so the host never wonders why Reveal does nothing.
     const alertEl = $('judgeAlert');
@@ -454,12 +459,22 @@ function render() {
     } else {
       alertEl.classList.add('hidden');
     }
+
+    // Skip banner — shown while a question is in "skipped" state (not counted yet).
+    const skipEl = $('skipAlert');
+    if (st.phase === 'skip') {
+      skipEl.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></svg>' +
+        '<span>Skipped — not counted until the answer is revealed. Players keep their stake &amp; locked-in answer.</span>';
+      skipEl.classList.remove('hidden');
+    } else {
+      skipEl.classList.add('hidden');
+    }
   }
 
   // players
   $('playersTitle').textContent = `Players (${st.players.length})`;
   $('playerList').innerHTML = boardRows(st.players, st.phase) +
-    ((st.phase === 'question' || st.phase === 'reveal') ? judgedRows(st.players, st) : '');
+    ((st.phase === 'question' || st.phase === 'reveal' || st.phase === 'skip') ? judgedRows(st.players, st) : '');
 
   // category picker (setup screen)
   if (st.phase === 'lobby' || st.phase === 'ended') renderCatGrid();
@@ -514,6 +529,14 @@ $('startBtn').onclick = () => {
 };
 
 $('revealBtn').onclick = () => socket.emit('reveal');
+$('skipBtn').onclick = () => {
+  if (st && st.pendingBonusCount > 0) {
+    // Don't silently wipe guesses the host hasn't judged yet.
+    alert(`Judge ${st.pendingBonusCount} song guess${st.pendingBonusCount === 1 ? '' : 'es'} before skipping — their verdicts would be lost.`);
+    return;
+  }
+  socket.emit('skipQuestion');
+};
 $('nextBtn').onclick = () => socket.emit('nextQuestion');
 $('showFinalBtn').onclick = () => socket.emit('showFinalQuestion');
 $('nextRoundBtn').onclick = () => socket.emit('startNextRound');

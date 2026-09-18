@@ -245,6 +245,14 @@ function currentWagerOptions() {
 // number of points from 0 up to their current score (double-or-nothing style).
 let finalQuestion = null; // normalized question object or null
 
+// Unused questions left over from the build — the refill pool for skips. A
+// skipped question is replaced by one of these so the game keeps its full
+// length (4 rounds x 4 questions) no matter how many are skipped.
+let spareQuestions = [];
+// Questions dropped by skips this game — excluded when drawing the final
+// question, so a bad/duplicate question never comes back as the finale.
+let skippedIds = new Set();
+
 // ---------------------------------------------------------------------------
 // Round helpers — the game is built up front as 4 rounds x 4 questions, but a
 // thin category selection can leave a round short (or empty). These keep the
@@ -326,6 +334,33 @@ function resetQuestionFlags() {
   bonusResults = {}; // and so are the host's verdicts on them
 }
 
+// Host skips the current question WITHOUT revealing its answer (e.g. it's a
+// duplicate or just bad). The skipped question is spliced out of
+// state.gameQuestions and REPLACED by one drawn from spareQuestions (the pool
+// of unused questions left over from the build), so we stay at the SAME qIndex
+// with a fresh question in this slot. Because every displayed counter is
+// derived from qIndex, none of them move — the round/question number stays put
+// until an answer is actually revealed. If no spare remains (the pool ran dry)
+// the game simply gets shorter by one, exactly like a short build. Per-question
+// flags are reset first so no stale answers/wagers/song-guesses carry over onto
+// the fresh question that now occupies this slot. No chip is spent (chips are
+// only marked in the reveal handler), so nothing is scored.
+function skipCurrentQuestion() {
+  if (state.qIndex < 0 || state.qIndex >= state.gameQuestions.length) return;
+  resetQuestionFlags(); // wipe answers/wagers/song-guesses for this slot
+  const skipped = state.gameQuestions[state.qIndex];
+  state.gameQuestions.splice(state.qIndex, 1); // drop it
+  skippedIds.add(skipped.id); // never re-draw this one as the final question
+  if (spareQuestions.length) {
+    // Refill the slot so the game keeps its full length.
+    state.gameQuestions.splice(state.qIndex, 0, spareQuestions.pop());
+    console.log(`Skipped a question (not counted) — replaced with a fresh one; qIndex stays at ${state.qIndex}`);
+  } else {
+    // No spares left: the game shrinks by one and later questions slide up.
+    console.log(`Skipped a question (no spare left to replace it) — game is now ${gameLength()} questions`);
+  }
+}
+
 // The chip list to expose for a player: chips spent in the CURRENT round, or
 // an empty list outside a round (lobby, final question, game over) — otherwise
 // stale chips would read back as "already staked" on the final question.
@@ -350,6 +385,8 @@ function fullReset() {
   state.players.clear();
   wagersUsed = {}; // fresh chip pools
   bonusGuesses = {}; // no pending song-artist guesses
+  spareQuestions = []; // no refill pool until the next build
+  skippedIds = new Set(); // no skipped questions to exclude from the finale
   state.gameQuestions = [];
   finalQuestion = null;
   state.qIndex = -1;
@@ -494,7 +531,11 @@ function buildState(role, playerId = null) {
           : undefined,
         // The host's verdict on THIS player's own song-artist guess — shown only
         // to that player ("You got the song artist right!" / "Sorry, you missed it.").
-        bonusResult: p.id === playerId && bonusResults[p.id] ? bonusResults[p.id].result : undefined,
+        // Held back until the answer reveal so both results land together; the
+        // host still sees every judged verdict live via bonusJudged above.
+        bonusResult: p.id === playerId && bonusResults[p.id] && (state.phase === 'reveal' || state.phase === 'ended')
+          ? bonusResults[p.id].result
+          : undefined,
       }))
       .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name)),
   };
@@ -642,6 +683,7 @@ io.on('connection', (socket) => {
     state.questionsPerRound = QUESTIONS_PER_ROUND;
     if (!keepScores) for (const p of state.players.values()) p.score = 0;
     wagersUsed = {}; // fresh chip pools — every round of the new game starts clean
+    skippedIds = new Set(); // no skips yet in this game
 
     // Build the whole game up front:
     //  • every question used AT MOST ONCE (nothing repeats during a game)
@@ -673,6 +715,10 @@ io.on('connection', (socket) => {
         state.gameQuestions.push(byCat.get(key).pop());
       }
     }
+    // Everything the build didn't use becomes the refill pool for skips — a
+    // skipped question is replaced by one of these so the game keeps its full
+    // length no matter how many questions are skipped.
+    spareQuestions = shuffle([...byCat.values()].flat());
     if (gameLength() < totalQuestionCount()) {
       console.warn(`Only ${gameLength()} of ${totalQuestionCount()} questions available — the selected categories ran out of questions`);
     }
@@ -725,15 +771,36 @@ io.on('connection', (socket) => {
 
   socket.on('nextQuestion', () => advance());
 
+  // Host skips the current question WITHOUT revealing its answer (e.g. it's a
+  // duplicate or just bad). The skipped question is spliced out of
+  // state.gameQuestions and replaced by one drawn from spareQuestions, so we
+  // stay at the SAME qIndex with a fresh question in this slot. Because every
+  // displayed counter is derived from qIndex, none of them move — the
+  // round/question number stays put until an answer is actually revealed.
+  // Per-question flags are reset first so no stale answers/wagers/song-guesses
+  // carry over onto the fresh question that now occupies this slot. No chip is
+  // spent (chips are only marked in the reveal handler), so nothing is scored.
+  // This lets a duplicate or bad question be dropped without eating one of the
+  // 4 slots in its round, so a full game still plays out as 4 rounds x 4
+  // questions plus the final question.
+  socket.on('skipQuestion', () => {
+    if (socket.data.role !== 'host') return;
+    if (state.phase !== 'question') return;
+    skipCurrentQuestion();
+    broadcastState();
+  });
+
   // After all regular rounds, one final question: each player may wager any
   // whole number of points from 0 up to their current score. Correct doubles
   // the stake into their total; wrong loses it (double-or-nothing).
   function startFinalQuestion() {
     const usedIds = new Set(state.gameQuestions.map((q) => q.id));
     // Draw from the host's selected categories too — a sports-free game stays
-    // sports-free. Fall back to any unused question if the pool is exhausted.
-    let candidates = poolForSelected().filter((q) => !usedIds.has(q.id));
-    if (!candidates.length) candidates = QUESTIONS.filter((q) => !usedIds.has(q.id));
+    // sports-free. Skipped questions are excluded so a bad/duplicate question
+    // never comes back as the finale. Fall back to any unused question if the
+    // pool is exhausted.
+    let candidates = poolForSelected().filter((q) => !usedIds.has(q.id) && !skippedIds.has(q.id));
+    if (!candidates.length) candidates = QUESTIONS.filter((q) => !usedIds.has(q.id) && !skippedIds.has(q.id));
     finalQuestion = (candidates.length ? shuffle(candidates) : shuffle(QUESTIONS))[0];
     state.qIndex = totalQuestionCount() - 1; // last regular index; advance() ends the game from here
     resetQuestionFlags();
