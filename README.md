@@ -1,4 +1,4 @@
-# AiTriviaGame — live trivia for restaurants & bars
+# QR Code Trivia - Live, self-hosted trivia game for restaurants and bars
 
 A self-contained Node.js + Socket.IO app for running **trivia night at a restaurant or
 bar**. One device acts as the **host** (controls questions, reveals answers, awards
@@ -22,6 +22,8 @@ their phone — name it and the host confirms it for **+1 point**. See
   draws from before starting.
 - **Per-question wagering** instead of fixed points — chip values can each be used once
   per round.
+- **Custom venue name**: the host types their restaurant/bar name on the setup screen and
+  it shows at the top of every player page (and in the browser tab) for the whole game.
 - **The venue song bonus**: players guess the artist of whatever the venue is playing
   between questions.
 - Join by QR code, no accounts, no build step.
@@ -62,8 +64,8 @@ That's it! The server listens on port **8090** and prints:
 - Players   : the join URL, e.g. `https://your-public-url.example.com/` — shown as a link on the host page
 
 **On the night**: open the host page on the laptop or tablet behind the bar (or on the
-host's phone), pick the categories, press **Start game**, and display or call out the
-join link (or tap **Show QR code** to put the QR on a screen / print it for tables).
+host's phone), type your **venue name**, pick the categories, press **Start game**, and
+display or call out the join link (or tap **Show QR code** to put the QR on a screen / print it for tables).
 Players join from anywhere and play between ordering and eating — no app, no account.
 
 ## The venue song (+1 bonus point)
@@ -88,8 +90,8 @@ This is the part that ties the game to the room you're in:
 
 ## Screenshots
 
-**Host — setup screen.** The game is always 4 rounds of 4 questions; the host only
-chooses which categories it draws from:
+**Host — setup screen.** The game is always 4 rounds of 4 questions; the host types their
+venue name (shown at the top of every player page) and chooses which categories it draws from:
 
 ![Host setup screen](Screenshot_host_setup.png)
 
@@ -122,9 +124,10 @@ The format is **fixed**: **4 rounds × 4 questions = 16 multiple-choice question
 one final double-or-nothing question. Rounds and questions-per-round are **not**
 configurable — every game is the same shape so it fits a trivia-night slot.
 
-1. Host picks which **categories** the game draws from (or leaves it on **all** for the
-   full spread) → **Start game**. Each round uses a different set of categories in random
-   order, and no question ever repeats during a game.
+1. Host types their **venue name** (shown at the top of every player page) and picks
+   which **categories** the game draws from (or leaves it on **all** for the full spread)
+   → **Start game**. Each round uses a different set of categories in random order, and no
+   question ever repeats during a game.
 2. Players see "waiting" until the first question is sent; they pick their **wager**
    (required — no stake means the question is forfeited), type/pick an answer, then
    lock it in before time runs out.

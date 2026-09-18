@@ -136,7 +136,10 @@
 
   /* upcoming categories on the round-intro screen */
   .upcoming-cats { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
-  .upcoming-cat { font-size: 13px; color: var(--text); background: rgba(255,255,255,.06); border: 1px solid var(--glass-border); padding: 7px 14px; border-radius: 999px; }
+  .upcoming-cat { font-size: 15.5px; font-weight: 600; color: var(--text); background: rgba(255,255,255,.07); border: 1px solid var(--glass-border); padding: 9px 18px; border-radius: 999px; }
+
+  /* final question category — big and centered on the wager screen */
+  .final-cat { text-align: center; margin: 6px auto 20px; font-size: clamp(30px, 7vw, 48px); font-weight: 800; line-height: 1.15; letter-spacing: .3px; color: var(--text); overflow-wrap: anywhere; }
 
   /* scoreboard */
   .board { margin-top: 24px; }
@@ -242,7 +245,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4.5A1.5 1.5 0 0 0 3 7.5C3 9.4 4.2 11 6 11.4M17 6h2.5A1.5 1.5 0 0 1 21 7.5c0 1.9-1.2 3.5-3 3.4"/></svg>
       <div><h1>🏆 Final question</h1><span class="sub">Waiting for players to wager…</span></div>
     </div>
-    <div id="fwCat" class="chip hidden"></div>
+    <div id="fwCat" class="final-cat hidden"></div>
     <div class="waiting"><div class="pulse"></div>The final question is hidden until every player has locked in a stake.<br/>Once everyone is in, the host will show it.</div>
     <div class="wager-row">
       <span class="wager-label">Your wager</span>
@@ -589,11 +592,14 @@ socket.on('state', (st) => {
   else venueEl.classList.add('hidden');
 
   switch (st.phase) {
-    case 'lobby':
-      $('lobbyName').textContent = `AiTriviaGame — ${myPlayer(st).name}`;
+    case 'lobby': {
+      const brand = st.title ? `${st.title} — ${myPlayer(st).name}` : `AiTriviaGame — ${myPlayer(st).name}`;
+      $('lobbyName').textContent = brand;
+      document.title = brand;
       $('lobbyBoard').innerHTML = boardHtml(st.players, st.phase);
       show('lobby');
       break;
+    }
     case 'question':
       if (st.question && st.question.id !== lastQuestionId) {
         myAnswer = null;

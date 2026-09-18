@@ -36,6 +36,7 @@
   .brand h1 { font-size: 19px; font-weight: 650; }
 
   /* setup */
+  .field { margin-bottom: 18px; }
   .field label { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
   input[type="number"], input[type="text"] {
     width: 100%; padding: 11px 13px; font-size: 16px; color: var(--text);
@@ -56,8 +57,8 @@
   .cat-chip.on small { color: rgba(255,255,255,.7); }
 
   /* upcoming categories on the round-intro screen */
-  .upcoming-cats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
-  .upcat { font-size: 13px; color: var(--text); background: rgba(255,255,255,.05); border: 1px solid var(--glass-border); padding: 6px 12px; border-radius: 999px; }
+  .upcoming-cats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; align-items: center; }
+  .upcat { font-size: 15.5px; font-weight: 600; color: var(--text); background: rgba(255,255,255,.07); border: 1px solid var(--glass-border); padding: 9px 18px; border-radius: 999px; }
   .upcat b { color: var(--accent); font-weight: 700; margin-right: 5px; }
 
   /* song-artist bonus row in the host player list */
@@ -149,7 +150,7 @@
   <div class="card">
     <div class="brand">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3h8a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M9.5 7h5M9.5 11h5M9.5 15h3"/></svg>
-      <div><h1>AiTriviaGame — Host</h1></div>
+      <div><h1 id="hostTitle">AiTriviaGame — Host</h1></div>
     </div>
 
     <!-- SETUP -->
@@ -493,6 +494,10 @@ function render() {
   const tc = $('titleChip');
   if (st.title) { tc.textContent = '📍 ' + st.title; tc.classList.remove('hidden'); }
   else tc.classList.add('hidden');
+  // The venue name replaces "AiTriviaGame" in the page title and header.
+  const brand = st.title ? `${st.title} — Host` : 'AiTriviaGame — Host';
+  $('hostTitle').textContent = brand;
+  document.title = brand;
 
   // manual points select
   const sel = $('ptPlayer');
