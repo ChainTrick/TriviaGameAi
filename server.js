@@ -155,6 +155,7 @@ const state = {
   phase: 'lobby', // lobby | question | finalWagering | reveal | roundIntro | roundEnd | ended
   totalRounds: ROUNDS,
   questionsPerRound: QUESTIONS_PER_ROUND,
+  title: '', // host-set venue/game name — shown at the top of every player page
   selectedCategories: [], // host's category picks; empty = all categories
   gameQuestions: [],
   qIndex: -1,
@@ -471,6 +472,7 @@ function buildState(role, playerId = null) {
     // All available categories (with counts) for the host's setup screen.
     categories: CATEGORIES.map((c) => ({ name: c.name, count: c.count })),
     selectedCategories: [...state.selectedCategories],
+    title: state.title || '', // venue/game name for the top of every player page
     currentRound: finalQuestion ? state.totalRounds : (state.qIndex >= 0 ? roundOf(state.qIndex) : 0),
     questionInRound: finalQuestion ? state.questionsPerRound + 1 : (state.qIndex >= 0 ? (state.qIndex % state.questionsPerRound) + 1 : 0),
     isFinal: !!finalQuestion,
@@ -676,6 +678,17 @@ io.on('connection', (socket) => {
   socket.on('resetAll', () => {
     if (socket.data.role !== 'host') return;
     fullReset();
+    broadcastState();
+  });
+
+  // Host sets the venue/game name — shown at the top of every player page.
+  // It's a property of the session, not one game: it survives "Restart game"
+  // (the host usually runs several games in the same venue).
+  socket.on('setTitle', ({ title }) => {
+    if (socket.data.role !== 'host') return;
+    const clean = String(title ?? '').trim().slice(0, 60);
+    state.title = clean;
+    console.log(`Game title set: "${clean}"`);
     broadcastState();
   });
 

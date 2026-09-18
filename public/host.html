@@ -37,11 +37,11 @@
 
   /* setup */
   .field label { display: block; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
-  input[type="number"] {
+  input[type="number"], input[type="text"] {
     width: 100%; padding: 11px 13px; font-size: 16px; color: var(--text);
     background: rgba(255,255,255,.06); border: 1px solid var(--glass-border); border-radius: 10px; outline: none;
   }
-  input[type="number"]:focus { border-color: var(--accent); }
+  input[type="number"]:focus, input[type="text"]:focus { border-color: var(--accent); }
 
   /* category picker */
   .cat-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
@@ -156,6 +156,10 @@
     <div id="setup" class="hidden">
       <p style="font-size:13px;color:var(--muted);margin-bottom:14px;line-height:1.55"><b>Restaurant &amp; bar trivia — fixed format:</b> 4 rounds of 4 questions — each round uses <b>4 different categories</b>, in random order, and no question ever repeats during a game. Then a final double-or-nothing question (wager up to your whole score). Players must stake a chip before answering — each chip value can be used once per round. Rounds 1 &amp; 3 offer chips worth 1–4 pts; rounds 2 &amp; 4 offer 2/4/6/8 pts. <b>The venue's music is part of the game:</b> players can name the artist of the song playing in the room in the bonus box at the bottom of their question for +1 point — you judge every guess (✓/✗) before any answer can be revealed.</p>
       <div class="field">
+        <label>Game title (venue name)</label>
+        <input id="titleInput" type="text" maxlength="60" placeholder="e.g. The Blue Note — shown at the top of every player page" autocomplete="off" />
+      </div>
+      <div class="field">
         <label>Question categories</label>
         <div id="catGrid" class="cat-grid"></div>
         <div id="catNote" style="font-size:12.5px;color:var(--muted);margin-top:8px"></div>
@@ -168,6 +172,7 @@
     <!-- GAME -->
     <div id="gameArea" class="hidden">
       <div class="game-head">
+        <span id="titleChip" class="chip hidden"></span>
         <span id="roundChip" class="chip"></span>
         <span id="qNumChip" class="chip"></span>
       </div>
@@ -477,7 +482,17 @@ function render() {
     ((st.phase === 'question' || st.phase === 'reveal' || st.phase === 'skip') ? judgedRows(st.players, st) : '');
 
   // category picker (setup screen)
-  if (st.phase === 'lobby' || st.phase === 'ended') renderCatGrid();
+  if (st.phase === 'lobby' || st.phase === 'ended') {
+    renderCatGrid();
+    // Keep the title input in sync with the server (don't clobber a live edit).
+    const ti = $('titleInput');
+    if (document.activeElement !== ti) ti.value = st.title || '';
+  }
+
+  // Venue/game name — shown on every player page; echo it in the host header too.
+  const tc = $('titleChip');
+  if (st.title) { tc.textContent = '📍 ' + st.title; tc.classList.remove('hidden'); }
+  else tc.classList.add('hidden');
 
   // manual points select
   const sel = $('ptPlayer');
@@ -523,6 +538,19 @@ $('catGrid').addEventListener('click', (e) => {
   if (selectedCats.has(name)) selectedCats.delete(name); else selectedCats.add(name);
   renderCatGrid();
 });
+
+// Venue/game title — sent to the server as soon as the host stops typing, so
+// every player page updates live. Flushed on blur too (e.g. clicking Start).
+let titleTimer = null;
+function sendTitle() {
+  clearTimeout(titleTimer);
+  socket.emit('setTitle', { title: $('titleInput').value.trim() });
+}
+$('titleInput').addEventListener('input', () => {
+  clearTimeout(titleTimer);
+  titleTimer = setTimeout(sendTitle, 400);
+});
+$('titleInput').addEventListener('blur', sendTitle);
 
 $('startBtn').onclick = () => {
   socket.emit('startGame', { keepScores: false, categories: [...selectedCats] });
