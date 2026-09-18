@@ -56,10 +56,14 @@
   .cat-chip.on { background: var(--accent-soft); border-color: var(--accent); color: #fff; box-shadow: 0 0 0 1px var(--accent) inset; }
   .cat-chip.on small { color: rgba(255,255,255,.7); }
 
-  /* upcoming categories on the round-intro screen */
-  .upcoming-cats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; align-items: center; }
-  .upcat { font-size: 15.5px; font-weight: 600; color: var(--text); background: rgba(255,255,255,.07); border: 1px solid var(--glass-border); padding: 9px 18px; border-radius: 999px; }
+  /* upcoming categories on the round-intro screen (host) — compact */
+  .upcoming-cats { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; align-items: center; }
+  .upcat { font-size: 13px; font-weight: 600; color: var(--text); background: rgba(255,255,255,.07); border: 1px solid var(--glass-border); padding: 6px 14px; border-radius: 999px; }
   .upcat b { color: var(--accent); font-weight: 700; margin-right: 5px; }
+
+  /* round-intro screen (host): center the chip and Start round button */
+  #introArea .chip { margin: 0 auto 14px; }
+  #introArea .controls { justify-content: center; }
 
   /* song-artist bonus row in the host player list */
   .bonus-row { display: flex; align-items: center; gap: 8px; padding: 6px 12px 9px 44px; font-size: 13px; color: var(--muted); }
@@ -211,7 +215,7 @@
       <h2 style="font-size:18px;margin-bottom:6px" id="introTitleHost">Round 2 of 4</h2>
       <p style="color:var(--muted);font-size:14.5px;margin-bottom:10px;line-height:1.6" id="introMsgHost"></p>
       <div class="upcoming-cats hidden" id="introUpcomingCats"></div>
-      <div class="chip hidden" id="introChipsHost" style="margin-bottom:14px;font-size:13.5px;padding:8px 16px;display:inline-flex"></div>
+      <div class="chip hidden" id="introChipsHost" style="font-size:13.5px;padding:8px 16px"></div>
       <div class="controls">
         <button id="startRoundBtn" class="primary">Start round →</button>
       </div>
