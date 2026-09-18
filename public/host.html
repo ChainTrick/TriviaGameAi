@@ -460,6 +460,8 @@ function render() {
       : 'Reveal answer';
     // Skip button: only while the question is still live (not yet revealed).
     $('skipBtn').style.display = liveQ ? '' : 'none';
+    // Next/Finish button: only after the answer has been revealed.
+    $('nextBtn').style.display = st.phase === 'reveal' ? '' : 'none';
     $('nextBtn').textContent = st.isFinal ? 'Finish game 🏁' : 'Next question →';
     // Say it loudly so the host never wonders why Reveal does nothing.
     const alertEl = $('judgeAlert');
@@ -575,17 +577,12 @@ $('skipBtn').onclick = () => {
     alert(`Judge ${st.pendingBonusCount} song guess${st.pendingBonusCount === 1 ? '' : 'es'} before skipping — their verdicts would be lost.`);
     return;
   }
+  const ok = confirm('Skip this question?\n\nIts answer will not be revealed and no points will be scored for it. The round/question count does NOT advance — a fresh question takes its place.');
+  if (!ok) return;
   socket.emit('skipQuestion');
 };
-$('nextBtn').onclick = () => {
-  // "Next" while the current question is still unrevealed skips it — no answer
-  // is revealed and nothing gets scored. Warn before doing that.
-  if (st && st.phase === 'question') {
-    const ok = confirm('You are about to skip this question.\n\nIts answer will not be revealed and no points will be scored for it. Continue?');
-    if (!ok) return;
-  }
-  socket.emit('nextQuestion');
-};
+// Only shown after the answer has been revealed, so this always advances.
+$('nextBtn').onclick = () => socket.emit('nextQuestion');
 $('showFinalBtn').onclick = () => socket.emit('showFinalQuestion');
 $('nextRoundBtn').onclick = () => socket.emit('startNextRound');
 $('startRoundBtn').onclick = () => socket.emit('startNextRound');

@@ -793,7 +793,13 @@ io.on('connection', (socket) => {
     broadcastState();
   });
 
-  socket.on('nextQuestion', () => advance());
+  // Advance to the next question — only after an answer has been revealed.
+  // Skipping a still-live question is done with skipQuestion, which does NOT
+  // advance (the round/question counters stay put).
+  socket.on('nextQuestion', () => {
+    if (state.phase !== 'reveal') return;
+    advance();
+  });
 
   // Host skips the current question WITHOUT revealing its answer (e.g. it's a
   // duplicate or just bad). The skipped question is spliced out of
