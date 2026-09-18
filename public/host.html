@@ -65,6 +65,9 @@
   #introArea .chip { display: flex; width: fit-content; margin: 0 auto 14px; }
   #introArea .controls { justify-content: center; }
 
+  /* setup screen: center the Start game button */
+  #setup .controls { justify-content: center; }
+
   /* song-artist bonus row in the host player list */
   .bonus-row { display: flex; align-items: center; gap: 8px; padding: 6px 12px 9px 44px; font-size: 13px; color: var(--muted); }
   .bonus-row .guess { color: var(--text); font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
@@ -574,7 +577,15 @@ $('skipBtn').onclick = () => {
   }
   socket.emit('skipQuestion');
 };
-$('nextBtn').onclick = () => socket.emit('nextQuestion');
+$('nextBtn').onclick = () => {
+  // "Next" while the current question is still unrevealed skips it — no answer
+  // is revealed and nothing gets scored. Warn before doing that.
+  if (st && st.phase === 'question') {
+    const ok = confirm('You are about to skip this question.\n\nIts answer will not be revealed and no points will be scored for it. Continue?');
+    if (!ok) return;
+  }
+  socket.emit('nextQuestion');
+};
 $('showFinalBtn').onclick = () => socket.emit('showFinalQuestion');
 $('nextRoundBtn').onclick = () => socket.emit('startNextRound');
 $('startRoundBtn').onclick = () => socket.emit('startNextRound');
