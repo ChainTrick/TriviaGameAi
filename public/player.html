@@ -324,6 +324,9 @@ function show(view) {
     $('view-' + v).classList.toggle('hidden', v !== view);
   }
 }
+// Letter label for an option index — works past D too (e, f, g, …).
+function optLetter(i) { return String.fromCharCode(97 + i); }
+
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>';
@@ -504,7 +507,7 @@ function renderQuestion(st) {
     q.options.forEach((label, i) => {
       const b = document.createElement('button');
       b.className = 'opt' + (noStake ? ' disabled' : '');
-      b.innerHTML = `<span class="key">${'abcd'[i]}</span><span>${esc(label)}</span>`;
+      b.innerHTML = `<span class="key">${optLetter(i)}</span><span>${esc(label)}</span>`;
       if (myAnswer === i) b.classList.add('selected');
       b.onclick = () => {
         if (st.phase !== 'question') return;
@@ -569,7 +572,7 @@ function renderReveal(st) {
       if (i === q.correctIndex) cls.push('correct');
       if (myAnswer === i && i !== q.correctIndex) cls.push('wrongpick');
       b.classList.add(...cls);
-      b.innerHTML = `<span class="key">${'abcd'[i]}</span><span>${esc(label)}</span>`;
+      b.innerHTML = `<span class="key">${optLetter(i)}</span><span>${esc(label)}</span>`;
       optsEl.appendChild(b);
     });
   } else {

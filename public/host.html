@@ -271,6 +271,9 @@ let st = null;
 const $ = (id) => document.getElementById(id);
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
+// Letter label for an option index — works past D too (e, f, g, …).
+function optLetter(i) { return String.fromCharCode(97 + i); }
+
 socket.on('state', (s) => {
   st = s;
   render();
@@ -344,7 +347,7 @@ function render() {
       q.options.forEach((label, i) => {
         const d = document.createElement('div');
         d.className = 'opt';
-        d.innerHTML = `<span class="key">${'abcd'[i]}</span><span>${esc(label)}</span>`;
+        d.innerHTML = `<span class="key">${optLetter(i)}</span><span>${esc(label)}</span>`;
         fwOpts.appendChild(d);
       });
     } else {
@@ -440,7 +443,7 @@ function render() {
       q.options.forEach((label, i) => {
         const d = document.createElement('div');
         d.className = 'opt' + ((st.phase === 'reveal' && i === q.correctIndex) ? ' correct' : '');
-        d.innerHTML = `<span class="key">${'abcd'[i]}</span><span>${esc(label)}</span>`;
+        d.innerHTML = `<span class="key">${optLetter(i)}</span><span>${esc(label)}</span>`;
         optsEl.appendChild(d);
       });
     } else {
