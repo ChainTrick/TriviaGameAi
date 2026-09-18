@@ -134,9 +134,15 @@
   .bonus-fineprint { margin-top: 4px; font-size: 10.5px; color: var(--muted); line-height: 1.35; }
   .join-note { margin-top: 14px; font-size: 12.5px; color: var(--muted); line-height: 1.55; text-align: center; }
 
-  /* upcoming categories on the round-intro screen */
-  .upcoming-cats { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  /* upcoming categories on the round-intro screen — numbered rows, centered */
+  .upcoming-cats { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+  .upcat-row { display: inline-flex; align-items: center; gap: 10px; font-size: 15.5px; color: var(--muted); }
+  .upcat-num { font-weight: 700; color: var(--accent); min-width: 86px; text-align: right; }
   .upcoming-cat { font-size: 15.5px; font-weight: 600; color: var(--text); background: rgba(255,255,255,.07); border: 1px solid var(--glass-border); padding: 9px 18px; border-radius: 999px; }
+
+  /* round intro / end screen — everything centered */
+  #view-roundend { text-align: center; }
+  #view-roundend .brand { justify-content: center; }
 
   /* final question category — big and centered on the wager screen */
   .final-cat { text-align: center; margin: 6px auto 20px; font-size: clamp(30px, 7vw, 48px); font-weight: 800; line-height: 1.15; letter-spacing: .3px; color: var(--text); overflow-wrap: anywhere; }
@@ -274,7 +280,6 @@
       <div><h1 id="reTitle">Round complete</h1><span class="sub" id="reSub">Waiting for the host to start the next round…</span></div>
     </div>
     <div class="waiting"><div class="pulse"></div><span id="reMsg">Take a breath — the next round is coming.</span></div>
-    <div id="introChips" class="chip hidden" style="display:inline-flex;margin:0 auto 14px;font-size:13.5px;padding:8px 16px"></div>
     <div id="upcomingCats" class="upcoming-cats hidden"></div>
     <div id="roundEndBoard" class="board"></div>
   </div>
@@ -320,6 +325,25 @@ const CHECK_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" st
 const X_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
 function myPlayer(st) { return meId ? st.players.find(p => p.id === meId) : null; }
+
+// Browser tab title for every screen — follows the venue name set by the host,
+// so a rename updates every open player page live.
+function pageTitle(st) {
+  const brand = st.title || 'AiTriviaGame';
+  switch (st.phase) {
+    case 'lobby': return `${brand} — Lobby`;
+    case 'questioning': return `${brand} — Round ${st.currentRound}, Q${(st.question && st.question.numInRound) || '?'}`;
+    case 'finalWagering': return `${brand} — Final question: place your wager`;
+    case 'reveal': return `${brand} — Answer reveal`;
+    case 'roundIntro': {
+      const rnd = st.introRound || (st.currentRound + 1);
+      return `${brand} — Round ${rnd} of ${st.totalRounds}`;
+    }
+    case 'roundEnd': return `${brand} — Round ${(st.currentRound || 0)} complete`;
+    case 'ended': return `${brand} — Final standings`;
+    default: return brand;
+  }
+}
 
 function boardHtml(players, phase) {
   if (!players.length) return '';
@@ -591,11 +615,13 @@ socket.on('state', (st) => {
   if (st.title) { venueEl.textContent = st.title; venueEl.classList.remove('hidden'); }
   else venueEl.classList.add('hidden');
 
+  // The browser tab title follows the venue name on EVERY screen, so a rename
+  // by the host updates every open player page live.
+  document.title = pageTitle(st);
+
   switch (st.phase) {
     case 'lobby': {
-      const brand = st.title ? `${st.title} — ${myPlayer(st).name}` : `AiTriviaGame — ${myPlayer(st).name}`;
-      $('lobbyName').textContent = brand;
-      document.title = brand;
+      $('lobbyName').textContent = st.title ? `${st.title} — ${myPlayer(st).name}` : `AiTriviaGame — ${myPlayer(st).name}`;
       $('lobbyBoard').innerHTML = boardHtml(st.players, st.phase);
       show('lobby');
       break;
@@ -630,25 +656,22 @@ socket.on('state', (st) => {
       break;
     }
     case 'roundIntro': {
-      // Message screen before a round starts: announce the round and which
-      // chips it offers (odd rounds 1–4, even rounds 2/4/6/8).
+      // Message screen before a round starts: announce the round, its chips,
+      // and the numbered list of upcoming categories.
       const rnd = st.introRound || (st.currentRound + 1);
       $('reTitle').textContent = `Round ${rnd} of ${st.totalRounds}`;
       $('reSub').textContent = 'Get ready — the host is about to start this round…';
-      $('reMsg').textContent = rnd % 2 === 0
-        ? 'This round offers chips worth 2, 4, 6 or 8 points.'
-        : 'This round offers chips worth 1, 2, 3 or 4 points.';
-      const chipsEl = $('introChips');
-      if (Array.isArray(st.roundWagerOptions) && st.roundWagerOptions.length) {
-        chipsEl.textContent = `Chips this round: ${st.roundWagerOptions.join(' / ')} pts`;
-        chipsEl.classList.remove('hidden');
-      } else {
-        chipsEl.classList.add('hidden');
-      }
-      // The 4 categories coming up in this round, so players know what's next.
+      // Chips for this round, stated once in the message line.
+      const chips = (Array.isArray(st.roundWagerOptions) && st.roundWagerOptions.length)
+        ? `Chips worth ${st.roundWagerOptions.join(' / ')} points.`
+        : (rnd % 2 === 0 ? 'Chips worth 2, 4, 6 or 8 points.' : 'Chips worth 1, 2, 3 or 4 points.');
+      $('reMsg').textContent = chips;
+      // The categories coming up in this round, numbered so players know which
+      // question each category will be.
       const catsEl = $('upcomingCats');
       if (Array.isArray(st.upcomingCategories) && st.upcomingCategories.length) {
-        catsEl.innerHTML = st.upcomingCategories.map((c) => `<span class="upcoming-cat">${esc(c || 'Trivia')}</span>`).join('');
+        catsEl.innerHTML = st.upcomingCategories.map((c, i) =>
+          `<div class="upcat-row"><span class="upcat-num">Question ${i + 1}</span><span class="upcoming-cat">${esc(c || 'Trivia')}</span></div>`).join('');
         catsEl.classList.remove('hidden');
       } else {
         catsEl.classList.add('hidden');
@@ -676,6 +699,8 @@ let venueName = '';
 function applyVenue(t) {
   venueName = t || '';
   $('joinName').textContent = venueName || 'AiTriviaGame';
+  // Tab title on the join screen follows the venue name too.
+  document.title = (venueName || 'AiTriviaGame') + ' — Join to play the game';
   const v = $('venueTitle');
   if (venueName) { v.textContent = venueName; v.classList.remove('hidden'); }
   else v.classList.add('hidden');
