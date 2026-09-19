@@ -95,13 +95,13 @@
   /* setup screen: center the Start game button */
   #setup .controls { justify-content: center; }
 
-  /* tip-link rows on the setup screen — checkbox + link input + optional label */
-  .tip-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
-  .tip-row input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--accent); flex-shrink: 0; cursor: pointer; }
+  /* tip-link field on the setup screen — checkbox + URL input on top, optional label below */
+  .tip-url-row { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .tip-url-row input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--accent); flex-shrink: 0; cursor: pointer; }
   /* Scoped so the global `input[type=text] { width:100% }` rule can't break the flex sizing */
-  .tip-row input[type="text"] { font-size: 14px; padding: 9px 11px; width: auto; }
-  .tip-row .tip-url { flex: 1; min-width: 0; }
-  .tip-row input[type="text"].tip-label { width: 132px; flex-shrink: 0; }
+  .tip-url-row input[type="text"] { font-size: 14px; padding: 9px 11px; width: auto; flex: 1; min-width: 0; }
+  /* label input sits below, aligned under the URL field (past checkbox + gap) */
+  .tip-label-input { font-size: 14px; padding: 9px 11px; margin-left: 25px; }
 
   /* game-over screen — heading sits lower and everything is centered */
   #endedArea { padding-top: 48px; text-align: center; }
@@ -205,17 +205,12 @@
         <div id="catNote" style="font-size:12.5px;color:var(--muted);margin-top:8px"></div>
       </div>
       <div class="field">
-        <label>Tip links — shown at the bottom of every player page</label>
-        <div class="tip-row">
-          <input type="checkbox" id="venmoOn" checked title="Show the Venmo tip link" />
-          <input id="venmoUrl" class="tip-url" type="text" value="https://account.venmo.com/u/Pay_Chad" placeholder="Venmo link" autocomplete="off" spellcheck="false" />
-          <input id="venmoLabel" class="tip-label" type="text" maxlength="30" value="Tip your host" placeholder="Optional label" autocomplete="off" />
+        <label>Tip link — shown at the bottom of every player page</label>
+        <div class="tip-url-row">
+          <input type="checkbox" id="venmoOn" checked title="Show the tip link" />
+          <input id="venmoUrl" type="text" value="https://account.venmo.com/u/Pay_Chad" placeholder="Tip link URL" autocomplete="off" spellcheck="false" />
         </div>
-        <div class="tip-row">
-          <input type="checkbox" id="btcOn" checked title="Show the Bitcoin tip link — copies the address to the clipboard" />
-          <input id="btcAddress" class="tip-url" type="text" value="bc1q540rxyahpl9rn2l00uuzvhuekx4tgyzdexqde2" placeholder="Bitcoin address" autocomplete="off" spellcheck="false" />
-          <input id="btcLabel" class="tip-label" type="text" maxlength="30" placeholder="Optional label" autocomplete="off" />
-        </div>
+        <input id="venmoLabel" class="tip-label-input" type="text" maxlength="30" value="Tip your host" placeholder="Optional label shown to players" autocomplete="off" />
       </div>
       <div class="controls">
         <button id="startBtn" class="primary">Start game</button>
@@ -382,15 +377,12 @@ function judgeBonus(playerId, correct) {
 let tipsSynced = false; // set once the tip inputs have been synced from the server
 let tipsSentOnce = false;
 
-// Tip links (Venmo / Bitcoin) — shown at the bottom of every player page.
+// Tip link — shown at the bottom of every player page.
 function sendTips() {
   socket.emit('setTips', {
     venmoOn: $('venmoOn').checked,
     venmoUrl: $('venmoUrl').value.trim(),
     venmoLabel: $('venmoLabel').value.trim().slice(0, 30),
-    btcOn: $('btcOn').checked,
-    btcAddress: $('btcAddress').value.trim(),
-    btcLabel: $('btcLabel').value.trim().slice(0, 30),
   });
 }
 
@@ -401,14 +393,11 @@ function syncTipsFromState(s) {
   $('venmoOn').checked = !!t.venmoOn;
   $('venmoUrl').value = t.venmoUrl || '';
   $('venmoLabel').value = t.venmoLabel || '';
-  $('btcOn').checked = !!t.btcOn;
-  $('btcAddress').value = t.btcAddress || '';
-  $('btcLabel').value = t.btcLabel || '';
   tipsSynced = true;
 }
 
 // Live edits apply as soon as the first sync has happened.
-for (const id of ['venmoOn', 'venmoUrl', 'venmoLabel', 'btcOn', 'btcAddress', 'btcLabel']) {
+for (const id of ['venmoOn', 'venmoUrl', 'venmoLabel']) {
   $(id).addEventListener('change', () => { if (tipsSynced) sendTips(); });
 }
 

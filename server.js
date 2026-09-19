@@ -156,13 +156,10 @@ const state = {
   totalRounds: ROUNDS,
   questionsPerRound: QUESTIONS_PER_ROUND,
   title: '', // host-set venue/game name — shown at the top of every player page
-  tips: { // tip links for the bottom of every player page (host-configurable, session-level)
+  tips: { // tip link for the bottom of every player page (host-configurable, session-level)
     venmoOn: true,
     venmoUrl: 'https://account.venmo.com/u/Pay_Chad',
     venmoLabel: 'Tip your host',
-    btcOn: true,
-    btcAddress: 'bc1q540rxyahpl9rn2l00uuzvhuekx4tgyzdexqde2',
-    btcLabel: '',
   },
   selectedCategories: [], // host's category picks; empty = all categories
   gameQuestions: [],
@@ -730,8 +727,8 @@ io.on('connection', (socket) => {
     broadcastState();
   });
 
-  // Host sets the tip links shown at the bottom of every player page — session-level
-  // like the venue title: they survive game restarts until changed again.
+  // Host sets the tip link shown at the bottom of every player page — session-level
+  // like the venue title: it survives game restarts until changed again.
   socket.on('setTips', (t) => {
     if (socket.data.role !== 'host') return;
     const clean = (v, max) => String(v ?? '').trim().slice(0, max);
@@ -739,9 +736,6 @@ io.on('connection', (socket) => {
       venmoOn: !!t.venmoOn,
       venmoUrl: clean(t.venmoUrl, 500),
       venmoLabel: clean(t.venmoLabel, 30),
-      btcOn: !!t.btcOn,
-      btcAddress: clean(t.btcAddress, 120),
-      btcLabel: clean(t.btcLabel, 30),
     };
     broadcastState();
   });
