@@ -550,7 +550,9 @@ function buildState(role, playerId = null) {
         wagersUsed: wagerStateFor(p), // chips already spent in the current round
         correct: (isHost || state.phase === 'reveal') && p.correct !== null ? p.correct : undefined,
         // Song-artist bonus guess for the CURRENT question — host judges it.
-        bonusGuess: isHost && state.phase === 'question' && bonusGuesses[p.id] != null
+        // Sent to everyone so each player's page can show their own locked-in
+        // guess text in the "Sent" note (the box itself is disabled client-side).
+        bonusGuess: state.phase === 'question' && bonusGuesses[p.id] != null
           ? bonusGuesses[p.id]
           : undefined,
         // The host's verdict on THIS player's own song-artist guess — shown only
@@ -670,11 +672,13 @@ io.on('connection', (socket) => {
       broadcastState();
     });
 
-    // Song-artist bonus guess: max 30 chars, one per player per question.
+    // Song-artist bonus guess: max 30 chars, ONE per player per question —
+    // once sent it can't be changed or resent (the client locks the box too).
     // The host sees it next to their name and judges it with judgeBonus.
     socket.on('bonusGuess', ({ text }) => {
       const p = state.players.get(socket.data.playerId);
       if (!p || state.phase !== 'question') return;
+      if (bonusGuesses[p.id] != null) return; // already used their one shot
       const guess = String(text ?? '').trim().slice(0, 30);
       if (!guess) return;
       bonusGuesses[p.id] = guess;
@@ -916,12 +920,32 @@ io.on('connection', (socket) => {
   });
 
   socket.on('awardPoints', ({ playerId, points }) => {
+    if (socket.data.role !== 'host') return; // host-only adjustment
     const p = state.players.get(playerId);
     if (!p) return;
     const pts = Math.max(-1000, Math.min(1000, Number(points) || 0));
     if (pts === 0) return;
     p.score += pts;
     console.log(`Manual ${pts > 0 ? '+' : ''}${pts} to ${p.name}`);
+    broadcastState();
+  });
+
+  // Host kicks a player out of the game — removes them entirely (identity,
+  // score and any pending wager/answer go with them). The kicked client is
+  // told to drop back to its join screen.
+  socket.on('kickPlayer', ({ playerId }) => {
+    if (socket.data.role !== 'host') return;
+    const p = state.players.get(playerId);
+    if (!p) return;
+    delete wagersUsed[p.id]; // no stale chip pool for a removed player
+    delete bonusGuesses[p.id]; // and no pending song-artist guess to judge
+    delete bonusResults[p.id];
+    state.players.delete(p.id);
+    console.log(`Player kicked: ${p.name}`);
+    if (p.socketId) {
+      const s = [...liveSockets].find((x) => x.id === p.socketId && x.data.role === 'player');
+      if (s) s.emit('kicked'); // their page goes back to the join screen
+    }
     broadcastState();
   });
 

@@ -134,11 +134,16 @@
   .bonus-fineprint { margin-top: 4px; font-size: 10.5px; color: var(--muted); line-height: 1.35; }
   .join-note { margin-top: 14px; font-size: 12.5px; color: var(--muted); line-height: 1.55; text-align: center; }
 
-  /* upcoming categories on the round-intro screen — numbered rows, left-aligned */
-  .upcoming-cats { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
-  .upcat-row { display: inline-flex; align-items: center; gap: 10px; font-size: 15.5px; color: var(--muted); }
-  .upcat-num { font-weight: 700; color: var(--accent); min-width: 86px; text-align: right; }
-  .upcoming-cat { font-size: 15.5px; font-weight: 600; color: var(--text); background: rgba(255,255,255,.07); border: 1px solid var(--glass-border); padding: 9px 18px; border-radius: 999px; }
+  /* upcoming categories on the round-intro screen — same bubble style as the
+     host panel ("Q1 (category name)" all in one bubble), but larger, and
+     listed centered on the page like before. */
+  .upcoming-cats { margin-top: 10px; display: flex; flex-direction: column; gap: 12px; align-items: center; }
+  .upcat-big { font-size: 17px; font-weight: 600; color: var(--text); background: rgba(255,255,255,.07); border: 1px solid var(--glass-border); padding: 12px 24px; border-radius: 999px; }
+  .upcat-big b { color: var(--accent); font-weight: 700; margin-right: 6px; }
+
+  /* scoreboard sits a little lower on the between-rounds screens, so it's not
+     hugging the category list above it */
+  #view-roundend .board { margin-top: 42px; }
 
   /* round intro / end screen — everything centered */
   #view-roundend { text-align: center; }
@@ -252,9 +257,10 @@
         <input id="bonusInput" type="text" maxlength="30" placeholder="Artist name…" autocomplete="off" />
         <button id="bonusSendBtn" class="bonus-send" type="button">Send</button>
       </div>
-      <div id="bonusNote" class="bonus-note hidden">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
-        Sent — the host will confirm if you got the artist.
+      <!-- Shown once the guess is sent: the box locks and can't be changed or resent. -->
+      <div id="bonusLockedNote" class="bonus-note hidden">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        <span id="bonusLockedText">Sent — locked in. You can't change or resend it.</span>
       </div>
     </div>
     <div id="bonusResultQ" class="result-banner hidden"></div>
@@ -298,6 +304,7 @@
       <div><h1 id="reTitle">Round complete</h1><span class="sub" id="reSub">Waiting for the host to start the next round…</span></div>
     </div>
     <div class="waiting"><div class="pulse"></div><span id="reMsg">Take a breath — the next round is coming.</span></div>
+    <div id="chipsBubble" class="chip hidden" style="margin:0 auto 16px;font-size:13.5px;padding:8px 16px"></div>
     <div id="upcomingCats" class="upcoming-cats hidden"></div>
     <div id="roundEndBoard" class="board"></div>
   </div>
@@ -558,14 +565,20 @@ function renderQuestion(st) {
   const answeredNow = me ? !!me.answered : false;
   $('lockedNote').classList.toggle('hidden', !(st.phase === 'question' && answeredNow));
 
-  // Song-artist bonus guess box — bottom of every question. The player may
-  // change their guess any time until the host judges it (correct / missed).
+  // Song-artist bonus guess box — bottom of every question. The player gets
+  // ONE shot per question: once they press Send, the input locks and can't be
+  // changed or resent (the server enforces this too).
   const judged = !!(me && me.bonusResult);
-  $('bonusInput').disabled = judged;
-  $('bonusSendBtn').disabled = judged;
+  const locked = bonusSent || judged;
+  $('bonusInput').disabled = locked;
+  $('bonusSendBtn').disabled = locked;
   renderBonusResult($('bonusResultQ'), me ? me.bonusResult : null);
-  // "Sent — waiting on the host" confirmation (hidden once the verdict lands).
-  $('bonusNote').classList.toggle('hidden', !(bonusSent && !judged));
+  // "Locked in" note — shown from the moment of Send until the verdict lands.
+  const sentText = bonusSent && !judged
+    ? `Sent “${esc(me && me.bonusGuess ? me.bonusGuess : $('bonusInput').value.trim())}” — locked in, you can't change or resend it.`
+    : 'Sent — locked in. You can\'t change or resend it.';
+  $('bonusLockedText').textContent = sentText;
+  $('bonusLockedNote').classList.toggle('hidden', !(bonusSent && !judged));
 }
 
 // The host's verdict on my song-artist guess — shown as a confirmation banner.
@@ -689,6 +702,7 @@ socket.on('state', (st) => {
     case 'roundEnd': {
       const done = st.currentRound || 0;
       $('reTitle').textContent = `Round ${done} complete`;
+      $('chipsBubble').classList.add('hidden'); // no chips line on the "complete" screen
       document.querySelector('#view-roundend .sub').textContent =
         done >= st.totalRounds ? 'Get ready — the final question is coming!' : 'Waiting for the host to start the next round…';
       $('roundEndBoard').innerHTML = boardHtml(st.players, st.phase);
@@ -701,17 +715,19 @@ socket.on('state', (st) => {
       const rnd = st.introRound || (st.currentRound + 1);
       $('reTitle').textContent = `Round ${rnd} of ${st.totalRounds}`;
       $('reSub').textContent = 'Get ready — the host is about to start this round…';
-      // Chips for this round, stated once in the message line.
+      // Chips for this round — in a themed bubble below the message line.
       const chips = (Array.isArray(st.roundWagerOptions) && st.roundWagerOptions.length)
-        ? `Chips worth ${st.roundWagerOptions.join(' / ')} points.`
-        : (rnd % 2 === 0 ? 'Chips worth 2, 4, 6 or 8 points.' : 'Chips worth 1, 2, 3 or 4 points.');
-      $('reMsg').textContent = chips;
+        ? `Chips worth ${st.roundWagerOptions.join(' / ')} points`
+        : (rnd % 2 === 0 ? 'Chips worth 2, 4, 6 or 8 points' : 'Chips worth 1, 2, 3 or 4 points');
+      $('chipsBubble').textContent = chips;
+      $('chipsBubble').classList.remove('hidden');
       // The categories coming up in this round, numbered so players know which
       // question each category will be.
       const catsEl = $('upcomingCats');
       if (Array.isArray(st.upcomingCategories) && st.upcomingCategories.length) {
+        // One bubble per category, host-panel style: "Q1 (category name)".
         catsEl.innerHTML = st.upcomingCategories.map((c, i) =>
-          `<div class="upcat-row"><span class="upcat-num">Question ${i + 1}</span><span class="upcoming-cat">${esc(c || 'Trivia')}</span></div>`).join('');
+          `<div class="upcat-big"><b>Q${i + 1}</b>${esc(c || 'Trivia')}</div>`).join('');
         catsEl.classList.remove('hidden');
       } else {
         catsEl.classList.add('hidden');
@@ -773,13 +789,30 @@ socket.on('resetAll', () => {
   show('join');
 });
 
-// Song-artist bonus guess — max 30 chars, sent to the host for judging.
+// Host kicked me out of the game — back to the join screen. The identity is
+// cleared so I don't auto-rejoin as a kicked team (joining again starts fresh).
+socket.on('kicked', () => {
+  meId = null;
+  myName = null;
+  myAnswer = null;
+  lastQuestionId = null;
+  bonusSent = false;
+  $('freeInput').value = '';
+  $('bonusInput').value = '';
+  show('join');
+});
+
+// Song-artist bonus guess — max 30 chars, ONE shot per question. Once sent the
+// box locks (input + button disabled) so it can't be changed or resent.
 function sendBonusGuess() {
   const v = $('bonusInput').value.trim();
-  if (!v) return;
+  if (!v || bonusSent) return; // already used this question's one shot
   socket.emit('bonusGuess', { text: v });
   bonusSent = true;
-  $('bonusNote').classList.remove('hidden');
+  $('bonusInput').disabled = true;
+  $('bonusSendBtn').disabled = true;
+  $('bonusLockedText').textContent = `Sent “${v}” — locked in, you can't change or resend it.`;
+  $('bonusLockedNote').classList.remove('hidden');
 }
 $('bonusSendBtn').onclick = sendBonusGuess;
 $('bonusInput').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendBonusGuess(); });

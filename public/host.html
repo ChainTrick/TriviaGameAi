@@ -57,9 +57,36 @@
   .cat-chip.on small { color: rgba(255,255,255,.7); }
 
   /* upcoming categories on the round-intro screen (host) — compact */
-  .upcoming-cats { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; align-items: center; }
+  .upcoming-cats { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; align-items: center; justify-content: center; }
+  /* "Coming up:" label takes its own centered line; the bubbles start below it */
+  .upcat-label { flex-basis: 100%; text-align: center; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
   .upcat { font-size: 13px; font-weight: 600; color: var(--text); background: rgba(255,255,255,.07); border: 1px solid var(--glass-border); padding: 6px 14px; border-radius: 999px; }
   .upcat b { color: var(--accent); font-weight: 700; margin-right: 5px; }
+
+  /* round category strip — same as the top of every player page */
+  .cat-strip { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; margin-bottom: 12px; }
+  .cat-pill { font-size: 12.5px; font-weight: 600; padding: 4px 11px; border-radius: 999px; line-height: 1.3; overflow-wrap: anywhere; }
+  /* current category — highlighted */
+  .cat-pill.current { background: rgba(59,130,246,.18); border: 1px solid var(--accent); color: #dbeafe; }
+  /* upcoming categories — grayed out but visible */
+  .cat-pill.upcoming { background: rgba(148,163,184,.10); border: 1px solid rgba(148,163,184,.25); color: var(--muted); opacity: .75; }
+  /* previous categories — crossed out but still visible */
+  .cat-pill.done { background: transparent; border: 1px solid rgba(148,163,184,.20); color: #64748b; text-decoration: line-through; opacity: .8; }
+
+  /* clickable player name — opens the adjust/kick dialog. No extra space on
+     the scoreboard: same size as before, just a pointer cursor + hover tint. */
+  .pname.clickable { cursor: pointer; border-radius: 6px; transition: background .12s; }
+  .pname.clickable:hover { background: rgba(59,130,246,.14); }
+
+  /* player dialog (points adjustment + kick) */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(5,10,20,.6); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; z-index: 50; }
+  .modal-card { width: min(400px, calc(100vw - 40px)); background: rgba(17,26,44,.92); border: 1px solid var(--glass-border); border-radius: 16px; padding: 20px; box-shadow: 0 18px 50px rgba(0,0,0,.45); }
+  .modal-card h3 { font-size: 16px; margin-bottom: 4px; }
+  .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+  .modal-points { display: flex; gap: 8px; align-items: center; margin-bottom: 16px; }
+  .modal-points input { width: 120px; padding: 9px 12px; font-size: 15px; color: var(--text); background: rgba(255,255,255,.06); border: 1px solid var(--glass-border); border-radius: 9px; outline: none; }
+  .modal-points input:focus { border-color: var(--accent); }
+  .modal-actions { display: flex; gap: 10px; justify-content: space-between; align-items: center; }
 
   /* round-intro screen (host): center the chip and Start round button */
   #introArea .chip { display: flex; width: fit-content; margin: 0 auto 14px; }
@@ -135,13 +162,6 @@
   .mark.good { color: var(--good); }
   .mark.bad { color: var(--bad); }
 
-  /* manual points */
-  .pt-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
-  select.pt-select { padding: 9px 10px; font-size: 14px; color: var(--text); background: rgba(255,255,255,.06); border: 1px solid var(--glass-border); border-radius: 9px; outline: none; flex: 1; }
-  select.pt-select option { background: #131c30; }
-  input.pt-input { width: 110px; padding: 9px 12px; font-size: 15px; color: var(--text); background: rgba(255,255,255,.06); border: 1px solid var(--glass-border); border-radius: 9px; outline: none; }
-  input.pt-input:focus { border-color: var(--accent); }
-
   .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
   .hidden { display: none !important; }
   .empty-note { font-size: 14px; color: var(--muted); padding: 8px 2px; }
@@ -184,7 +204,7 @@
         <span id="roundChip" class="chip"></span>
         <span id="qNumChip" class="chip"></span>
       </div>
-      <div id="qCat" class="chip hidden" style="margin-bottom:12px"></div>
+      <div id="qCat" class="cat-strip hidden"></div>
       <div id="finalWagerNote" class="chip hidden" style="margin-bottom:12px"></div>
       <div id="qText" class="qtext"></div>
       <div id="opts" class="opts"></div>
@@ -203,7 +223,7 @@
     <div id="finalWagerArea" class="hidden">
       <h2 style="font-size:18px;margin-bottom:6px">🏆 Final question — waiting for wagers</h2>
       <p style="color:var(--muted);font-size:14.5px;margin-bottom:14px;line-height:1.6">Players see only their wager screen right now — the question below is hidden from them until you press <b>Show final question</b>. Everyone must lock in a stake first.</p>
-      <div id="fwqCat" class="chip hidden" style="margin-bottom:10px"></div>
+      <div id="fwqCat" class="cat-strip hidden" style="margin-bottom:10px"></div>
       <div id="fwqText" class="qtext"></div>
       <div id="fwqOpts" class="opts"></div>
       <h3 style="font-size:12.5px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin:18px 0 10px">Wager status</h3>
@@ -249,12 +269,20 @@
   <div class="card players-card">
     <h3 id="playersTitle">Players</h3>
     <div id="playerList"></div>
-    <div id="manualPoints" class="hidden" style="margin-top:14px">
-      <label style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:8px">Manual points (bonus / corrections)</label>
-      <div class="pt-row">
-        <select id="ptPlayer" class="pt-select"></select>
-        <input id="ptAmount" class="pt-input" type="number" step="1" placeholder="+/- pts" autocomplete="off" />
-        <button id="ptApply" class="ghost" style="padding:9px 14px;font-size:14px">Apply</button>
+  </div>
+
+  <!-- PLAYER DIALOG — points adjustment + kick (opened by clicking a player name) -->
+  <div id="playerModal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <h3 id="pmName"></h3>
+      <p class="modal-sub">Adjust this player's score, or remove them from the game.</p>
+      <div class="modal-points">
+        <input id="pmAmount" type="number" step="1" placeholder="+/- pts" autocomplete="off" />
+        <button id="pmApply" class="ghost" style="padding:9px 14px;font-size:14px">Apply points</button>
+      </div>
+      <div class="modal-actions">
+        <button id="pmKick" class="ghost danger-ghost" style="padding:10px 16px;font-size:14px">Kick player</button>
+        <button id="pmClose" class="ghost" style="padding:10px 16px;font-size:14px">Close</button>
       </div>
     </div>
   </div>
@@ -274,6 +302,15 @@ function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;',
 // Letter label for an option index — works past D too (e, f, g, …).
 function optLetter(i) { return String.fromCharCode(97 + i); }
 
+// Category strip shared with the player pages — previous crossed out, current
+// highlighted, upcoming grayed out.
+function catStripHtml(cats) {
+  return cats.map((c, i) => {
+    const label = c.isFinal ? `🏆 ${esc(c.name || 'Trivia')}` : esc(c.name || 'Trivia');
+    return `<span class="cat-pill ${c.status}" title="${c.isFinal ? 'Final question' : 'Question ' + (i + 1)}">${label}</span>`;
+  }).join('');
+}
+
 socket.on('state', (s) => {
   st = s;
   render();
@@ -292,7 +329,9 @@ function boardRows(players, phase) {
       else if (p.correct === false) mark = '<span class="mark bad">✗</span>';
     }
     const wcell = showWager && p.wager != null ? `<span class="pwager" title="stake on this question">${p.wager}pt</span>` : '';
-    html += `<div class="row${p.online === false ? ' offline' : ''}"><span class="rank">${i + 1}</span>${dot}<span class="pname">${esc(p.name)}${mark}${p.online === false ? ' <small>(offline)</small>' : ''}</span>${wcell}<span class="pscore">${p.score}</span></div>`;
+    // Clickable name (except on the final board) — opens the adjust/kick dialog.
+    const nameCls = phase === 'ended' ? 'pname' : 'pname clickable';
+    html += `<div class="row${p.online === false ? ' offline' : ''}"><span class="rank">${i + 1}</span>${dot}<span class="${nameCls}" data-pid="${p.id}" title="${phase === 'ended' ? '' : 'Click to adjust points or kick'}">${esc(p.name)}${mark}${p.online === false ? ' <small>(offline)</small>' : ''}</span>${wcell}<span class="pscore">${p.score}</span></div>`;
     // Song-artist bonus guess for the current question — host judges it.
     if (phase === 'question' && p.bonusGuess != null) {
       html += `<div class="bonus-row"><span>🎵 <b style="color:var(--text);font-weight:600">${esc(p.name)}</b></span><span class="guess">"${esc(p.bonusGuess)}"</span>` +
@@ -338,8 +377,13 @@ function render() {
   if (st.phase === 'finalWagering' && st.question) {
     // Host-only view: the full final question + live wager status per player.
     const q = st.question;
-    $('fwqCat').classList.toggle('hidden', !q.category);
-    $('fwqCat').textContent = q.category || '';
+    // Same category strip as the player pages — the final question is "current".
+    if (Array.isArray(st.roundCategories) && st.roundCategories.length) {
+      $('fwqCat').innerHTML = catStripHtml(st.roundCategories);
+      $('fwqCat').classList.remove('hidden');
+    } else {
+      $('fwqCat').classList.add('hidden');
+    }
     $('fwqText').textContent = q.text;
     const fwOpts = $('fwqOpts');
     fwOpts.innerHTML = '';
@@ -385,7 +429,8 @@ function render() {
     // The 4 categories coming up in this round.
     const upEl = $('introUpcomingCats');
     if (Array.isArray(st.upcomingCategories) && st.upcomingCategories.length) {
-      upEl.innerHTML = `<span style="font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-right:4px">Coming up:</span>` +
+      // Label centered on its own line; the bubbles start below it.
+      upEl.innerHTML = `<span class="upcat-label">Coming up:</span>` +
         st.upcomingCategories.map((c, i) => `<span class="upcat"><b>Q${i + 1}</b>${esc(c)}</span>`).join('');
       upEl.classList.remove('hidden');
     } else {
@@ -423,8 +468,14 @@ function render() {
       $('roundChip').textContent = `Round ${st.currentRound}/${st.totalRounds}`;
       $('qNumChip').textContent = `Q${st.questionInRound}/${st.questionsPerRound} · #${st.questionNumber}/${st.totalQuestions}`;
     }
-    $('qCat').classList.toggle('hidden', !q.category);
-    $('qCat').textContent = q.category || '';
+    // Same category strip as the top of every player page — previous crossed
+    // out, current highlighted, upcoming grayed out.
+    if (Array.isArray(st.roundCategories) && st.roundCategories.length) {
+      $('qCat').innerHTML = catStripHtml(st.roundCategories);
+      $('qCat').classList.remove('hidden');
+    } else {
+      $('qCat').classList.add('hidden');
+    }
 
     // Final question: wagers were locked in during the finalWagering phase, so
     // by the time the question is shown every player already has a stake.
@@ -511,21 +562,6 @@ function render() {
   $('hostTitle').textContent = brand;
   document.title = brand;
 
-  // manual points select
-  const sel = $('ptPlayer');
-  if (st.players.length) {
-    $('manualPoints').classList.remove('hidden');
-    if (!sel.options.length || [...sel.options].every(o => o.value === '')) {
-      sel.innerHTML = st.players.map(p => `<option value="${p.id}">${esc(p.name)}</option>`).join('');
-    } else {
-      // keep selection valid
-      const cur = sel.value;
-      if (!st.players.some(p => p.id === cur)) sel.selectedIndex = 0;
-    }
-  } else {
-    $('manualPoints').classList.add('hidden');
-    sel.innerHTML = '';
-  }
 }
 
 // Category picker — host chooses which categories questions are drawn from.
@@ -598,23 +634,47 @@ function restartGame() {
 }
 $('restartTinyBtn').onclick = restartGame;
 
-// Song-artist bonus judging buttons (delegated — rows are re-rendered live).
+// Song-artist bonus judging buttons + clickable player names (delegated — rows
+// are re-rendered live).
 $('playerList').addEventListener('click', (e) => {
   const btn = e.target.closest('.bonus-btn');
-  if (!btn) return;
-  judgeBonus(btn.dataset.bid, btn.dataset.ok === '1');
+  if (btn) { judgeBonus(btn.dataset.bid, btn.dataset.ok === '1'); return; }
+  const nameEl = e.target.closest('.pname.clickable');
+  if (nameEl && nameEl.dataset.pid) openPlayerDialog(nameEl.dataset.pid);
 });
 
-function applyManualPoints() {
-  const id = $('ptPlayer').value;
-  if (!id) return;
-  const pts = Math.round(Number($('ptAmount').value));
-  if (!Number.isFinite(pts) || pts === 0) return; // empty / zero = no-op
-  socket.emit('awardPoints', { playerId: id, points: pts });
-  $('ptAmount').value = '';
+// Player dialog — points adjustment + kick. Opened by clicking a player's name
+// in the list (replaces the old manual-points dropdown at the bottom).
+let pmPlayerId = null;
+function openPlayerDialog(playerId) {
+  const p = st && st.players.find((x) => x.id === playerId);
+  if (!p) return;
+  pmPlayerId = playerId;
+  $('pmName').textContent = p.name;
+  $('pmAmount').value = '';
+  $('playerModal').classList.remove('hidden');
 }
-$('ptApply').onclick = applyManualPoints;
-$('ptAmount').addEventListener('keydown', (e) => { if (e.key === 'Enter') applyManualPoints(); });
+function closePlayerDialog() {
+  pmPlayerId = null;
+  $('playerModal').classList.add('hidden');
+}
+$('pmClose').onclick = closePlayerDialog;
+$('playerModal').addEventListener('click', (e) => { if (e.target === e.currentTarget) closePlayerDialog(); });
+function applyPoints() {
+  const pts = Math.round(Number($('pmAmount').value));
+  if (!Number.isFinite(pts) || pts === 0) return; // empty / zero = no-op
+  socket.emit('awardPoints', { playerId: pmPlayerId, points: pts });
+  closePlayerDialog();
+}
+$('pmApply').onclick = applyPoints;
+$('pmAmount').addEventListener('keydown', (e) => { if (e.key === 'Enter') applyPoints(); });
+$('pmKick').onclick = () => {
+  const p = st && st.players.find((x) => x.id === pmPlayerId);
+  if (!p) return;
+  if (!confirm(`Kick ${p.name} out of the game?\n\nTheir score and any pending wager/answer will be removed.`)) return;
+  socket.emit('kickPlayer', { playerId: p.id });
+  closePlayerDialog();
+};
 
 // keyboard shortcuts for the host
 document.addEventListener('keydown', (e) => {
