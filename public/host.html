@@ -98,9 +98,10 @@
   /* tip-link rows on the setup screen — checkbox + link input + optional label */
   .tip-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
   .tip-row input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--accent); flex-shrink: 0; cursor: pointer; }
-  .tip-row input[type="text"] { font-size: 14px; padding: 9px 11px; }
-  .tip-url { flex: 1; min-width: 0; }
-  .tip-label { width: 132px; flex-shrink: 0; }
+  /* Scoped so the global `input[type=text] { width:100% }` rule can't break the flex sizing */
+  .tip-row input[type="text"] { font-size: 14px; padding: 9px 11px; width: auto; }
+  .tip-row .tip-url { flex: 1; min-width: 0; }
+  .tip-row input[type="text"].tip-label { width: 132px; flex-shrink: 0; }
 
   /* game-over screen — heading sits lower and everything is centered */
   #endedArea { padding-top: 48px; text-align: center; }
