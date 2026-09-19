@@ -56,10 +56,10 @@
   .cat-chip.on { background: var(--accent-soft); border-color: var(--accent); color: #fff; box-shadow: 0 0 0 1px var(--accent) inset; }
   .cat-chip.on small { color: rgba(255,255,255,.7); }
 
-  /* upcoming categories on the round-intro screen (host) — compact */
-  .upcoming-cats { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 14px; align-items: center; justify-content: center; }
+  /* upcoming categories on the round-intro screen (host) — compact, two per line */
+  .upcoming-cats { display: grid; grid-template-columns: repeat(2, max-content); gap: 7px; margin-bottom: 14px; justify-content: center; }
   /* "Coming up:" label takes its own centered line; the bubbles start below it */
-  .upcat-label { flex-basis: 100%; text-align: center; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+  .upcat-label { grid-column: 1 / -1; text-align: center; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
   .upcat { font-size: 13px; font-weight: 600; color: var(--text); background: rgba(255,255,255,.07); border: 1px solid var(--glass-border); padding: 6px 14px; border-radius: 999px; }
   .upcat b { color: var(--accent); font-weight: 700; margin-right: 5px; }
 
@@ -94,6 +94,17 @@
 
   /* setup screen: center the Start game button */
   #setup .controls { justify-content: center; }
+
+  /* tip-link rows on the setup screen — checkbox + link input + optional label */
+  .tip-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .tip-row input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--accent); flex-shrink: 0; cursor: pointer; }
+  .tip-row input[type="text"] { font-size: 14px; padding: 9px 11px; }
+  .tip-url { flex: 1; min-width: 0; }
+  .tip-label { width: 132px; flex-shrink: 0; }
+
+  /* game-over screen — heading sits lower and everything is centered */
+  #endedArea { padding-top: 48px; text-align: center; }
+  #endedArea .board { width: fit-content; margin: 0 auto; }
 
   /* song-artist bonus row in the host player list */
   .bonus-row { display: flex; align-items: center; gap: 8px; padding: 6px 12px 9px 44px; font-size: 13px; color: var(--muted); }
@@ -192,6 +203,19 @@
         <div id="catGrid" class="cat-grid"></div>
         <div id="catNote" style="font-size:12.5px;color:var(--muted);margin-top:8px"></div>
       </div>
+      <div class="field">
+        <label>Tip links — shown at the bottom of every player page</label>
+        <div class="tip-row">
+          <input type="checkbox" id="venmoOn" checked title="Show the Venmo tip link" />
+          <input id="venmoUrl" class="tip-url" type="text" value="https://account.venmo.com/u/Pay_Chad" placeholder="Venmo link" autocomplete="off" spellcheck="false" />
+          <input id="venmoLabel" class="tip-label" type="text" maxlength="30" value="Tip your host" placeholder="Optional label" autocomplete="off" />
+        </div>
+        <div class="tip-row">
+          <input type="checkbox" id="btcOn" checked title="Show the Bitcoin tip link — copies the address to the clipboard" />
+          <input id="btcAddress" class="tip-url" type="text" value="bc1q540rxyahpl9rn2l00uuzvhuekx4tgyzdexqde2" placeholder="Bitcoin address" autocomplete="off" spellcheck="false" />
+          <input id="btcLabel" class="tip-label" type="text" maxlength="30" placeholder="Optional label" autocomplete="off" />
+        </div>
+      </div>
       <div class="controls">
         <button id="startBtn" class="primary">Start game</button>
       </div>
@@ -236,7 +260,6 @@
     <!-- ROUND INTRO -->
     <div id="introArea" class="hidden">
       <h2 style="font-size:18px;margin-bottom:6px" id="introTitleHost">Round 2 of 4</h2>
-      <p style="color:var(--muted);font-size:14.5px;margin-bottom:10px;line-height:1.6" id="introMsgHost"></p>
       <div class="upcoming-cats hidden" id="introUpcomingCats"></div>
       <div class="chip hidden" id="introChipsHost" style="font-size:13.5px;padding:8px 16px"></div>
       <div class="controls">
@@ -355,6 +378,49 @@ function judgeBonus(playerId, correct) {
   socket.emit('judgeBonus', { playerId, correct: !!correct });
 }
 
+let tipsSynced = false; // set once the tip inputs have been synced from the server
+let tipsSentOnce = false;
+
+// Tip links (Venmo / Bitcoin) — shown at the bottom of every player page.
+function sendTips() {
+  socket.emit('setTips', {
+    venmoOn: $('venmoOn').checked,
+    venmoUrl: $('venmoUrl').value.trim(),
+    venmoLabel: $('venmoLabel').value.trim().slice(0, 30),
+    btcOn: $('btcOn').checked,
+    btcAddress: $('btcAddress').value.trim(),
+    btcLabel: $('btcLabel').value.trim().slice(0, 30),
+  });
+}
+
+// Pull the server's tip settings into the setup inputs once (server is source of truth).
+function syncTipsFromState(s) {
+  const t = s.tips;
+  if (!t || tipsSynced) return;
+  $('venmoOn').checked = !!t.venmoOn;
+  $('venmoUrl').value = t.venmoUrl || '';
+  $('venmoLabel').value = t.venmoLabel || '';
+  $('btcOn').checked = !!t.btcOn;
+  $('btcAddress').value = t.btcAddress || '';
+  $('btcLabel').value = t.btcLabel || '';
+  tipsSynced = true;
+}
+
+// Live edits apply as soon as the first sync has happened.
+for (const id of ['venmoOn', 'venmoUrl', 'venmoLabel', 'btcOn', 'btcAddress', 'btcLabel']) {
+  $(id).addEventListener('change', () => { if (tipsSynced) sendTips(); });
+}
+
+socket.on('state', (s) => {
+  st = s;
+  syncTipsFromState(st);
+  render();
+  // Push the tip links back to the server exactly once, after the first state has
+  // synced them — so the prefilled defaults reach a fresh server even if the host
+  // never edits them.
+  if (!tipsSentOnce && tipsSynced) { tipsSentOnce = true; sendTips(); }
+});
+
 let prevPhase = null; // for transition detection (game end / reset)
 function render() {
   if (!st) return;
@@ -423,9 +489,6 @@ function render() {
   if (st.phase === 'roundIntro') {
     const rnd = st.introRound || (st.currentRound + 1);
     $('introTitleHost').textContent = `Round ${rnd} of ${st.totalRounds}`;
-    $('introMsgHost').textContent = rnd % 2 === 0
-      ? 'This round offers chips worth 2, 4, 6 or 8 points. Players see this message too — press Start when ready.'
-      : 'This round offers chips worth 1, 2, 3 or 4 points. Players see this message too — press Start when ready.';
     // The 4 categories coming up in this round.
     const upEl = $('introUpcomingCats');
     if (Array.isArray(st.upcomingCategories) && st.upcomingCategories.length) {
@@ -510,7 +573,7 @@ function render() {
     $('revealBtn').style.display = liveQ ? '' : 'none';
     $('revealBtn').disabled = blocked;
     $('revealBtn').textContent = blocked
-      ? `Judge ${pending} song guess${pending === 1 ? '' : 'es'} first ⚠`
+      ? `Judge ${pending} song(s)`
       : 'Reveal answer';
     // Skip button: only while the question is still live (not yet revealed).
     $('skipBtn').style.display = liveQ ? '' : 'none';

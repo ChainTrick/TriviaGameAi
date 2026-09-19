@@ -192,6 +192,13 @@
   .cat-pill.done { background: transparent; border: 1px solid rgba(148,163,184,.20); color: var(--faint, #64748b); text-decoration: line-through; opacity: .8; }
 
   .meta-line { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--muted); margin-bottom: 14px; }
+
+  /* tip footer — small line at the bottom of every player page, well below the content */
+  .tip-footer { display: flex; justify-content: center; align-items: center; gap: 16px; margin-top: 30px; font-size: 13px; color: var(--muted); }
+  .tip-venmo { display: inline-flex; align-items: center; gap: 7px; text-decoration: none; color: #93c5fd; font-weight: 600; overflow-wrap: anywhere; }
+  .tip-btc { background: rgba(148,163,184,.10); border: 1px solid rgba(148,163,184,.25); color: var(--muted); font-size: 12.5px; font-weight: 600; padding: 5px 11px; border-radius: 999px; cursor: pointer; }
+  .tip-btc:hover { color: var(--text); border-color: rgba(148,163,184,.45); }
+
   .hidden { display: none !important; }
 </style>
 </head>
@@ -322,6 +329,9 @@
     <div id="finalBoard" class="board"></div>
   </div>
 
+  <!-- Tip footer — host-configured Venmo/Bitcoin links, bottom of every player page -->
+  <div id="tipFooter" class="tip-footer hidden"></div>
+
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
@@ -368,6 +378,52 @@ function renderCatStrip(st) {
   }).join('');
   el.classList.remove('hidden');
 }
+
+// Tip footer at the bottom of every player page — host-configured Venmo/Bitcoin links.
+const VENMO_SVG = '<svg viewBox="0 0 24 24" width="15" height="15"><rect x="1.5" y="1.5" width="21" height="21" rx="5" fill="#3897F0"/><path d="M7 7l5 10 5-10" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function renderTipFooter(st) {
+  const el = $('tipFooter');
+  const t = st.tips;
+  let html = '';
+  if (t && t.venmoOn && t.venmoUrl) {
+    html += `<a class="tip-venmo" href="${esc(t.venmoUrl)}" target="_blank" rel="noopener">${VENMO_SVG}<span>${esc(t.venmoLabel || 'Tip your host')}</span></a>`;
+  }
+  if (t && t.btcOn && t.btcAddress) {
+    html += `<button class="tip-btc" type="button" data-addr="${esc(t.btcAddress)}">₿ ${esc(t.btcLabel || 'Bitcoin')}</button>`;
+  }
+  el.innerHTML = html;
+  el.classList.toggle('hidden', !html);
+}
+
+function fallbackCopy(text, done) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); } catch (e) {}
+  document.body.removeChild(ta);
+  done();
+}
+
+function copyBtc(addr, btn) {
+  const done = () => {
+    const old = btn.textContent;
+    btn.textContent = 'Copied ✓';
+    setTimeout(() => { btn.textContent = old; }, 1600);
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(addr).then(done, () => fallbackCopy(addr, done));
+  } else fallbackCopy(addr, done);
+}
+
+$('tipFooter').addEventListener('click', (e) => {
+  const btn = e.target.closest('.tip-btc');
+  if (!btn) return;
+  copyBtc(btn.dataset.addr, btn);
+});
 
 // Browser tab title for every screen — follows the venue name set by the host,
 // so a rename updates every open player page live.
@@ -663,6 +719,9 @@ socket.on('state', (st) => {
   const venueEl = $('venueTitle');
   if (st.title) { venueEl.textContent = st.title; venueEl.classList.remove('hidden'); }
   else venueEl.classList.add('hidden');
+
+  // Tip footer — host-configured Venmo/Bitcoin links at the bottom of every player page.
+  renderTipFooter(st);
 
   // Category strip under the venue title — current highlighted, upcoming grayed,
   // previous crossed out. Shown on every screen of a joined player page.
